@@ -1,8 +1,10 @@
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
+import { Provider } from "react-redux";
 import { createBrowserRouter, RouterProvider } from "react-router";
 
 import "./index.css";
+import { store } from "@/redux/store";
 import AppProvider from "@/AppProvider";
 import ErrorBoundary from "@/layout/ErrorBoundary";
 import MainLayout from "@/layout/MainLayout";
@@ -31,9 +33,11 @@ const router = createBrowserRouter(routes);
 
 function App() {
   return (
-    <AppProvider>
-      <RouterProvider router={router} />
-    </AppProvider>
+    <Provider store={store}>
+      <AppProvider>
+        <RouterProvider router={router} />
+      </AppProvider>
+    </Provider>
   );
 }
 
