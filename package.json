@@ -9,13 +9,27 @@
     "build": "tsc && vite build",
     "preview": "vite preview",
     "test": "vitest",
-    "lint": "tsc --noEmit"
+    "lint": "tsc --noEmit",
+    "sync": "pnpm build && npx cap sync",
+    "open:android": "npx cap open android",
+    "open:ios": "npx cap open ios"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "packageManager": "pnpm@10.25.0",
   "dependencies": {
+    "@capacitor/app": "^8.1.0",
+    "@capacitor/browser": "^8.0.3",
+    "@capacitor/clipboard": "^8.0.1",
+    "@capacitor/core": "^8.3.3",
+    "@capacitor/device": "^8.0.2",
+    "@capacitor/haptics": "^8.0.2",
+    "@capacitor/keyboard": "^8.0.3",
+    "@capacitor/network": "^8.0.1",
+    "@capacitor/preferences": "^8.0.1",
+    "@capacitor/share": "^8.0.1",
+    "@capacitor/splash-screen": "^8.0.1",
     "@reduxjs/toolkit": "^2.0.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
@@ -25,6 +39,9 @@
     "viem": "^2.0.0"
   },
   "devDependencies": {
+    "@capacitor/android": "^8.3.3",
+    "@capacitor/cli": "^8.3.3",
+    "@capacitor/ios": "^8.3.3",
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",
     "@vitejs/plugin-react": "^4.0.0",

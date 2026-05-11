@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Merge Wallet</string>
+    <string name="title_activity_main">Merge Wallet</string>
+    <string name="package_name">co.rsk.mergewallet</string>
+    <string name="custom_url_scheme">co.rsk.mergewallet</string>
+</resources>

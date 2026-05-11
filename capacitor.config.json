@@ -1,0 +1,13 @@
+{
+  "appId": "co.rsk.mergewallet",
+  "appName": "Merge Wallet",
+  "webDir": "dist",
+  "plugins": {
+    "Keyboard": {
+      "resize": "native"
+    },
+    "SplashScreen": {
+      "launchAutoHide": false
+    }
+  }
+}
