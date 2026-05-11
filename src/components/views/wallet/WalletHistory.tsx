@@ -5,10 +5,13 @@ import ViewHeader from "@/layout/ViewHeader";
 import WeiDisplay from "@/atoms/WeiDisplay";
 import Address from "@/atoms/Address";
 import { selectWalletAddress } from "@/redux/wallet";
+import { selectNetwork } from "@/redux/preferences";
+import { buildTxUrl } from "@/util/networks";
 import TransactionHistoryService, { type TxHistoryEntry } from "@/kernel/evm/TransactionHistoryService";
 
 export default function WalletHistory() {
   const address = useSelector(selectWalletAddress);
+  const network = useSelector(selectNetwork);
   const [txs, setTxs] = useState<TxHistoryEntry[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -16,7 +19,7 @@ export default function WalletHistory() {
     if (!address) return;
 
     setIsLoading(true);
-    TransactionHistoryService()
+    TransactionHistoryService(network)
       .getHistory(address as `0x${string}`)
       .then(setTxs)
       .finally(() => setIsLoading(false));
@@ -48,7 +51,7 @@ export default function WalletHistory() {
             return (
               <a
                 key={tx.hash}
-                href={`https://explorer.testnet.rsk.co/tx/${tx.hash}`}
+                href={buildTxUrl(network, tx.hash)}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex items-center justify-between p-3 rounded-lg bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700"

@@ -6,6 +6,7 @@ import { SplashScreen } from "@capacitor/splash-screen";
 import AppLockScreen from "@/views/security/AppLockScreen";
 import ErrorBoundary from "@/layout/ErrorBoundary";
 import KeyManagerService from "@/kernel/evm/KeyManagerService";
+import SecurityService from "@/kernel/app/SecurityService";
 import { setWalletAddress } from "@/redux/wallet";
 
 type Phase = "PREFLIGHT" | "LOCKED" | "RUNNING" | "PAUSED" | "STARTUP_ERROR";
@@ -22,7 +23,10 @@ export default function AppProvider({ children }: AppProviderProps) {
   phaseRef.current = phase;
 
   useEffect(function mount() {
+    let mounted = true;
+
     function go(next: Phase) {
+      if (!mounted) return;
       setPhase(next);
       phaseRef.current = next;
     }
@@ -30,9 +34,17 @@ export default function AppProvider({ children }: AppProviderProps) {
     async function coldStart() {
       try {
         await SplashScreen.hide();
-        go("LOCKED");
       } catch {
+        // web
+      }
+
+      const Security = SecurityService();
+      const result = await Security.initEncryption();
+
+      if (result.hasPinConfigured) {
         go("LOCKED");
+      } else {
+        boot();
       }
     }
 
@@ -40,6 +52,7 @@ export default function AppProvider({ children }: AppProviderProps) {
 
     async function handlePause() {
       if (phaseRef.current === "RUNNING") {
+        await SecurityService().clearKeyFromMemory();
         go("PAUSED");
       }
     }
@@ -54,6 +67,7 @@ export default function AppProvider({ children }: AppProviderProps) {
     App.addListener("resume", handleResume);
 
     return () => {
+      mounted = false;
       App.removeAllListeners();
     };
   }, []);

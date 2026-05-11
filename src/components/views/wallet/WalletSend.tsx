@@ -4,11 +4,14 @@ import { isAddress, parseEther, formatEther } from "viem";
 
 import ViewHeader from "@/layout/ViewHeader";
 import { selectWalletAddress } from "@/redux/wallet";
+import { selectNetwork } from "@/redux/preferences";
+import { buildTxUrl } from "@/util/networks";
 import KeyManagerService from "@/kernel/evm/KeyManagerService";
 import { getPublicClient, getWalletClient } from "@/kernel/evm/ClientService";
 
 export default function WalletSend() {
   const address = useSelector(selectWalletAddress);
+  const network = useSelector(selectNetwork);
   const [to, setTo] = useState("");
   const [amount, setAmount] = useState("");
   const [gasEstimate, setGasEstimate] = useState<bigint | null>(null);
@@ -76,7 +79,7 @@ export default function WalletSend() {
           <h2 className="text-lg font-bold">Transaction Sent</h2>
           <p className="text-sm text-neutral-500 font-mono break-all">{txHash}</p>
           <a
-            href={`https://explorer.testnet.rsk.co/tx/${txHash}`}
+            href={buildTxUrl(network, txHash)}
             target="_blank"
             rel="noopener noreferrer"
             className="text-primary text-sm"

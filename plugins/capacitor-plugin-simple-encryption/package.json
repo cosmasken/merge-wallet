@@ -1,0 +1,63 @@
+{
+  "name": "capacitor-plugin-simple-encryption",
+  "version": "0.1.0",
+  "description": "Simple encryption plugin for Capacitor - encrypts data at rest using platform secure storage",
+  "main": "dist/plugin.cjs.js",
+  "module": "dist/esm/index.js",
+  "types": "dist/esm/index.d.ts",
+  "unpkg": "dist/plugin.js",
+  "files": [
+    "android/src/main/",
+    "android/build.gradle",
+    "dist/",
+    "ios/Sources/",
+    "Package.swift",
+    "SimpleEncryptionPlugin.podspec"
+  ],
+  "author": "Selene Wallet",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://git.xulu.tech/selene.cash/capacitor-plugin-simple-encryption.git"
+  },
+  "keywords": [
+    "capacitor",
+    "plugin",
+    "native",
+    "encryption",
+    "keychain",
+    "keystore",
+    "aes"
+  ],
+  "scripts": {
+    "build": "npm run clean && tsc && rollup -c rollup.config.mjs",
+    "clean": "rimraf ./dist",
+    "watch": "tsc --watch",
+    "prepublishOnly": "npm run build",
+    "lint": "eslint src/",
+    "prettier": "prettier --check \"src/**/*.ts\""
+  },
+  "devDependencies": {
+    "@capacitor/android": "^8.0.0",
+    "@capacitor/core": "^8.0.0",
+    "@capacitor/ios": "^8.0.0",
+    "@rollup/plugin-node-resolve": "^15.2.3",
+    "@types/node": "^20.14.0",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.0",
+    "rimraf": "^5.0.7",
+    "rollup": "^4.18.0",
+    "typescript": "^5.4.5"
+  },
+  "peerDependencies": {
+    "@capacitor/core": "^8.0.0"
+  },
+  "capacitor": {
+    "ios": {
+      "src": "ios"
+    },
+    "android": {
+      "src": "android"
+    }
+  }
+}

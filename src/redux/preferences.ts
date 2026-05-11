@@ -16,6 +16,9 @@ interface PreferencesState {
   languageCode: string;
   localCurrency: string;
   hideBalance: boolean;
+  authMode: string;
+  authActions: string;
+  pinInputMode: string;
 }
 
 const initialState: PreferencesState = {
@@ -24,12 +27,17 @@ const initialState: PreferencesState = {
   languageCode: "en",
   localCurrency: "USD",
   hideBalance: false,
+  authMode: "none",
+  authActions: "Any;SendTransaction;RevealBalance",
+  pinInputMode: "true",
 };
 
 export const setTheme = createAction<ThemeMode>("preferences/setTheme");
 export const setNetwork = createAction<ValidNetwork>("preferences/setNetwork");
 export const setCurrency = createAction<string>("preferences/setCurrency");
 export const toggleHideBalance = createAction("preferences/toggleHideBalance");
+export const setAuthMode = createAction<string>("preferences/setAuthMode");
+export const setAuthActions = createAction<string>("preferences/setAuthActions");
 
 export const preferencesReducer = createReducer(initialState, (builder) => {
   builder
@@ -44,6 +52,12 @@ export const preferencesReducer = createReducer(initialState, (builder) => {
     })
     .addCase(toggleHideBalance, (state) => {
       state.hideBalance = !state.hideBalance;
+    })
+    .addCase(setAuthMode, (state, action) => {
+      state.authMode = action.payload;
+    })
+    .addCase(setAuthActions, (state, action) => {
+      state.authActions = action.payload;
     });
 });
 
@@ -75,4 +89,18 @@ export const selectIsDarkMode = createSelector(
     prefs.themeMode === "dark" ||
     (prefs.themeMode === ThemeMode.System &&
       window.matchMedia("(prefers-color-scheme: dark)").matches),
+);
+
+export const selectSecuritySettings = createSelector(
+  selectPreferences,
+  (prefs) => ({
+    authMode: prefs.authMode,
+    authActions: prefs.authActions.split(";"),
+    isNumericPin: prefs.pinInputMode === "true",
+  }),
+);
+
+export const selectAuthMode = createSelector(
+  selectPreferences,
+  (prefs) => prefs.authMode,
 );

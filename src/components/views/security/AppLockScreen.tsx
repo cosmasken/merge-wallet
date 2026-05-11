@@ -2,18 +2,28 @@ import { useState } from "react";
 import { MemoryRouter, Route, Routes, useNavigate } from "react-router";
 
 import MergeLogo from "@/atoms/MergeLogo";
+import SecurityService from "@/kernel/app/SecurityService";
 
 function LockScreen({ boot }: { boot: () => void }) {
   const navigate = useNavigate();
   const [pin, setPin] = useState("");
   const [error, setError] = useState("");
 
-  const handleDigit = (digit: string) => {
+  const handleDigit = async (digit: string) => {
     const newPin = pin + digit;
     setPin(newPin);
-    if (newPin.length >= 6) {
-      setPin("");
-      boot();
+    setError("");
+
+    if (newPin.length >= 4) {
+      const Security = SecurityService();
+      const isValid = await Security.verifyPin(newPin);
+      if (isValid) {
+        await Security.initEncryption(newPin);
+        boot();
+      } else {
+        setPin("");
+        setError("Incorrect PIN. Try again.");
+      }
     }
   };
 
@@ -25,7 +35,7 @@ function LockScreen({ boot }: { boot: () => void }) {
       <h1 className="text-2xl font-bold text-white">Merge Wallet</h1>
 
       <div className="flex gap-3">
-        {[0, 1, 2, 3, 4, 5].map((i) => (
+        {[0, 1, 2, 3].map((i) => (
           <div
             key={i}
             className={`w-3 h-3 rounded-full border-2 border-primary ${
@@ -35,9 +45,7 @@ function LockScreen({ boot }: { boot: () => void }) {
         ))}
       </div>
 
-      {error && (
-        <p className="text-error text-sm">{error}</p>
-      )}
+      {error && <p className="text-error text-sm">{error}</p>}
 
       <div className="grid grid-cols-3 gap-4 max-w-xs">
         {[1, 2, 3, 4, 5, 6, 7, 8, 9].map((d) => (
