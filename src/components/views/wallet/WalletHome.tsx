@@ -1,5 +1,6 @@
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
 
 import Button from "@/atoms/Button";
 import Card from "@/atoms/Card";
@@ -8,20 +9,40 @@ import WeiDisplay from "@/atoms/WeiDisplay";
 import SendIcon from "@/icons/SendIcon";
 import ReceiveIcon from "@/icons/ReceiveIcon";
 import HistoryIcon from "@/icons/HistoryIcon";
-import { selectWalletAddress, selectWalletBalance } from "@/redux/wallet";
+import { selectWalletAddress, selectWalletBalance, setWalletBalance } from "@/redux/wallet";
+import BalanceService from "@/kernel/evm/BalanceService";
 
 export default function WalletHome() {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
   const address = useSelector(selectWalletAddress);
   const balance = useSelector(selectWalletBalance);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(function fetchBalance() {
+    if (!address) return;
+
+    setIsLoading(true);
+    const Balance = BalanceService();
+
+    Balance.startAutoRefresh(address as `0x${string}`, (value) => {
+      dispatch(setWalletBalance(value.toString()));
+      setIsLoading(false);
+    });
+
+    return () => Balance.stopAutoRefresh();
+  }, [address, dispatch]);
 
   return (
     <div className="flex flex-col items-center gap-6 px-4 pt-8">
       <div className="text-center">
         <div className="text-4xl font-bold text-neutral-800 dark:text-neutral-100">
-          <WeiDisplay value={BigInt(balance)} />
+          {isLoading ? (
+            <div className="w-32 h-8 bg-neutral-200 dark:bg-neutral-800 rounded animate-pulse mx-auto" />
+          ) : (
+            <WeiDisplay value={BigInt(balance)} />
+          )}
         </div>
-        <p className="text-sm text-neutral-500 mt-1">~$0.00 USD</p>
       </div>
 
       <Address address={address} short className="text-xs text-neutral-400" />
@@ -51,7 +72,13 @@ export default function WalletHome() {
               <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center text-white text-xs font-bold">RBTC</div>
               <span className="font-medium">Rootstock RBTC</span>
             </div>
-            <span className="font-mono text-sm"><WeiDisplay value={BigInt(balance)} /></span>
+            <span className="font-mono text-sm">
+              {isLoading ? (
+                <div className="w-16 h-4 bg-neutral-200 dark:bg-neutral-800 rounded animate-pulse" />
+              ) : (
+                <WeiDisplay value={BigInt(balance)} />
+              )}
+            </span>
           </div>
         </Card>
       </div>
