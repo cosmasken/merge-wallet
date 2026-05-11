@@ -1,0 +1,31 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@font-face {
+  font-family: "Archivo";
+  src: url("/fonts/Archivo-Regular.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: "Archivo";
+  src: url("/fonts/Archivo-Bold.woff2") format("woff2");
+  font-weight: 700;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: "Chivo Mono";
+  src: url("/fonts/ChivoMono-Regular.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: "Chivo Mono";
+  src: url("/fonts/ChivoMono-Bold.woff2") format("woff2");
+  font-weight: 700;
+  font-style: normal;
+}

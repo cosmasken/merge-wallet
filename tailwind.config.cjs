@@ -1,0 +1,72 @@
+/** @type {import('tailwindcss').Config} */
+module.exports = {
+  darkMode: "class",
+  content: ["./index.html", "./src/**/*.{js,ts,jsx,tsx}"],
+  theme: {
+    screens: {
+      sm: "360px",
+      md: "640px",
+    },
+    fontFamily: {
+      sans: ["Archivo", "sans-serif"],
+      mono: ['"Chivo Mono"', "monospace"],
+    },
+    colors: {
+      transparent: "rgba(0,0,0,0)",
+      black: "rgba(0, 0, 0, 1)",
+      white: "rgba(255, 255, 255, 1)",
+      error: {
+        light: "rgba(230, 174, 157, 1)",
+        DEFAULT: "rgba(202, 50, 36, 1)",
+        dark: "rgba(89, 34, 29, 1)",
+      },
+      success: {
+        light: "rgba(212, 231, 186, 1)",
+        DEFAULT: "rgba(148, 195, 82, 1)",
+        dark: "rgba(63, 84, 7, 1)",
+      },
+      warn: {
+        light: "rgba(255, 217, 153, 1)",
+        DEFAULT: "rgba(232, 157, 30, 1)",
+        dark: "rgba(103, 60, 24, 1)",
+      },
+      primary: {
+        50: "#fff5eb",
+        100: "#ffe0b3",
+        200: "#ffcc80",
+        300: "#ffb84d",
+        400: "#ffa31a",
+        500: "#FF8C00",
+        700: "#cc7000",
+        900: "#664700",
+        DEFAULT: "#FF8C00",
+      },
+      primarydark: {
+        50: "#1a1a1a",
+        100: "#2d2414",
+        200: "#4d3d14",
+        300: "#735714",
+        400: "#996e14",
+        500: "#FF8C00",
+        700: "#ffaa33",
+        900: "#ffc066",
+      },
+      neutral: {
+        25: "rgba(247, 246, 242, 1)",
+        50: "rgba(243, 241, 236, 1)",
+        100: "rgba(231, 229, 223, 1)",
+        150: "rgba(211, 209, 201, 1)",
+        200: "rgba(181, 179, 170, 1)",
+        300: "rgba(143, 141, 133, 1)",
+        400: "rgba(104, 103, 96, 1)",
+        500: "rgba(71, 70, 65, 1)",
+        600: "rgba(46, 45, 42, 1)",
+        700: "rgba(37, 36, 35, 1)",
+        800: "rgba(29, 28, 27, 1)",
+        900: "rgba(25, 24, 24, 1)",
+        1000: "rgba(20, 20, 20, 1)",
+      },
+    },
+  },
+  plugins: [],
+};
