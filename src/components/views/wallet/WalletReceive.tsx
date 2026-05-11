@@ -1,10 +1,13 @@
+import { useSelector } from "react-redux";
+
 import ViewHeader from "@/layout/ViewHeader";
 import Address from "@/atoms/Address";
 import Card from "@/atoms/Card";
-
-const DEMO_ADDRESS = "0x742d35Cc6634C0532925a3b844Bc9e7595f2bD18";
+import { selectWalletAddress } from "@/redux/wallet";
 
 export default function WalletReceive() {
+  const address = useSelector(selectWalletAddress);
+
   return (
     <div>
       <ViewHeader title="Receive" subtitle="Share your address to receive RBTC" />
@@ -14,7 +17,7 @@ export default function WalletReceive() {
             QR Code Placeholder
           </div>
           <div className="text-center font-mono text-sm break-all">
-            <Address address={DEMO_ADDRESS} />
+            <Address address={address} />
           </div>
           <button className="text-primary text-sm font-medium">
             Copy Address

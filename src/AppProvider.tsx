@@ -1,9 +1,12 @@
 import { ReactNode, useEffect, useRef, useState } from "react";
+import { useDispatch } from "react-redux";
 import { App } from "@capacitor/app";
 import { SplashScreen } from "@capacitor/splash-screen";
 
 import AppLockScreen from "@/views/security/AppLockScreen";
 import ErrorBoundary from "@/layout/ErrorBoundary";
+import KeyManagerService from "@/kernel/evm/KeyManagerService";
+import { setWalletAddress } from "@/redux/wallet";
 
 type Phase = "PREFLIGHT" | "LOCKED" | "RUNNING" | "PAUSED" | "STARTUP_ERROR";
 
@@ -12,6 +15,7 @@ interface AppProviderProps {
 }
 
 export default function AppProvider({ children }: AppProviderProps) {
+  const dispatch = useDispatch();
   const [phase, setPhase] = useState<Phase>("PREFLIGHT");
   const [startupError, setStartupError] = useState<Error | null>(null);
   const phaseRef = useRef<Phase>("PREFLIGHT");
@@ -24,8 +28,12 @@ export default function AppProvider({ children }: AppProviderProps) {
     }
 
     async function coldStart() {
-      await SplashScreen.hide();
-      go("LOCKED");
+      try {
+        await SplashScreen.hide();
+        go("LOCKED");
+      } catch {
+        go("LOCKED");
+      }
     }
 
     coldStart();
@@ -51,7 +59,19 @@ export default function AppProvider({ children }: AppProviderProps) {
   }, []);
 
   const boot = async () => {
-    setPhase("RUNNING");
+    try {
+      const KeyManager = KeyManagerService();
+      if (!KeyManager.isInitialized()) {
+        const { address } = KeyManager.generateWallet();
+        dispatch(setWalletAddress(address));
+      } else {
+        dispatch(setWalletAddress(KeyManager.getAddress()));
+      }
+      setPhase("RUNNING");
+    } catch (e) {
+      setStartupError(e instanceof Error ? e : new Error(String(e)));
+      setPhase("STARTUP_ERROR");
+    }
   };
 
   let content: ReactNode = null;

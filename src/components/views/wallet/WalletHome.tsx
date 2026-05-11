@@ -1,23 +1,30 @@
 import { useNavigate } from "react-router-dom";
+import { useSelector } from "react-redux";
 
 import Button from "@/atoms/Button";
 import Card from "@/atoms/Card";
+import Address from "@/atoms/Address";
 import WeiDisplay from "@/atoms/WeiDisplay";
 import SendIcon from "@/icons/SendIcon";
 import ReceiveIcon from "@/icons/ReceiveIcon";
 import HistoryIcon from "@/icons/HistoryIcon";
+import { selectWalletAddress, selectWalletBalance } from "@/redux/wallet";
 
 export default function WalletHome() {
   const navigate = useNavigate();
+  const address = useSelector(selectWalletAddress);
+  const balance = useSelector(selectWalletBalance);
 
   return (
     <div className="flex flex-col items-center gap-6 px-4 pt-8">
       <div className="text-center">
         <div className="text-4xl font-bold text-neutral-800 dark:text-neutral-100">
-          <WeiDisplay value={0n} />
+          <WeiDisplay value={BigInt(balance)} />
         </div>
         <p className="text-sm text-neutral-500 mt-1">~$0.00 USD</p>
       </div>
+
+      <Address address={address} short className="text-xs text-neutral-400" />
 
       <div className="flex gap-4 w-full max-w-sm">
         <Button
@@ -44,7 +51,7 @@ export default function WalletHome() {
               <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center text-white text-xs font-bold">RBTC</div>
               <span className="font-medium">Rootstock RBTC</span>
             </div>
-            <span className="font-mono text-sm"><WeiDisplay value={0n} /></span>
+            <span className="font-mono text-sm"><WeiDisplay value={BigInt(balance)} /></span>
           </div>
         </Card>
       </div>
