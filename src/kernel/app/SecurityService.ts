@@ -7,10 +7,13 @@ export default function SecurityService() {
     initEncryption,
     verifyPin,
     setPin,
+    removePin,
     isPinConfigured,
+    isBiometricAvailable,
     hasBiometricKey,
     unlockWithBiometric,
     storeBiometricKeyFromCurrent,
+    removeBiometricKey,
     resetEncryption,
     clearKeyFromMemory,
   };
@@ -35,8 +38,18 @@ export default function SecurityService() {
     _hasPinConfigured = true;
   }
 
+  async function removePin(): Promise<void> {
+    await SimpleEncryption.removePin();
+    _hasPinConfigured = false;
+  }
+
   function isPinConfigured(): boolean {
     return _hasPinConfigured;
+  }
+
+  async function isBiometricAvailable(): Promise<boolean> {
+    const { value } = await SimpleEncryption.isBiometricAvailable();
+    return value;
   }
 
   async function hasBiometricKey(): Promise<boolean> {
@@ -57,6 +70,10 @@ export default function SecurityService() {
   async function storeBiometricKeyFromCurrent(): Promise<void> {
     const { key } = await SimpleEncryption.exportCurrentKey();
     await SimpleEncryption.storeBiometricKey({ key });
+  }
+
+  async function removeBiometricKey(): Promise<void> {
+    await SimpleEncryption.removeBiometricKey();
   }
 
   async function resetEncryption(): Promise<void> {
