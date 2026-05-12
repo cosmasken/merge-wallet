@@ -1,8 +1,17 @@
+import { useEffect } from "react";
 import { Outlet } from "react-router-dom";
+import { useSelector } from "react-redux";
 
 import BottomNavigation from "@/layout/BottomNavigation";
+import { selectIsDarkMode } from "@/redux/preferences";
 
 export default function MainLayout() {
+  const isDark = useSelector(selectIsDarkMode);
+
+  useEffect(() => {
+    document.documentElement.classList.toggle("dark", isDark);
+  }, [isDark]);
+
   return (
     <div className="min-h-screen bg-neutral-50 dark:bg-neutral-1000 text-neutral-800 dark:text-neutral-100">
       <main className="pb-20">

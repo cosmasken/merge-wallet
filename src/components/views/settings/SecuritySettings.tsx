@@ -154,7 +154,9 @@ export default function SecuritySettings() {
   if (loading) {
     return (
       <div>
-        <ViewHeader title="Security" subtitle="PIN, biometric, and recovery" />
+        <ViewHeader title="Security" subtitle="PIN, biometric, and recovery" showBack />
+
+  
         <div className="px-4 text-sm text-neutral-500">Loading...</div>
       </div>
     );

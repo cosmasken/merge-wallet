@@ -53,7 +53,7 @@ export default function CurrencySettings() {
 
   return (
     <div>
-      <ViewHeader title="Currency" subtitle="Display and fiat currency" />
+      <ViewHeader title="Currency" subtitle="Display and fiat currency" showBack />
       <div className="flex flex-col gap-4 px-4">
         {priceLoading ? (
           <div className="p-3 rounded-lg bg-neutral-100 dark:bg-neutral-800 text-sm text-neutral-500 text-center">

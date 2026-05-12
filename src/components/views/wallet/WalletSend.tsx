@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
-import { isAddress, parseEther, formatEther } from "viem";
+import { isAddress, parseEther, formatEther, encodeFunctionData, erc20Abi, parseUnits } from "viem";
 
 import ViewHeader from "@/layout/ViewHeader";
 import { selectWalletAddress, selectWalletBalance } from "@/redux/wallet";
@@ -8,8 +8,21 @@ import { selectNetwork } from "@/redux/preferences";
 import { selectIsConnected } from "@/redux/device";
 import { buildTxUrl } from "@/util/networks";
 import { getPublicClient } from "@/kernel/evm/ClientService";
+import TransactionBuilderService from "@/kernel/evm/TransactionBuilderService";
 import TransactionManagerService from "@/kernel/evm/TransactionManagerService";
+import TokenManagerService from "@/kernel/evm/TokenManagerService";
 import { classifyError, InsufficientFundsError } from "@/kernel/evm/errors";
+
+interface TokenOption {
+  type: "native" | "erc20";
+  symbol: string;
+  address?: `0x${string}`;
+  decimals: number;
+  balance: bigint;
+}
+
+const RIF_MAINNET = "0x2acc95758f8b5f583470bA265E685CF8e3f4283b";
+const RIF_TESTNET = "0x19F64674D8A5B4E652319F5e239eFd3bc969a1fE";
 
 export default function WalletSend() {
   const address = useSelector(selectWalletAddress);
@@ -24,14 +37,49 @@ export default function WalletSend() {
   const [isSending, setIsSending] = useState(false);
   const [error, setError] = useState("");
   const [txHash, setTxHash] = useState("");
+  const [selectedToken, setSelectedToken] = useState<TokenOption>({
+    type: "native",
+    symbol: "RBTC",
+    decimals: 18,
+    balance: BigInt(balance),
+  });
+  const [tokenBalances, setTokenBalances] = useState<TokenOption[]>([]);
+
+  const rifAddress = network === "mainnet" ? RIF_MAINNET : RIF_TESTNET;
+
+  useEffect(() => {
+    if (!address) return;
+    TokenManagerService(network)
+      .getTokenBalance(rifAddress as `0x${string}`, address as `0x${string}`)
+      .then((rif) => {
+        const tokens: TokenOption[] = [
+          { type: "native", symbol: "RBTC", decimals: 18, balance: BigInt(balance) },
+        ];
+        if (rif && rif.balance > 0n) {
+          tokens.push({
+            type: "erc20",
+            symbol: rif.symbol,
+            address: rifAddress as `0x${string}`,
+            decimals: rif.decimals,
+            balance: rif.balance,
+          });
+        }
+        setTokenBalances(tokens);
+      });
+  }, [address, network, balance, rifAddress]);
 
   const isValidAddress = isAddress(to);
   const isValidAmount = amount && !isNaN(Number(amount)) && Number(amount) > 0;
-  const valueWei = isValidAmount ? parseEther(amount) : 0n;
-  const balanceBigInt = BigInt(balance);
+  const balanceBigInt = selectedToken.balance;
 
-  const isInsufficientFunds = isValidAmount && gasEstimate !== null && gasPrice !== null
-    ? valueWei + gasEstimate * gasPrice > balanceBigInt
+  const valueWei = isValidAmount
+    ? selectedToken.type === "native"
+      ? parseEther(amount)
+      : parseUnits(amount, selectedToken.decimals)
+    : 0n;
+
+  const isInsufficientFunds = isValidAmount
+    ? valueWei > balanceBigInt
     : false;
 
   const handleEstimateGas = async () => {
@@ -39,17 +87,32 @@ export default function WalletSend() {
     setIsEstimating(true);
     setError("");
     try {
-      const publicClient = getPublicClient();
-      const [gas, gPrice] = await Promise.all([
-        publicClient.estimateGas({
-          to: to as `0x${string}`,
-          value: parseEther(amount),
-          account: address as `0x${string}`,
-        }),
-        publicClient.getGasPrice(),
-      ]);
-      setGasEstimate(gas);
-      setGasPrice(gPrice);
+      const builder = TransactionBuilderService(network);
+      if (selectedToken.type === "native") {
+        const gas = await builder.estimateGas(
+          to as `0x${string}`,
+          amount,
+          address as `0x${string}`,
+        );
+        setGasEstimate(gas);
+      } else {
+        const publicClient = getPublicClient(network);
+        const data = encodeFunctionData({
+          abi: erc20Abi,
+          functionName: "transfer",
+          args: [to as `0x${string}`, valueWei],
+        });
+        const [gas, gPrice] = await Promise.all([
+          publicClient.estimateGas({
+            to: selectedToken.address,
+            data,
+            account: address as `0x${string}`,
+          }),
+          publicClient.getGasPrice(),
+        ]);
+        setGasEstimate(gas);
+        setGasPrice(gPrice);
+      }
     } catch (e) {
       setError(classifyError(e).message);
     }
@@ -59,18 +122,34 @@ export default function WalletSend() {
   const handleSend = async () => {
     if (!isValidAddress || !isValidAmount) return;
     if (isInsufficientFunds) {
-      setError(new InsufficientFundsError(valueWei + (gasEstimate ?? 0n) * (gasPrice ?? 0n), balanceBigInt).message);
+      setError(new InsufficientFundsError(valueWei, balanceBigInt).message);
       return;
     }
     setIsSending(true);
     setError("");
     try {
-      const { hash } = await TransactionManagerService(network).sendTransaction(
-        to as `0x${string}`,
-        parseEther(amount),
-        gasEstimate ?? undefined,
-      );
-      setTxHash(hash);
+      const txManager = TransactionManagerService(network);
+      if (selectedToken.type === "native") {
+        const { hash } = await txManager.sendTransaction(
+          to as `0x${string}`,
+          valueWei,
+          gasEstimate ?? undefined,
+        );
+        setTxHash(hash);
+      } else {
+        const data = encodeFunctionData({
+          abi: erc20Abi,
+          functionName: "transfer",
+          args: [to as `0x${string}`, valueWei],
+        });
+        const { hash } = await txManager.sendContractTransaction(
+          selectedToken.address!,
+          0n,
+          data,
+          gasEstimate ?? undefined,
+        );
+        setTxHash(hash);
+      }
     } catch (e) {
       setError(classifyError(e).message);
     }
@@ -104,8 +183,30 @@ export default function WalletSend() {
 
   return (
     <div>
-      <ViewHeader title="Send" subtitle="Send RBTC or tokens" />
+      <ViewHeader title="Send" subtitle="Send RBTC or tokens" showBack />
       <div className="flex flex-col gap-4 px-4">
+        <div>
+          <label className="text-sm text-neutral-500 mb-1 block">Token</label>
+          <div className="flex gap-2">
+            {tokenBalances.map((token) => (
+              <button
+                key={token.symbol}
+                onClick={() => { setSelectedToken(token); setGasEstimate(null); setError(""); }}
+                className={`flex-1 p-3 rounded-lg border-2 text-sm font-medium transition-colors ${
+                  selectedToken.symbol === token.symbol
+                    ? "border-primary bg-primary/10 text-primary"
+                    : "border-neutral-300 dark:border-neutral-600 text-neutral-600 dark:text-neutral-300"
+                }`}
+              >
+                <div>{token.symbol}</div>
+                <div className="text-xs opacity-70 font-mono mt-0.5">
+                  {formatEther(token.balance)} RBTC
+                </div>
+              </button>
+            ))}
+          </div>
+        </div>
+
         <div>
           <label className="text-sm text-neutral-500 mb-1 block">Recipient Address</label>
           <input
@@ -121,7 +222,9 @@ export default function WalletSend() {
         </div>
 
         <div>
-          <label className="text-sm text-neutral-500 mb-1 block">Amount (RBTC)</label>
+          <label className="text-sm text-neutral-500 mb-1 block">
+            Amount ({selectedToken.symbol})
+          </label>
           <input
             type="text"
             placeholder="0.00"
@@ -156,7 +259,7 @@ export default function WalletSend() {
 
         {isInsufficientFunds && (
           <p className="text-error text-sm bg-error/10 p-3 rounded-lg">
-            Insufficient RBTC balance. You need at least {formatEther(valueWei + (gasEstimate ?? 0n) * (gasPrice ?? 0n))} RBTC including gas.
+            Insufficient {selectedToken.symbol} balance.
           </p>
         )}
 
@@ -169,7 +272,7 @@ export default function WalletSend() {
           disabled={!isConnected || !isValidAddress || !isValidAmount || isSending || isInsufficientFunds}
           className="w-full p-3 rounded-full bg-primary text-white font-semibold disabled:opacity-50 mt-4"
         >
-          {isSending ? "Sending..." : isInsufficientFunds ? "Insufficient Funds" : "Send"}
+          {isSending ? "Sending..." : isInsufficientFunds ? "Insufficient Funds" : `Send ${selectedToken.symbol}`}
         </button>
       </div>
     </div>

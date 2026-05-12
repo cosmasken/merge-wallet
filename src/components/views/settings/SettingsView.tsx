@@ -2,7 +2,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 
 import ViewHeader from "@/layout/ViewHeader";
-import { selectThemeMode, setTheme, ThemeMode } from "@/redux/preferences";
+import { selectThemeMode, selectShouldHideBalance, setTheme, toggleHideBalance, ThemeMode } from "@/redux/preferences";
 
 const sections = [
   { title: "Security", path: "/settings/security", desc: "PIN, biometric, recovery" },
@@ -22,6 +22,7 @@ export default function SettingsView() {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const currentTheme = useSelector(selectThemeMode);
+  const hideBalance = useSelector(selectShouldHideBalance);
 
   return (
     <div>
@@ -47,6 +48,21 @@ export default function SettingsView() {
               </button>
             ))}
           </div>
+        </div>
+
+        <div className="rounded-lg bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 overflow-hidden mt-4">
+          <button
+            onClick={() => dispatch(toggleHideBalance())}
+            className="flex items-center justify-between w-full p-4 text-left"
+          >
+            <div>
+              <div className="font-medium text-neutral-800 dark:text-neutral-100">Hide Balance</div>
+              <div className="text-xs text-neutral-500">Hide wallet balances from view</div>
+            </div>
+            <div className={`w-10 h-6 rounded-full transition-colors ${hideBalance ? "bg-primary" : "bg-neutral-300 dark:bg-neutral-600"} relative`}>
+              <div className={`w-5 h-5 rounded-full bg-white absolute top-0.5 transition-transform ${hideBalance ? "translate-x-[18px]" : "translate-x-0.5"}`} />
+            </div>
+          </button>
         </div>
 
         {sections.map(({ title, path, desc }) => (

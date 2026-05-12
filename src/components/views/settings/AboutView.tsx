@@ -4,7 +4,7 @@ import MergeLogo from "@/atoms/MergeLogo";
 export default function AboutView() {
   return (
     <div>
-      <ViewHeader title="About" />
+      <ViewHeader title="About" showBack />
       <div className="flex flex-col items-center gap-4 px-4 pt-8 text-center">
         <MergeLogo className="w-16 h-16" />
         <div>

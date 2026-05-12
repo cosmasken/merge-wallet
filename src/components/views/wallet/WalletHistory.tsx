@@ -27,7 +27,7 @@ export default function WalletHistory() {
 
   return (
     <div>
-      <ViewHeader title="History" subtitle="Your transaction history" />
+      <ViewHeader title="History" subtitle="Your transaction history" showBack />
       {isLoading ? (
         <div className="flex flex-col gap-3 px-4">
           {[1, 2, 3].map((i) => (

@@ -20,7 +20,7 @@ export default function NetworkSettings() {
 
   return (
     <div>
-      <ViewHeader title="Network" subtitle="Rootstock network configuration" />
+      <ViewHeader title="Network" subtitle="Rootstock network configuration" showBack />
       <div className="flex flex-col gap-3 px-4">
         {NETWORKS.map(({ key, label }) => {
           const chain = getChain(key);

@@ -37,7 +37,7 @@ export default function WalletReceive() {
 
   return (
     <div>
-      <ViewHeader title="Receive" subtitle="Share your address to receive RBTC" />
+      <ViewHeader title="Receive" subtitle="Share your address to receive RBTC" showBack />
       <div className="flex flex-col items-center gap-6 px-4">
         <Card className="p-8 flex flex-col items-center gap-4">
           <canvas ref={canvasRef} className="w-48 h-48 rounded-lg" />

@@ -15,6 +15,15 @@ export default function TransactionManagerService(network?: ValidNetwork) {
     value: bigint,
     gas?: bigint,
   ): Promise<SendResult> {
+    return sendContractTransaction(to, value, undefined, gas)
+  }
+
+  async function sendContractTransaction(
+    to: `0x${string}`,
+    value: bigint,
+    data?: `0x${string}`,
+    gas?: bigint,
+  ): Promise<SendResult> {
     try {
       const publicClient = getPublicClient(network)
       const from = KeyManagerService().getAddress()
@@ -27,6 +36,7 @@ export default function TransactionManagerService(network?: ValidNetwork) {
       const signedTx = await KeyManagerService().signTransaction({
         to,
         value,
+        data,
         chainId,
         nonce,
         gas,
@@ -65,6 +75,7 @@ export default function TransactionManagerService(network?: ValidNetwork) {
 
   return {
     sendTransaction,
+    sendContractTransaction,
     waitForReceipt,
     sendAndWait,
   }

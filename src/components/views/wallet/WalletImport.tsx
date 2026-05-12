@@ -48,7 +48,7 @@ export default function WalletImport() {
 
   return (
     <div>
-      <ViewHeader title="Import Wallet" subtitle="Restore from recovery phrase" />
+      <ViewHeader title="Import Wallet" subtitle="Restore from recovery phrase" showBack />
       <div className="flex flex-col gap-4 px-4">
         <label className="text-sm text-neutral-500">
           Enter your 12 or 24 word recovery phrase

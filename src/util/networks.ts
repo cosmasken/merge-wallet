@@ -22,7 +22,7 @@ export const rskTestnet = {
     public: { http: ["https://public-node.testnet.rsk.co"] },
   },
   blockExplorers: {
-    default: { name: "RSK Testnet Explorer", url: "https://explorer.testnet.rsk.co" },
+    default: { name: "RSK Testnet Explorer", url: "https://explorer.testnet.rootstock.io" },
   },
 } as const satisfies Chain;
 

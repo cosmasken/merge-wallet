@@ -14,6 +14,9 @@ interface PersistedState {
   wallet: {
     address: string;
     name: string;
+    balance?: string;
+    seedBackedUp?: boolean;
+    trackedNfts?: string[];
   };
 }
 
@@ -33,6 +36,11 @@ export async function saveState(state: {
     wallet: {
       address: String(state.wallet.address ?? ""),
       name: String(state.wallet.name ?? "My Wallet"),
+      balance: String(state.wallet.balance ?? "0"),
+      seedBackedUp: Boolean(state.wallet.seedBackedUp),
+      trackedNfts: Array.isArray(state.wallet.trackedNfts)
+        ? state.wallet.trackedNfts
+        : [],
     },
   };
 

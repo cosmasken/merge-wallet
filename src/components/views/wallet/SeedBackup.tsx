@@ -23,7 +23,7 @@ export default function SeedBackup() {
 
   return (
     <div>
-      <ViewHeader title="Backup Wallet" subtitle="Secure your recovery phrase" />
+      <ViewHeader title="Backup Wallet" subtitle="Secure your recovery phrase" showBack />
       <div className="flex flex-col gap-4 px-4">
         <p className="text-sm text-neutral-500">
           Your recovery phrase is the only way to restore your wallet if you lose access.
