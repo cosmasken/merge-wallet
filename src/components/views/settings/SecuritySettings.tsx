@@ -3,14 +3,15 @@ import { useDispatch, useSelector } from "react-redux";
 
 import ViewHeader from "@/layout/ViewHeader";
 import KeyManagerService from "@/kernel/evm/KeyManagerService";
-import SecurityService from "@/kernel/app/SecurityService";
-import { selectAuthMode, setAuthMode } from "@/redux/preferences";
+import SecurityService, { AuthActions } from "@/kernel/app/SecurityService";
+import { selectAuthMode, selectSecuritySettings, setAuthMode, setAuthActions } from "@/redux/preferences";
 
 type View = "main" | "setPin" | "confirmPin" | "currentPin" | "phrase";
 
 export default function SecuritySettings() {
   const dispatch = useDispatch();
   const authMode = useSelector(selectAuthMode);
+  const { authActions: securityActions } = useSelector(selectSecuritySettings);
   const [view, setView] = useState<View>("main");
   const [pin, setPin] = useState("");
   const [error, setError] = useState("");
@@ -333,6 +334,59 @@ export default function SecuritySettings() {
                   }`}
                 />
               </button>
+            </div>
+          </div>
+        )}
+
+        {pinConfigured && (
+          <div className="rounded-lg bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 overflow-hidden">
+            <div className="p-4 border-b border-neutral-200 dark:border-neutral-700">
+              <div className="font-medium text-neutral-800 dark:text-neutral-100">
+                Require Authorization For
+              </div>
+              <div className="text-xs text-neutral-500 mt-1">
+                Actions that need PIN or biometric confirmation
+              </div>
+            </div>
+            <div className="divide-y divide-neutral-200 dark:divide-neutral-700">
+              {(Object.values(AuthActions) as AuthActions[]).map((action) => {
+                const isEnabled = securityActions.includes(action);
+                return (
+                  <div key={action} className="flex items-center justify-between px-4 py-3">
+                    <span className="text-sm text-neutral-800 dark:text-neutral-100">
+                      {action === AuthActions.Any ? "App Lock" :
+                       action === AuthActions.AppResume ? "App Resume" :
+                       action === AuthActions.SendTransaction ? "Send Transaction" :
+                       action === AuthActions.RevealBalance ? "Reveal Balance" :
+                       action === AuthActions.RevealPrivateKeys ? "Reveal Private Keys" : action}
+                    </span>
+                    <button
+                      onClick={() => {
+                        const current = new Set(securityActions);
+                        if (action === AuthActions.Any) {
+                          // Toggle all
+                          const all = Object.values(AuthActions) as string[];
+                          const allOn = current.size === all.length;
+                          dispatch(setAuthActions(allOn ? "" : all.join(";")));
+                        } else {
+                          if (isEnabled) current.delete(action);
+                          else current.add(action);
+                          // Always include Any
+                          current.add(AuthActions.Any);
+                          dispatch(setAuthActions(Array.from(current).join(";")));
+                        }
+                      }}
+                      className={`w-10 h-6 rounded-full transition-colors ${
+                        isEnabled ? "bg-primary" : "bg-neutral-300 dark:bg-neutral-600"
+                      }`}
+                    >
+                      <div className={`w-4 h-4 rounded-full bg-white shadow transition-transform ${
+                        isEnabled ? "translate-x-5" : "translate-x-1"
+                      }`} />
+                    </button>
+                  </div>
+                );
+              })}
             </div>
           </div>
         )}

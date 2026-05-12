@@ -7,7 +7,7 @@ On web, data passes through unencrypted (development only).
 ## Install
 
 ```bash
-npm install https://git.xulu.tech/selene.cash/capacitor-plugin-simple-encryption.git
+npm install https://github.com/cosmasken/capacitor-plugin-simple-encryption.git
 npx cap sync
 ```
 

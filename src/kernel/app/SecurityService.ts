@@ -1,13 +1,25 @@
 import { SimpleEncryption } from "capacitor-plugin-simple-encryption";
 
+import { store } from "@/redux/store";
+import { selectSecuritySettings } from "@/redux/preferences";
+
 let _hasPinConfigured = false;
 
 function isCryptoAvailable(): boolean {
   return typeof crypto !== "undefined" && !!crypto.subtle;
 }
 
+export enum AuthActions {
+  Any = "Any",
+  AppResume = "AppResume",
+  SendTransaction = "SendTransaction",
+  RevealBalance = "RevealBalance",
+  RevealPrivateKeys = "RevealPrivateKeys",
+}
+
 export default function SecurityService() {
   return {
+    authorize,
     initEncryption,
     verifyPin,
     setPin,
@@ -21,6 +33,32 @@ export default function SecurityService() {
     resetEncryption,
     clearKeyFromMemory,
   };
+
+  async function authorize(action: AuthActions = AuthActions.Any): Promise<boolean> {
+    const { authMode, authActions } = selectSecuritySettings(store.getState());
+    const isAuthRequired = action === AuthActions.Any || authActions.includes(action);
+    if (!isAuthRequired) return true;
+
+    switch (authMode) {
+      case "bio": {
+        try {
+          await SimpleEncryption.verifyBiometric({ title: "Merge Wallet", reason: "Authorize this action" });
+          return true;
+        } catch {
+          return false;
+        }
+      }
+      case "pin":
+      case "password":
+        if (!_hasPinConfigured) return true;
+        // fall through to PIN verification
+        return false;
+      case "none":
+        return true;
+      default:
+        return false;
+    }
+  }
 
   async function initEncryption(pin?: string) {
     const result = await SimpleEncryption.initialize({ pin });

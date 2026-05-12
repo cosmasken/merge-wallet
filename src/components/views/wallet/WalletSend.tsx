@@ -12,6 +12,7 @@ import TransactionBuilderService from "@/kernel/evm/TransactionBuilderService";
 import TransactionManagerService from "@/kernel/evm/TransactionManagerService";
 import TokenManagerService, { getTokenList } from "@/kernel/evm/TokenManagerService";
 import { classifyError, InsufficientFundsError } from "@/kernel/evm/errors";
+import SecurityService, { AuthActions } from "@/kernel/app/SecurityService";
 
 interface TokenOption {
   type: "native" | "erc20";
@@ -118,6 +119,13 @@ export default function WalletSend() {
       setError(new InsufficientFundsError(valueWei, balanceBigInt).message);
       return;
     }
+
+    const authorized = await SecurityService().authorize(AuthActions.SendTransaction);
+    if (!authorized) {
+      setError("Authorization required");
+      return;
+    }
+
     setIsSending(true);
     setError("");
     try {
