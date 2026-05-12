@@ -13,6 +13,7 @@ export default defineConfig({
       "@/icons": path.resolve(__dirname, "./src/components/atoms/icons"),
       "@/composite": path.resolve(__dirname, "./src/components/composite"),
       "@": path.resolve(__dirname, "./src"),
+      "capacitor-plugin-simple-encryption": path.resolve(__dirname, "./plugins/capacitor-plugin-simple-encryption/dist/esm/index.js"),
     },
   },
   test: {
