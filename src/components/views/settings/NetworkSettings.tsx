@@ -23,7 +23,7 @@ export default function NetworkSettings() {
     setTesting(true);
     try {
       const client = ClientService(network);
-      await client.getBlockNumber();
+      await client.getPublicClient().getBlockNumber();
       setTestResults(prev => ({ ...prev, [network]: true }));
     } catch {
       setTestResults(prev => ({ ...prev, [network]: false }));
@@ -38,7 +38,7 @@ export default function NetworkSettings() {
     for (const { key } of NETWORKS) {
       try {
         const client = ClientService(key);
-        await client.getBlockNumber();
+        await client.getPublicClient().getBlockNumber();
         setTestResults(prev => ({ ...prev, [key]: true }));
       } catch {
         setTestResults(prev => ({ ...prev, [key]: false }));
