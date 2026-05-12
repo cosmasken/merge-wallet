@@ -2,6 +2,7 @@ import { type Hash, type TransactionReceipt, parseEther } from "viem"
 import { getPublicClient } from "@/kernel/evm/ClientService"
 import KeyManagerService from "@/kernel/evm/KeyManagerService"
 import type { ValidNetwork } from "@/redux/preferences"
+import { classifyError } from "@/kernel/evm/errors"
 
 export interface SendResult {
   hash: Hash
@@ -14,29 +15,33 @@ export default function TransactionManagerService(network?: ValidNetwork) {
     value: bigint,
     gas?: bigint,
   ): Promise<SendResult> {
-    const publicClient = getPublicClient(network)
-    const from = KeyManagerService().getAddress()
-    const [chainId, nonce, gasPrice] = await Promise.all([
-      publicClient.getChainId(),
-      publicClient.getTransactionCount({ address: from }),
-      gas ? Promise.resolve(undefined) : publicClient.getGasPrice(),
-    ])
+    try {
+      const publicClient = getPublicClient(network)
+      const from = KeyManagerService().getAddress()
+      const [chainId, nonce, gasPrice] = await Promise.all([
+        publicClient.getChainId(),
+        publicClient.getTransactionCount({ address: from }),
+        gas ? Promise.resolve(undefined) : publicClient.getGasPrice(),
+      ])
 
-    const signedTx = await KeyManagerService().signTransaction({
-      to,
-      value,
-      chainId,
-      nonce,
-      gas,
-      gasPrice,
-      from,
-    })
+      const signedTx = await KeyManagerService().signTransaction({
+        to,
+        value,
+        chainId,
+        nonce,
+        gas,
+        gasPrice,
+        from,
+      })
 
-    const hash = await publicClient.sendRawTransaction({
-      serializedTransaction: signedTx,
-    })
+      const hash = await publicClient.sendRawTransaction({
+        serializedTransaction: signedTx,
+      })
 
-    return { hash, receipt: null }
+      return { hash, receipt: null }
+    } catch (e) {
+      throw classifyError(e)
+    }
   }
 
   async function waitForReceipt(

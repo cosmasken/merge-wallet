@@ -9,6 +9,7 @@ import KeyManagerService from "@/kernel/evm/KeyManagerService";
 import SecurityService from "@/kernel/app/SecurityService";
 import { setWalletAddress, setSeedBackedUp, hydrateWallet } from "@/redux/wallet";
 import { hydratePreferences } from "@/redux/preferences";
+import { setConnected } from "@/redux/device";
 import { loadState } from "@/redux/persistence";
 
 type Phase = "PREFLIGHT" | "LOCKED" | "RUNNING" | "PAUSED" | "STARTUP_ERROR";
@@ -74,9 +75,14 @@ export default function AppProvider({ children }: AppProviderProps) {
     App.addListener("pause", handlePause);
     App.addListener("resume", handleResume);
 
+    window.addEventListener("online", () => dispatch(setConnected(true)));
+    window.addEventListener("offline", () => dispatch(setConnected(false)));
+
     return () => {
       mounted = false;
       App.removeAllListeners();
+      window.removeEventListener("online", () => dispatch(setConnected(true)));
+      window.removeEventListener("offline", () => dispatch(setConnected(false)));
     };
   }, []);
 

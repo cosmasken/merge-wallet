@@ -10,6 +10,7 @@ import SendIcon from "@/icons/SendIcon";
 import ReceiveIcon from "@/icons/ReceiveIcon";
 import HistoryIcon from "@/icons/HistoryIcon";
 import { selectWalletAddress, selectWalletBalance, selectSeedBackedUp, setWalletBalance } from "@/redux/wallet";
+import { selectIsConnected } from "@/redux/device";
 import BalanceService from "@/kernel/evm/BalanceService";
 
 export default function WalletHome() {
@@ -18,24 +19,53 @@ export default function WalletHome() {
   const address = useSelector(selectWalletAddress);
   const balance = useSelector(selectWalletBalance);
   const seedBackedUp = useSelector(selectSeedBackedUp);
+  const isConnected = useSelector(selectIsConnected);
   const [isLoading, setIsLoading] = useState(true);
+  const [connectionError, setConnectionError] = useState(false);
 
   useEffect(function fetchBalance() {
     if (!address) return;
 
     setIsLoading(true);
+    setConnectionError(false);
     const Balance = BalanceService();
 
-    Balance.startAutoRefresh(address as `0x${string}`, (value) => {
-      dispatch(setWalletBalance(value.toString()));
-      setIsLoading(false);
-    });
+    Balance.startAutoRefresh(
+      address as `0x${string}`,
+      (value) => {
+        dispatch(setWalletBalance(value.toString()));
+        setIsLoading(false);
+        setConnectionError(false);
+      },
+      () => {
+        setConnectionError(true);
+        setIsLoading(false);
+      },
+    );
 
     return () => Balance.stopAutoRefresh();
   }, [address, dispatch]);
 
   return (
     <div className="flex flex-col items-center gap-6 px-4 pt-8">
+      {!isConnected && (
+        <div className="w-full max-w-sm p-3 rounded-lg bg-error/10 border border-error/30 flex items-center gap-2">
+          <div className="w-2 h-2 rounded-full bg-error animate-pulse shrink-0" />
+          <p className="text-xs text-error">
+            No internet connection
+          </p>
+        </div>
+      )}
+
+      {connectionError && isConnected && (
+        <div className="w-full max-w-sm p-3 rounded-lg bg-warn-light/20 border border-warn/30 flex items-center gap-2">
+          <div className="w-2 h-2 rounded-full bg-warn animate-pulse shrink-0" />
+          <p className="text-xs text-warn-dark">
+            Unable to reach Rootstock network
+          </p>
+        </div>
+      )}
+
       {!seedBackedUp && (
         <div className="w-full max-w-sm p-3 rounded-lg bg-warn-light/20 border border-warn/30 flex items-center justify-between">
           <p className="text-xs text-warn-dark">

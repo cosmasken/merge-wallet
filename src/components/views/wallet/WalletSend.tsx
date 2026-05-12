@@ -1,20 +1,25 @@
 import { useState } from "react";
 import { useSelector } from "react-redux";
-import { isAddress, parseEther } from "viem";
+import { isAddress, parseEther, formatEther } from "viem";
 
 import ViewHeader from "@/layout/ViewHeader";
-import { selectWalletAddress } from "@/redux/wallet";
+import { selectWalletAddress, selectWalletBalance } from "@/redux/wallet";
 import { selectNetwork } from "@/redux/preferences";
+import { selectIsConnected } from "@/redux/device";
 import { buildTxUrl } from "@/util/networks";
 import { getPublicClient } from "@/kernel/evm/ClientService";
 import TransactionManagerService from "@/kernel/evm/TransactionManagerService";
+import { classifyError, InsufficientFundsError } from "@/kernel/evm/errors";
 
 export default function WalletSend() {
   const address = useSelector(selectWalletAddress);
+  const balance = useSelector(selectWalletBalance);
   const network = useSelector(selectNetwork);
+  const isConnected = useSelector(selectIsConnected);
   const [to, setTo] = useState("");
   const [amount, setAmount] = useState("");
   const [gasEstimate, setGasEstimate] = useState<bigint | null>(null);
+  const [gasPrice, setGasPrice] = useState<bigint | null>(null);
   const [isEstimating, setIsEstimating] = useState(false);
   const [isSending, setIsSending] = useState(false);
   const [error, setError] = useState("");
@@ -22,6 +27,12 @@ export default function WalletSend() {
 
   const isValidAddress = isAddress(to);
   const isValidAmount = amount && !isNaN(Number(amount)) && Number(amount) > 0;
+  const valueWei = isValidAmount ? parseEther(amount) : 0n;
+  const balanceBigInt = BigInt(balance);
+
+  const isInsufficientFunds = isValidAmount && gasEstimate !== null && gasPrice !== null
+    ? valueWei + gasEstimate * gasPrice > balanceBigInt
+    : false;
 
   const handleEstimateGas = async () => {
     if (!isValidAddress || !isValidAmount) return;
@@ -29,20 +40,28 @@ export default function WalletSend() {
     setError("");
     try {
       const publicClient = getPublicClient();
-      const gas = await publicClient.estimateGas({
-        to: to as `0x${string}`,
-        value: parseEther(amount),
-        account: address as `0x${string}`,
-      });
+      const [gas, gPrice] = await Promise.all([
+        publicClient.estimateGas({
+          to: to as `0x${string}`,
+          value: parseEther(amount),
+          account: address as `0x${string}`,
+        }),
+        publicClient.getGasPrice(),
+      ]);
       setGasEstimate(gas);
+      setGasPrice(gPrice);
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Gas estimation failed");
+      setError(classifyError(e).message);
     }
     setIsEstimating(false);
   };
 
   const handleSend = async () => {
     if (!isValidAddress || !isValidAmount) return;
+    if (isInsufficientFunds) {
+      setError(new InsufficientFundsError(valueWei + (gasEstimate ?? 0n) * (gasPrice ?? 0n), balanceBigInt).message);
+      return;
+    }
     setIsSending(true);
     setError("");
     try {
@@ -53,7 +72,7 @@ export default function WalletSend() {
       );
       setTxHash(hash);
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Transaction failed");
+      setError(classifyError(e).message);
     }
     setIsSending(false);
   };
@@ -112,7 +131,11 @@ export default function WalletSend() {
           />
         </div>
 
-        {isValidAddress && isValidAmount && gasEstimate === null && (
+        {!isConnected && (
+          <p className="text-error text-sm bg-error/10 p-3 rounded-lg">No internet connection</p>
+        )}
+
+        {isConnected && isValidAddress && isValidAmount && gasEstimate === null && (
           <button
             onClick={handleEstimateGas}
             disabled={isEstimating}
@@ -125,19 +148,28 @@ export default function WalletSend() {
         {gasEstimate !== null && (
           <div className="text-sm text-neutral-500">
             Estimated gas: {gasEstimate.toString()} units
+            {gasPrice !== null && (
+              <span> · Max fee: {formatEther(gasEstimate * gasPrice)} RBTC</span>
+            )}
           </div>
         )}
 
+        {isInsufficientFunds && (
+          <p className="text-error text-sm bg-error/10 p-3 rounded-lg">
+            Insufficient RBTC balance. You need at least {formatEther(valueWei + (gasEstimate ?? 0n) * (gasPrice ?? 0n))} RBTC including gas.
+          </p>
+        )}
+
         {error && (
-          <p className="text-error text-sm bg-error-light/20 dark:bg-error-dark/30 p-3 rounded-lg">{error}</p>
+          <p className="text-error text-sm bg-error/10 p-3 rounded-lg">{error}</p>
         )}
 
         <button
           onClick={handleSend}
-          disabled={!isValidAddress || !isValidAmount || isSending}
+          disabled={!isConnected || !isValidAddress || !isValidAmount || isSending || isInsufficientFunds}
           className="w-full p-3 rounded-full bg-primary text-white font-semibold disabled:opacity-50 mt-4"
         >
-          {isSending ? "Sending..." : "Send"}
+          {isSending ? "Sending..." : isInsufficientFunds ? "Insufficient Funds" : "Send"}
         </button>
       </div>
     </div>

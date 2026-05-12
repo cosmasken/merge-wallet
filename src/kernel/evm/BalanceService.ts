@@ -13,6 +13,7 @@ export default function BalanceService(network?: ValidNetwork) {
   function startAutoRefresh(
     address: `0x${string}`,
     callback: (balance: bigint) => void,
+    errorCallback?: (error: Error) => void,
     intervalMs = 15000,
   ) {
     stopAutoRefresh()
@@ -21,8 +22,8 @@ export default function BalanceService(network?: ValidNetwork) {
       try {
         const balance = await getBalance(address)
         callback(balance)
-      } catch {
-        // silent fail on auto-refresh
+      } catch (e) {
+        errorCallback?.(e instanceof Error ? e : new Error(String(e)))
       }
     }
 
