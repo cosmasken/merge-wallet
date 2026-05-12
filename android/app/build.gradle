@@ -4,7 +4,7 @@ android {
     namespace = "co.rsk.mergewallet"
     compileSdk = rootProject.ext.compileSdkVersion
     defaultConfig {
-        applicationId "co.rsk.mergewallet"
+        applicationId "com.mergewallet.app"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1

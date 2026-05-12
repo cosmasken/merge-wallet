@@ -1,5 +1,5 @@
 {
-  "appId": "co.rsk.mergewallet",
+  "appId": "com.mergewallet.app",
   "appName": "Merge Wallet",
   "webDir": "dist",
   "plugins": {
@@ -8,6 +8,9 @@
     },
     "SplashScreen": {
       "launchAutoHide": false
+    },
+    "CapacitorHttp": {
+      "enabled": true
     }
   }
 }

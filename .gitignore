@@ -8,3 +8,8 @@ references/
 techdebt.md
 summary.md
 todo.md
+android/.idea/
+ios/*.xcworkspace
+ios/Pods/
+*.apk
+*.aab
