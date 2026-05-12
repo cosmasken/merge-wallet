@@ -27,7 +27,7 @@ export default function TransactionHistoryService(network?: ValidNetwork) {
   async function getHistory(address: `0x${string}`): Promise<TxHistoryEntry[]> {
     try {
       const explorerUrl = getExplorerUrl(network ?? "testnet")
-      const apiUrl = `${explorerUrl}/api?module=account&action=txlist&address=${address}&sort=desc&limit=20`
+      const apiUrl = `${explorerUrl}/api?module=account&action=txlist&address=${address}&sort=desc&limit=100`
 
       const response = await fetch(apiUrl)
       const data = await response.json()

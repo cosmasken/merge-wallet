@@ -8,12 +8,14 @@ import { selectWalletAddress } from "@/redux/wallet";
 import { selectNetwork } from "@/redux/preferences";
 import { buildTxUrl } from "@/util/networks";
 import TransactionHistoryService, { type TxHistoryEntry } from "@/kernel/evm/TransactionHistoryService";
+import TransactionExportService from "@/kernel/evm/TransactionExportService";
 
 export default function WalletHistory() {
   const address = useSelector(selectWalletAddress);
   const network = useSelector(selectNetwork);
   const [txs, setTxs] = useState<TxHistoryEntry[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [exporting, setExporting] = useState(false);
 
   useEffect(function fetchHistory() {
     if (!address) return;
@@ -24,6 +26,17 @@ export default function WalletHistory() {
       .then(setTxs)
       .finally(() => setIsLoading(false));
   }, [address]);
+
+  const handleExport = async () => {
+    if (!address) return;
+    setExporting(true);
+    try {
+      await TransactionExportService(network).exportCsv(address as `0x${string}`);
+    } catch {
+      // silently fail
+    }
+    setExporting(false);
+  };
 
   return (
     <div>
@@ -46,6 +59,13 @@ export default function WalletHistory() {
         </div>
       ) : (
         <div className="flex flex-col px-4 gap-2">
+          <button
+            onClick={handleExport}
+            disabled={exporting}
+            className="self-end px-3 py-1.5 rounded-full border border-primary text-primary text-xs font-medium active:bg-primary/10 disabled:opacity-50"
+          >
+            {exporting ? "Exporting..." : "Export CSV"}
+          </button>
           {txs.map((tx) => {
             const isOutgoing = tx.from.toLowerCase() === address.toLowerCase();
             return (
