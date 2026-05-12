@@ -49,7 +49,33 @@ jobs:
     - name: Setup keystore for signing
       if: github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/')
       run: |
-        echo "${{ secrets.KEYSTORE_FILE }}" | base64 -d > android/app/release-key.keystore
+        # Fail fast if KEYSTORE_FILE secret is empty
+        if [ -z "${{ secrets.KEYSTORE_FILE }}" ]; then
+          echo "ERROR: KEYSTORE_FILE secret is empty"
+          exit 1
+        fi
+        
+        # Decode keystore with validation
+        echo "${{ secrets.KEYSTORE_FILE }}" | base64 -d > android/app/release-key.keystore || {
+          echo "ERROR: Failed to decode keystore from base64"
+          exit 1
+        }
+        
+        # Verify keystore file is non-zero size
+        if [ ! -s android/app/release-key.keystore ]; then
+          echo "ERROR: Decoded keystore file is empty or does not exist"
+          exit 1
+        fi
+        
+        # Optional: Validate keystore with keytool if KEYSTORE_PASSWORD is available
+        if [ -n "${{ secrets.KEYSTORE_PASSWORD }}" ]; then
+          keytool -list -keystore android/app/release-key.keystore -storepass "${{ secrets.KEYSTORE_PASSWORD }}" || {
+            echo "ERROR: Keystore validation failed - invalid keystore or password"
+            exit 1
+          }
+        else
+          echo "WARNING: KEYSTORE_PASSWORD not available, skipping keystore validation"
+        fi
 
     - name: Prepare Gradle signing properties
       if: github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/')
@@ -92,13 +118,13 @@ jobs:
         retention-days: 90
 
     - name: Build Android AAB (Release - Signed)
-      if: github.ref == 'refs/heads/main'
+      if: github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/')
       run: |
         cd android
         ./gradlew bundleRelease
 
     - name: Upload AAB artifact
-      if: github.ref == 'refs/heads/main'
+      if: github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/')
       uses: actions/upload-artifact@v4
       with:
         name: merge-wallet-release.aab
