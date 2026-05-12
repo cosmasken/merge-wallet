@@ -6,8 +6,8 @@ import ViewHeader from "@/layout/ViewHeader";
 import { selectWalletAddress } from "@/redux/wallet";
 import { selectNetwork } from "@/redux/preferences";
 import { buildTxUrl } from "@/util/networks";
-import KeyManagerService from "@/kernel/evm/KeyManagerService";
 import { getPublicClient } from "@/kernel/evm/ClientService";
+import TransactionManagerService from "@/kernel/evm/TransactionManagerService";
 
 export default function WalletSend() {
   const address = useSelector(selectWalletAddress);
@@ -46,25 +46,11 @@ export default function WalletSend() {
     setIsSending(true);
     setError("");
     try {
-      const publicClient = getPublicClient();
-      const chainId = await publicClient.getChainId();
-      const nonce = await publicClient.getTransactionCount({
-        address: address as `0x${string}`,
-      });
-
-      const KeyManager = KeyManagerService();
-      const signedTx = await KeyManager.signTransaction({
-        to: to as `0x${string}`,
-        value: parseEther(amount),
-        chainId,
-        nonce,
-        gas: gasEstimate ?? undefined,
-      });
-
-      const hash = await publicClient.sendRawTransaction({
-        serializedTransaction: signedTx,
-      });
-
+      const { hash } = await TransactionManagerService(network).sendTransaction(
+        to as `0x${string}`,
+        parseEther(amount),
+        gasEstimate ?? undefined,
+      );
       setTxHash(hash);
     } catch (e) {
       setError(e instanceof Error ? e.message : "Transaction failed");
