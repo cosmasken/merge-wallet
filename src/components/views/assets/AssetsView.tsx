@@ -156,7 +156,15 @@ export default function AssetsView() {
       {activeTab === "nfts" && (
         <div className="flex flex-col px-4 pt-4 gap-2">
           {nfts.length === 0 ? (
-            <p className="text-center text-neutral-500 pt-8">No NFTs tracked</p>
+            <div className="flex flex-col items-center gap-3 pt-12 text-center">
+              <svg viewBox="0 0 24 24" className="w-12 h-12 text-neutral-300 dark:text-neutral-600" fill="none" stroke="currentColor" strokeWidth="1.5">
+                <rect x="3" y="3" width="18" height="18" rx="2" />
+                <circle cx="8.5" cy="8.5" r="1.5" />
+                <path d="M21 15l-5-5L5 21" />
+              </svg>
+              <p className="text-neutral-500">No NFTs tracked</p>
+              <p className="text-xs text-neutral-400 max-w-xs">Import an ERC-721 contract address to track your NFTs</p>
+            </div>
           ) : (
             nfts.map((nft) => (
               <div
@@ -197,7 +205,7 @@ export default function AssetsView() {
 
       {showImport && (
         <div
-          className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4"
+          className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4"
           onClick={() => { setShowImport(false); setImportError(""); }}
         >
           <div

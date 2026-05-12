@@ -169,6 +169,12 @@ export default function WalletSend() {
           >
             View on Explorer
           </a>
+          <button
+            onClick={() => window.history.go(-2)}
+            className="mt-4 px-6 py-3 rounded-full bg-primary text-white font-semibold"
+          >
+            Back to Wallet
+          </button>
         </div>
       </div>
     );
