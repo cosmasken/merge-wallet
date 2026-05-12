@@ -13,6 +13,7 @@ import TransactionManagerService from "@/kernel/evm/TransactionManagerService";
 import TokenManagerService, { getTokenList } from "@/kernel/evm/TokenManagerService";
 import { classifyError, InsufficientFundsError } from "@/kernel/evm/errors";
 import SecurityService, { AuthActions } from "@/kernel/app/SecurityService";
+import SlideToAction from "@/atoms/SlideToAction";
 
 interface TokenOption {
   type: "native" | "erc20";
@@ -274,13 +275,13 @@ export default function WalletSend() {
           <p className="text-error text-sm bg-error/10 p-3 rounded-lg">{error}</p>
         )}
 
-        <button
-          onClick={handleSend}
-          disabled={!isConnected || !isValidAddress || !isValidAmount || isSending || isInsufficientFunds}
-          className="w-full p-3 rounded-full bg-primary text-white font-semibold disabled:opacity-50 mt-4"
-        >
-          {isSending ? "Sending..." : isInsufficientFunds ? "Insufficient Funds" : `Send ${selectedToken.symbol}`}
-        </button>
+        <div className="mt-4">
+          <SlideToAction
+            label={isSending ? "Sending..." : `Slide to send ${selectedToken.symbol}`}
+            onSlide={handleSend}
+            disabled={!isConnected || !isValidAddress || !isValidAmount || isSending || isInsufficientFunds}
+          />
+        </div>
       </div>
     </div>
   );
