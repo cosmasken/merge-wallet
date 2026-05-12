@@ -47,10 +47,12 @@ jobs:
         pnpm exec cap sync android
 
     - name: Setup keystore for signing
+      if: github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/')
       run: |
         echo "${{ secrets.KEYSTORE_FILE }}" | base64 -d > android/app/release-key.keystore
 
     - name: Prepare Gradle signing properties
+      if: github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/')
       env:
         KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
         KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
@@ -69,6 +71,7 @@ jobs:
         ./gradlew assembleDebug
 
     - name: Build Android APK (Release - Signed)
+      if: github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/')
       run: |
         cd android
         ./gradlew assembleRelease
@@ -81,6 +84,7 @@ jobs:
         retention-days: 30
 
     - name: Upload Signed APK
+      if: github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/')
       uses: actions/upload-artifact@v4
       with:
         name: merge-wallet-release-signed.apk

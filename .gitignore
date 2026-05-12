@@ -14,5 +14,6 @@ ios/Pods/
 *.apk
 *.aab
 android/gradle.properties
+android/app/release-key.keystore
 
 PROPOSAL.md
