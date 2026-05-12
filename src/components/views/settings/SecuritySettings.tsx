@@ -67,13 +67,19 @@ export default function SecuritySettings() {
   }, [pinConfigured]);
 
   const handleCurrentPin = useCallback(async () => {
-    const isValid = await Security.verifyPin(pin);
-    if (isValid) {
-      setPin("");
-      setError("");
-      setView("setPin");
-    } else {
-      setError("Incorrect PIN");
+    try {
+      const isValid = await Security.verifyPin(pin);
+      if (isValid) {
+        await Security.initEncryption(pin);
+        setPin("");
+        setError("");
+        setView("setPin");
+      } else {
+        setError("Incorrect PIN");
+        setPin("");
+      }
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "PIN verification failed");
       setPin("");
     }
   }, [pin, Security]);

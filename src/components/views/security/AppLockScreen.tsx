@@ -8,29 +8,40 @@ function LockScreen({ boot }: { boot: () => void }) {
   const navigate = useNavigate();
   const [pin, setPin] = useState("");
   const [error, setError] = useState("");
+  const [isVerifying, setIsVerifying] = useState(false);
 
   const handleDigit = async (digit: string) => {
+    if (isVerifying) return;
     const newPin = pin + digit;
     setPin(newPin);
     setError("");
 
     if (newPin.length >= 4) {
-      const Security = SecurityService();
-      const isValid = await Security.verifyPin(newPin);
-      if (isValid) {
-        await Security.initEncryption(newPin);
-        boot();
-      } else {
+      setIsVerifying(true);
+      try {
+        const Security = SecurityService();
+        const isValid = await Security.verifyPin(newPin);
+        if (isValid) {
+          await Security.initEncryption(newPin);
+          boot();
+        } else {
+          setPin("");
+          setError("Incorrect PIN. Try again.");
+        }
+      } catch {
         setPin("");
-        setError("Incorrect PIN. Try again.");
+        setError("PIN verification unavailable on this device");
       }
+      setIsVerifying(false);
     }
   };
 
   const handleDelete = () => setPin((p) => p.slice(0, -1));
 
+  const handleForgot = () => navigate("/forgot-pin");
+
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center gap-8 bg-neutral-1000 px-4">
+    <div className="flex min-h-screen flex-col items-center justify-center gap-8 bg-neutral-1000 px-4 sm:px-8">
       <MergeLogo className="w-32 h-32" />
       <h1 className="text-2xl font-bold text-white">Merge Wallet</h1>
 
@@ -52,20 +63,23 @@ function LockScreen({ boot }: { boot: () => void }) {
           <button
             key={d}
             onClick={() => handleDigit(String(d))}
-            className="w-16 h-16 rounded-full bg-neutral-800 text-white text-xl font-bold active:bg-neutral-700"
+            disabled={isVerifying}
+            className="w-16 h-16 rounded-full bg-neutral-800 text-white text-xl font-bold active:bg-neutral-700 disabled:opacity-40"
           >
             {d}
           </button>
         ))}
         <button
           onClick={handleDelete}
-          className="w-16 h-16 rounded-full bg-neutral-800 text-white text-xl active:bg-neutral-700"
+          disabled={isVerifying}
+          className="w-16 h-16 rounded-full bg-neutral-800 text-white text-xl active:bg-neutral-700 disabled:opacity-40"
         >
           ⌫
         </button>
         <button
           onClick={() => handleDigit("0")}
-          className="w-16 h-16 rounded-full bg-neutral-800 text-white text-xl font-bold active:bg-neutral-700"
+          disabled={isVerifying}
+          className="w-16 h-16 rounded-full bg-neutral-800 text-white text-xl font-bold active:bg-neutral-700 disabled:opacity-40"
         >
           0
         </button>
@@ -73,10 +87,65 @@ function LockScreen({ boot }: { boot: () => void }) {
       </div>
 
       <button
-        onClick={() => navigate("/forgot-pin")}
+        onClick={handleForgot}
         className="text-primary text-sm mt-4"
       >
         Forgot PIN?
+      </button>
+    </div>
+  );
+}
+
+function ForgotPinScreen() {
+  const navigate = useNavigate();
+  const [resetDone, setResetDone] = useState(false);
+  const [resetError, setResetError] = useState("");
+
+  const handleReset = async () => {
+    try {
+      const Security = SecurityService();
+      await Security.resetEncryption();
+      setResetDone(true);
+    } catch {
+      setResetError("Failed to reset. Reload the page.");
+    }
+  };
+
+  if (resetDone) {
+    return (
+      <div className="flex min-h-screen flex-col items-center justify-center gap-6 bg-neutral-1000 px-4">
+        <h1 className="text-xl font-bold text-white">Reset Complete</h1>
+        <p className="text-neutral-400 text-sm text-center max-w-xs">
+          Encryption has been reset. Reload the app to create a new wallet.
+        </p>
+        <button
+          onClick={() => window.location.reload()}
+          className="p-3 rounded-full bg-primary text-white font-semibold"
+        >
+          Reload App
+        </button>
+      </div>
+    );
+  }
+
+  return (
+    <div className="flex min-h-screen flex-col items-center justify-center gap-6 bg-neutral-1000 px-4">
+      <h1 className="text-xl font-bold text-white">Forgot PIN</h1>
+      <p className="text-neutral-400 text-sm text-center max-w-xs">
+        Resetting will clear the encryption key. You will need to restore your wallet from your recovery phrase.
+      </p>
+      {resetError && <p className="text-error text-sm">{resetError}</p>}
+      <button
+        onClick={handleReset}
+        className="p-3 rounded-full bg-error text-white font-semibold"
+      >
+        Reset Encryption
+      </button>
+      <button
+        onClick={() => navigate("/")}
+        className="text-neutral-400 text-sm"
+      >
+        Back
       </button>
     </div>
   );
@@ -87,17 +156,7 @@ export default function AppLockScreen({ boot }: { boot: () => void }) {
     <MemoryRouter>
       <Routes>
         <Route path="/" element={<LockScreen boot={boot} />} />
-        <Route
-          path="/forgot-pin"
-          element={
-            <div className="flex min-h-screen flex-col items-center justify-center gap-6 bg-neutral-1000 px-4">
-              <h1 className="text-xl font-bold text-white">Forgot PIN</h1>
-              <p className="text-neutral-400 text-sm text-center max-w-xs">
-                Resetting requires restoring from recovery phrase.
-              </p>
-            </div>
-          }
-        />
+        <Route path="/forgot-pin" element={<ForgotPinScreen />} />
       </Routes>
     </MemoryRouter>
   );

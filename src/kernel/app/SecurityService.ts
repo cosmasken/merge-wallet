@@ -2,6 +2,10 @@ import { SimpleEncryption } from "capacitor-plugin-simple-encryption";
 
 let _hasPinConfigured = false;
 
+function isCryptoAvailable(): boolean {
+  return typeof crypto !== "undefined" && !!crypto.subtle;
+}
+
 export default function SecurityService() {
   return {
     initEncryption,
@@ -25,15 +29,17 @@ export default function SecurityService() {
   }
 
   async function verifyPin(pin: string): Promise<boolean> {
-    try {
-      const { isValid } = await SimpleEncryption.verifyPin({ pin });
-      return isValid;
-    } catch {
-      return false;
+    if (!isCryptoAvailable()) {
+      throw new Error("Crypto not available — run over HTTPS or localhost");
     }
+    const { isValid } = await SimpleEncryption.verifyPin({ pin });
+    return isValid;
   }
 
   async function setPin(newPin: string): Promise<void> {
+    if (!isCryptoAvailable()) {
+      throw new Error("Crypto not available — run over HTTPS or localhost");
+    }
     await SimpleEncryption.setPin({ newPin });
     _hasPinConfigured = true;
   }
