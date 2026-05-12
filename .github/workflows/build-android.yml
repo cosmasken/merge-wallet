@@ -32,6 +32,12 @@ jobs:
     - name: Install dependencies
       run: pnpm install
 
+    - name: Build native plugin
+      run: |
+        cd plugins/capacitor-plugin-simple-encryption
+        pnpm install
+        pnpm run build
+
     - name: Build web app
       run: pnpm run build
 
