@@ -7,7 +7,7 @@ import AppLockScreen from "@/views/security/AppLockScreen";
 import ErrorBoundary from "@/layout/ErrorBoundary";
 import KeyManagerService from "@/kernel/evm/KeyManagerService";
 import SecurityService from "@/kernel/app/SecurityService";
-import { setWalletAddress, hydrateWallet } from "@/redux/wallet";
+import { setWalletAddress, setSeedBackedUp, hydrateWallet } from "@/redux/wallet";
 import { hydratePreferences } from "@/redux/preferences";
 import { loadState } from "@/redux/persistence";
 
@@ -86,6 +86,7 @@ export default function AppProvider({ children }: AppProviderProps) {
       if (!KeyManager.isInitialized()) {
         const { address } = KeyManager.generateWallet();
         dispatch(setWalletAddress(address));
+        dispatch(setSeedBackedUp(false));
       } else {
         dispatch(setWalletAddress(KeyManager.getAddress()));
       }

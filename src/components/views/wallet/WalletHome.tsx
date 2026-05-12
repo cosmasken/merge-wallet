@@ -9,7 +9,7 @@ import WeiDisplay from "@/atoms/WeiDisplay";
 import SendIcon from "@/icons/SendIcon";
 import ReceiveIcon from "@/icons/ReceiveIcon";
 import HistoryIcon from "@/icons/HistoryIcon";
-import { selectWalletAddress, selectWalletBalance, setWalletBalance } from "@/redux/wallet";
+import { selectWalletAddress, selectWalletBalance, selectSeedBackedUp, setWalletBalance } from "@/redux/wallet";
 import BalanceService from "@/kernel/evm/BalanceService";
 
 export default function WalletHome() {
@@ -17,6 +17,7 @@ export default function WalletHome() {
   const dispatch = useDispatch();
   const address = useSelector(selectWalletAddress);
   const balance = useSelector(selectWalletBalance);
+  const seedBackedUp = useSelector(selectSeedBackedUp);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(function fetchBalance() {
@@ -35,6 +36,20 @@ export default function WalletHome() {
 
   return (
     <div className="flex flex-col items-center gap-6 px-4 pt-8">
+      {!seedBackedUp && (
+        <div className="w-full max-w-sm p-3 rounded-lg bg-warn-light/20 border border-warn/30 flex items-center justify-between">
+          <p className="text-xs text-warn-dark">
+            Back up your recovery phrase to protect your wallet.
+          </p>
+          <button
+            onClick={() => navigate("/wallet/backup")}
+            className="text-xs font-semibold text-primary ml-2 shrink-0"
+          >
+            Back Up
+          </button>
+        </div>
+      )}
+
       <div className="text-center">
         <div className="text-4xl font-bold text-neutral-800 dark:text-neutral-100">
           {isLoading ? (

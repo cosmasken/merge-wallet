@@ -6,17 +6,20 @@ interface WalletState {
   address: string;
   balance: string;
   name: string;
+  seedBackedUp: boolean;
 }
 
 const initialState: WalletState = {
   address: "",
   balance: "0",
   name: "My Wallet",
+  seedBackedUp: false,
 };
 
 export const setWalletAddress = createAction<string>("wallet/setAddress");
 export const setWalletBalance = createAction<string>("wallet/setBalance");
 export const setWalletName = createAction<string>("wallet/setName");
+export const setSeedBackedUp = createAction<boolean>("wallet/setSeedBackedUp");
 export const hydrateWallet = createAction<Partial<WalletState>>("wallet/hydrate");
 
 export const walletReducer = createReducer(initialState, (builder) => {
@@ -29,6 +32,9 @@ export const walletReducer = createReducer(initialState, (builder) => {
     })
     .addCase(setWalletName, (state, action) => {
       state.name = action.payload;
+    })
+    .addCase(setSeedBackedUp, (state, action) => {
+      state.seedBackedUp = action.payload;
     })
     .addCase(hydrateWallet, (_state, action) => ({
       ...initialState,
@@ -51,4 +57,9 @@ export const selectWalletBalance = createSelector(
 export const selectWalletName = createSelector(
   selectWallet,
   (wallet) => wallet.name,
+);
+
+export const selectSeedBackedUp = createSelector(
+  selectWallet,
+  (wallet) => wallet.seedBackedUp,
 );
