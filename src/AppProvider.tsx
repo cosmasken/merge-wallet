@@ -89,11 +89,7 @@ export default function AppProvider({ children }: AppProviderProps) {
   const boot = async () => {
     try {
       const KeyManager = KeyManagerService();
-      if (!KeyManager.isInitialized()) {
-        const { address } = KeyManager.generateWallet();
-        dispatch(setWalletAddress(address));
-        dispatch(setSeedBackedUp(false));
-      } else {
+      if (KeyManager.isInitialized()) {
         dispatch(setWalletAddress(KeyManager.getAddress()));
       }
       setPhase("RUNNING");

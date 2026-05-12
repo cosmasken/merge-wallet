@@ -9,6 +9,7 @@ import AppProvider from "@/AppProvider";
 import ErrorBoundary from "@/layout/ErrorBoundary";
 import MainLayout from "@/layout/MainLayout";
 import IndexRoute from "@/views/IndexRoute";
+import WalletOnboarding from "@/views/wallet/WalletOnboarding";
 import { routeWallet } from "@/routes/routeWallet";
 import { routeAssets } from "@/routes/routeAssets";
 import { routeSettings } from "@/routes/routeSettings";
@@ -21,6 +22,10 @@ const routes = [
       {
         path: "/",
         element: <IndexRoute />,
+      },
+      {
+        path: "/onboarding",
+        element: <WalletOnboarding />,
       },
       ...routeWallet,
       ...routeAssets,
