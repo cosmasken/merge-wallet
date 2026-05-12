@@ -13,3 +13,5 @@ ios/*.xcworkspace
 ios/Pods/
 *.apk
 *.aab
+
+PROPOSAL.md

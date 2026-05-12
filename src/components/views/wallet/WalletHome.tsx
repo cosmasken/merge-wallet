@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 
@@ -7,6 +7,7 @@ import Card from "@/atoms/Card";
 import Address from "@/atoms/Address";
 import WeiDisplay from "@/atoms/WeiDisplay";
 import FiatValue from "@/atoms/FiatValue";
+import PullToRefresh from "@/atoms/PullToRefresh";
 import SendIcon from "@/icons/SendIcon";
 import ReceiveIcon from "@/icons/ReceiveIcon";
 import HistoryIcon from "@/icons/HistoryIcon";
@@ -60,7 +61,19 @@ export default function WalletHome() {
       .then(setTokens);
   }, [address, network]);
 
+  const refreshAll = useCallback(async () => {
+    if (!address) return;
+    const Balance = BalanceService();
+    const [b, t] = await Promise.all([
+      Balance.getBalance(address as `0x${string}`),
+      TokenManagerService(network).getAllTokenBalances(address as `0x${string}`, getTokenList(network)),
+    ]);
+    dispatch(setWalletBalance(b.toString()));
+    setTokens(t);
+  }, [address, network, dispatch]);
+
   return (
+    <PullToRefresh onRefresh={refreshAll}>
     <div className="flex flex-col gap-6 px-4 pt-8">
       {!isConnected && (
         <div className="w-full p-3 rounded-lg bg-error/10 border border-error/30 flex items-center gap-2">
@@ -199,5 +212,6 @@ export default function WalletHome() {
         onClick={() => navigate("/wallet/history")}
       />
     </div>
+    </PullToRefresh>
   );
 }
