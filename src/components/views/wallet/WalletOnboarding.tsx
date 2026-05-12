@@ -1,14 +1,23 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 
 import KeyManagerService from "@/kernel/evm/KeyManagerService";
-import { setWalletAddress, setSeedBackedUp } from "@/redux/wallet";
+import { setWalletAddress, setSeedBackedUp, selectWalletAddress } from "@/redux/wallet";
+import { clearState } from "@/redux/persistence";
 
 export default function WalletOnboarding() {
   const navigate = useNavigate();
   const dispatch = useDispatch();
+  const existingAddress = useSelector(selectWalletAddress);
   const [creating, setCreating] = useState(false);
+
+  useEffect(() => {
+    if (existingAddress && !KeyManagerService().isInitialized()) {
+      // Stale persisted state without seed — clear it
+      clearState();
+    }
+  }, [existingAddress]);
 
   const handleCreate = async () => {
     setCreating(true);
