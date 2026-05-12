@@ -38,6 +38,7 @@ export const setCurrency = createAction<string>("preferences/setCurrency");
 export const toggleHideBalance = createAction("preferences/toggleHideBalance");
 export const setAuthMode = createAction<string>("preferences/setAuthMode");
 export const setAuthActions = createAction<string>("preferences/setAuthActions");
+export const hydratePreferences = createAction<Partial<PreferencesState>>("preferences/hydrate");
 
 export const preferencesReducer = createReducer(initialState, (builder) => {
   builder
@@ -58,7 +59,11 @@ export const preferencesReducer = createReducer(initialState, (builder) => {
     })
     .addCase(setAuthActions, (state, action) => {
       state.authActions = action.payload;
-    });
+    })
+    .addCase(hydratePreferences, (_state, action) => ({
+      ...initialState,
+      ...action.payload,
+    }));
 });
 
 export const selectPreferences = (state: RootState) => state.preferences;

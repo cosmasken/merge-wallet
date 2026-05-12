@@ -3,12 +3,15 @@ import { combineReducers, configureStore, isPlain } from "@reduxjs/toolkit";
 import { preferencesReducer } from "./preferences";
 import { deviceReducer } from "./device";
 import { walletReducer } from "./wallet";
+import { saveState } from "./persistence";
 
 const rootReducer = combineReducers({
   device: deviceReducer,
   preferences: preferencesReducer,
   wallet: walletReducer,
 });
+
+export type RootState = ReturnType<typeof rootReducer>;
 
 export const store = configureStore({
   reducer: rootReducer,
@@ -21,5 +24,17 @@ export const store = configureStore({
     }),
 });
 
-export type RootState = ReturnType<typeof rootReducer>;
+let persistTimer: ReturnType<typeof setTimeout> | null = null;
+
+store.subscribe(() => {
+  if (persistTimer) clearTimeout(persistTimer);
+  persistTimer = setTimeout(() => {
+    const state = store.getState();
+    saveState({
+      preferences: state.preferences as unknown as Record<string, unknown>,
+      wallet: state.wallet as unknown as Record<string, unknown>,
+    });
+  }, 500);
+});
+
 export type AppDispatch = typeof store.dispatch;

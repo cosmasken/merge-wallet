@@ -7,7 +7,9 @@ import AppLockScreen from "@/views/security/AppLockScreen";
 import ErrorBoundary from "@/layout/ErrorBoundary";
 import KeyManagerService from "@/kernel/evm/KeyManagerService";
 import SecurityService from "@/kernel/app/SecurityService";
-import { setWalletAddress } from "@/redux/wallet";
+import { setWalletAddress, hydrateWallet } from "@/redux/wallet";
+import { hydratePreferences } from "@/redux/preferences";
+import { loadState } from "@/redux/persistence";
 
 type Phase = "PREFLIGHT" | "LOCKED" | "RUNNING" | "PAUSED" | "STARTUP_ERROR";
 
@@ -36,6 +38,12 @@ export default function AppProvider({ children }: AppProviderProps) {
         await SplashScreen.hide();
       } catch {
         // web
+      }
+
+      const persisted = await loadState();
+      if (persisted) {
+        if (persisted.preferences) dispatch(hydratePreferences(persisted.preferences));
+        if (persisted.wallet) dispatch(hydrateWallet(persisted.wallet));
       }
 
       const Security = SecurityService();

@@ -17,6 +17,7 @@ const initialState: WalletState = {
 export const setWalletAddress = createAction<string>("wallet/setAddress");
 export const setWalletBalance = createAction<string>("wallet/setBalance");
 export const setWalletName = createAction<string>("wallet/setName");
+export const hydrateWallet = createAction<Partial<WalletState>>("wallet/hydrate");
 
 export const walletReducer = createReducer(initialState, (builder) => {
   builder
@@ -28,7 +29,11 @@ export const walletReducer = createReducer(initialState, (builder) => {
     })
     .addCase(setWalletName, (state, action) => {
       state.name = action.payload;
-    });
+    })
+    .addCase(hydrateWallet, (_state, action) => ({
+      ...initialState,
+      ...action.payload,
+    }));
 });
 
 export const selectWallet = (state: RootState) => state.wallet;
