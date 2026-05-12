@@ -1,30 +1,24 @@
 import { useCallback, useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { isAddress } from "viem";
+import { isAddress, formatEther } from "viem";
 
 import ViewHeader from "@/layout/ViewHeader";
 import WeiDisplay from "@/atoms/WeiDisplay";
 import Button from "@/atoms/Button";
-import { selectWalletAddress, addTrackedNft, removeTrackedNft, selectTrackedNfts } from "@/redux/wallet";
-import TokenManagerService from "@/kernel/evm/TokenManagerService";
+import { selectWalletAddress, selectWalletBalance, addTrackedNft, removeTrackedNft, selectTrackedNfts } from "@/redux/wallet";
+import { selectNetwork } from "@/redux/preferences";
+import TokenManagerService, { getTokenList } from "@/kernel/evm/TokenManagerService";
+import type { TokenBalance } from "@/kernel/evm/TokenManagerService";
 import NftService from "@/kernel/evm/NftService";
 import type { NftInfo } from "@/kernel/evm/NftService";
-
-interface TokenBalance {
-  address: `0x${string}`
-  symbol: string
-  balance: bigint
-}
-
-const RIF_MAINNET = "0x2acc95758f8b5f583470bA265E685CF8e3f4283b";
-const RIF_TESTNET = "0x19F64674D8A5B4E652319F5e239eFd3bc969a1fE";
-const TRACKED_TOKENS = [RIF_TESTNET, RIF_MAINNET];
 
 type Tab = "tokens" | "nfts";
 
 export default function AssetsView() {
   const dispatch = useDispatch();
   const address = useSelector(selectWalletAddress);
+  const balance = useSelector(selectWalletBalance);
+  const network = useSelector(selectNetwork);
   const trackedNfts = useSelector(selectTrackedNfts);
   const [activeTab, setActiveTab] = useState<Tab>("tokens");
   const [tokens, setTokens] = useState<TokenBalance[]>([]);
@@ -39,14 +33,11 @@ export default function AssetsView() {
     if (!address) return;
 
     setIsLoading(true);
-    TokenManagerService()
-      .getTokenBalances(
-        address as `0x${string}`,
-        TRACKED_TOKENS as `0x${string}`[],
-      )
+    TokenManagerService(network)
+      .getAllTokenBalances(address as `0x${string}`, getTokenList(network))
       .then(setTokens)
       .finally(() => setIsLoading(false));
-  }, [address]);
+  }, [address, network]);
 
   useEffect(function fetchNfts() {
     if (!address || trackedNfts.length === 0) {
@@ -121,12 +112,23 @@ export default function AssetsView() {
 
       {activeTab === "tokens" && (
         <div className="flex flex-col px-4 pt-4 gap-2">
+          <div className="flex items-center justify-between p-3 rounded-lg bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700">
+            <div className="flex items-center gap-3">
+              <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center text-white text-xs font-bold">RBTC</div>
+              <div>
+                <div className="font-medium text-sm">Rootstock RBTC</div>
+                <div className="text-xs text-neutral-500">Native</div>
+              </div>
+            </div>
+            <div className="font-mono text-sm">
+              <WeiDisplay value={BigInt(balance)} />
+            </div>
+          </div>
+
           {isLoading ? (
             [1, 2].map((i) => (
               <div key={i} className="h-14 bg-neutral-200 dark:bg-neutral-800 rounded-lg animate-pulse" />
             ))
-          ) : tokens.length === 0 ? (
-            <p className="text-center text-neutral-500 pt-8">No token balances found</p>
           ) : (
             tokens.map((token) => (
               <div

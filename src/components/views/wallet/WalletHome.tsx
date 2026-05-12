@@ -10,25 +10,18 @@ import SendIcon from "@/icons/SendIcon";
 import ReceiveIcon from "@/icons/ReceiveIcon";
 import HistoryIcon from "@/icons/HistoryIcon";
 import { selectWalletAddress, selectWalletBalance, selectSeedBackedUp, setWalletBalance } from "@/redux/wallet";
-import { selectShouldHideBalance, toggleHideBalance } from "@/redux/preferences";
+import { selectShouldHideBalance, toggleHideBalance, selectNetwork } from "@/redux/preferences";
 import { selectIsConnected } from "@/redux/device";
 import BalanceService from "@/kernel/evm/BalanceService";
-import TokenManagerService from "@/kernel/evm/TokenManagerService";
-
-const RIF_MAINNET = "0x2acc95758f8b5f583470bA265E685CF8e3f4283b";
-const RIF_TESTNET = "0x19F64674D8A5B4E652319F5e239eFd3bc969a1fE";
-const TRACKED_TOKENS = [RIF_TESTNET, RIF_MAINNET];
-
-interface TokenBalance {
-  symbol: string;
-  balance: bigint;
-}
+import TokenManagerService, { getTokenList } from "@/kernel/evm/TokenManagerService";
+import type { TokenBalance } from "@/kernel/evm/TokenManagerService";
 
 export default function WalletHome() {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const address = useSelector(selectWalletAddress);
   const balance = useSelector(selectWalletBalance);
+  const network = useSelector(selectNetwork);
   const seedBackedUp = useSelector(selectSeedBackedUp);
   const isConnected = useSelector(selectIsConnected);
   const hideBalance = useSelector(selectShouldHideBalance);
@@ -61,12 +54,10 @@ export default function WalletHome() {
 
   useEffect(function fetchTokens() {
     if (!address) return;
-    TokenManagerService()
-      .getTokenBalances(address as `0x${string}`, TRACKED_TOKENS as `0x${string}`[])
-      .then((results) => {
-        setTokens(results.map((r) => ({ symbol: r.symbol, balance: r.balance })));
-      });
-  }, [address]);
+    TokenManagerService(network)
+      .getAllTokenBalances(address as `0x${string}`, getTokenList(network))
+      .then(setTokens);
+  }, [address, network]);
 
   return (
     <div className="flex flex-col items-center gap-6 px-4 pt-8">

@@ -10,7 +10,7 @@ import { buildTxUrl } from "@/util/networks";
 import { getPublicClient } from "@/kernel/evm/ClientService";
 import TransactionBuilderService from "@/kernel/evm/TransactionBuilderService";
 import TransactionManagerService from "@/kernel/evm/TransactionManagerService";
-import TokenManagerService from "@/kernel/evm/TokenManagerService";
+import TokenManagerService, { getTokenList } from "@/kernel/evm/TokenManagerService";
 import { classifyError, InsufficientFundsError } from "@/kernel/evm/errors";
 
 interface TokenOption {
@@ -20,9 +20,6 @@ interface TokenOption {
   decimals: number;
   balance: bigint;
 }
-
-const RIF_MAINNET = "0x2acc95758f8b5f583470bA265E685CF8e3f4283b";
-const RIF_TESTNET = "0x19F64674D8A5B4E652319F5e239eFd3bc969a1fE";
 
 export default function WalletSend() {
   const address = useSelector(selectWalletAddress);
@@ -45,28 +42,24 @@ export default function WalletSend() {
   });
   const [tokenBalances, setTokenBalances] = useState<TokenOption[]>([]);
 
-  const rifAddress = network === "mainnet" ? RIF_MAINNET : RIF_TESTNET;
-
   useEffect(() => {
     if (!address) return;
     TokenManagerService(network)
-      .getTokenBalance(rifAddress as `0x${string}`, address as `0x${string}`)
-      .then((rif) => {
+      .getAllTokenBalances(address as `0x${string}`, getTokenList(network))
+      .then((results) => {
         const tokens: TokenOption[] = [
           { type: "native", symbol: "RBTC", decimals: 18, balance: BigInt(balance) },
+          ...results.map((t) => ({
+            type: "erc20" as const,
+            symbol: t.symbol,
+            address: t.address,
+            decimals: t.decimals,
+            balance: t.balance,
+          })),
         ];
-        if (rif && rif.balance > 0n) {
-          tokens.push({
-            type: "erc20",
-            symbol: rif.symbol,
-            address: rifAddress as `0x${string}`,
-            decimals: rif.decimals,
-            balance: rif.balance,
-          });
-        }
         setTokenBalances(tokens);
       });
-  }, [address, network, balance, rifAddress]);
+  }, [address, network, balance]);
 
   const isValidAddress = isAddress(to);
   const isValidAmount = amount && !isNaN(Number(amount)) && Number(amount) > 0;
@@ -200,7 +193,7 @@ export default function WalletSend() {
               >
                 <div>{token.symbol}</div>
                 <div className="text-xs opacity-70 font-mono mt-0.5">
-                  {formatEther(token.balance)} RBTC
+                  {formatEther(token.balance)} {token.symbol}
                 </div>
               </button>
             ))}
