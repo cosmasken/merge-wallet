@@ -13,5 +13,6 @@ ios/*.xcworkspace
 ios/Pods/
 *.apk
 *.aab
+android/gradle.properties
 
 PROPOSAL.md
