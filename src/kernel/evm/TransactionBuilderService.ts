@@ -1,13 +1,18 @@
 import { parseEther } from "viem"
-import { getPublicClient, getWalletClient } from "@/kernel/evm/ClientService"
+import { getPublicClient } from "@/kernel/evm/ClientService"
 import type { ValidNetwork } from "@/redux/preferences"
 
 export default function TransactionBuilderService(network?: ValidNetwork) {
-  async function estimateGas(to: `0x${string}`, amount: string): Promise<bigint> {
+  async function estimateGas(
+    to: `0x${string}`,
+    amount: string,
+    from: `0x${string}`,
+  ): Promise<bigint> {
     const publicClient = getPublicClient(network)
     const gas = await publicClient.estimateGas({
       to,
       value: parseEther(amount),
+      account: from,
     })
     return gas
   }
@@ -18,10 +23,11 @@ export default function TransactionBuilderService(network?: ValidNetwork) {
     amount: string,
   ) {
     const publicClient = getPublicClient(network)
-    const [gas, gasPrice, nonce] = await Promise.all([
-      estimateGas(to, amount),
+    const [gas, gasPrice, nonce, chainId] = await Promise.all([
+      estimateGas(to, amount, from),
       publicClient.getGasPrice(),
       publicClient.getTransactionCount({ address: from }),
+      publicClient.getChainId(),
     ])
 
     return {
@@ -30,7 +36,8 @@ export default function TransactionBuilderService(network?: ValidNetwork) {
       gas,
       gasPrice,
       nonce,
-      chainId: (await publicClient.getChainId()) as 30 | 31,
+      chainId,
+      from,
     }
   }
 
