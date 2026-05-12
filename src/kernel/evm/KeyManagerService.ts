@@ -7,6 +7,13 @@ let currentAccount: HDAccount | null = null
 let currentMnemonic: string | null = null
 
 export default function KeyManagerService() {
+  function getAccount(): HDAccount {
+    if (!currentAccount) {
+      generateWallet()
+    }
+    return currentAccount!
+  }
+
   function generateWallet() {
     const mnemonic = generateMnemonic(english, 128)
     const account = mnemonicToAccount(mnemonic, { path: BIP44_PATH })
@@ -30,13 +37,6 @@ export default function KeyManagerService() {
     }
   }
 
-  function getAccount(): HDAccount {
-    if (!currentAccount) {
-      generateWallet()
-    }
-    return currentAccount!
-  }
-
   function getAddress(): `0x${string}` {
     return getAccount().address
   }
@@ -49,12 +49,24 @@ export default function KeyManagerService() {
     return currentAccount !== null
   }
 
+  function clearMnemonic(): void {
+    currentMnemonic = null
+  }
+
+  async function signTransaction(
+    tx: Record<string, unknown>,
+  ): Promise<`0x${string}`> {
+    const account = getAccount()
+    return account.signTransaction(tx as never)
+  }
+
   return {
     generateWallet,
     importFromMnemonic,
-    getAccount,
     getAddress,
     getMnemonic,
+    clearMnemonic,
+    signTransaction,
     isInitialized,
   }
 }

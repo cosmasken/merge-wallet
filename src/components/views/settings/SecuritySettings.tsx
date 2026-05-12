@@ -45,6 +45,8 @@ export default function SecuritySettings() {
 
       setLoading(false);
     })();
+
+    return () => KeyManagerService().clearMnemonic();
   }, []);
 
   const resetFlow = useCallback(() => {

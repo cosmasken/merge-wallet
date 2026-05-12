@@ -17,6 +17,7 @@ export default function SeedBackup() {
 
   const handleConfirm = () => {
     dispatch(setSeedBackedUp(true));
+    KeyManagerService().clearMnemonic();
     navigate("/wallet");
   };
 
