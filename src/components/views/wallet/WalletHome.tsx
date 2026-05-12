@@ -126,11 +126,12 @@ export default function WalletHome() {
           </button>
         </div>
 
-        <FiatValue
-          value={BigInt(balance)}
-          hideBalance={hideBalance}
-          className="text-lg text-neutral-500"
-        />
+        {!hideBalance && (
+          <FiatValue
+            value={BigInt(balance)}
+            className="text-lg text-neutral-500"
+          />
+        )}
 
         <Address address={address} short className="text-xs text-neutral-400" />
       </div>
@@ -176,9 +177,11 @@ export default function WalletHome() {
                 </div>
                 <div>
                   <span className="font-medium">{token.symbol}</span>
-                  <div className="text-xs text-neutral-400">
-                    <FiatValue value={token.balance} hideBalance={hideBalance} fallbackClassName="inline" />
-                  </div>
+                  {!hideBalance && (
+                    <div className="text-xs text-neutral-400">
+                      <FiatValue value={token.balance} fallbackClassName="inline" />
+                    </div>
+                  )}
                 </div>
               </div>
               <span className="font-mono text-sm">

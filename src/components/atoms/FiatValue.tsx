@@ -5,23 +5,17 @@ import { selectLocalCurrency, selectRbtcPrice } from "@/redux/preferences";
 
 interface FiatValueProps {
   value?: bigint | string;
-  hideBalance?: boolean;
   className?: string;
   fallbackClassName?: string;
 }
 
 export default function FiatValue({
   value = 0n,
-  hideBalance = false,
   className,
   fallbackClassName,
 }: FiatValueProps) {
   const rbtcPrice = useSelector(selectRbtcPrice);
   const currency = useSelector(selectLocalCurrency);
-
-  if (hideBalance) {
-    return <span className={className}>XXXXX</span>;
-  }
 
   if (!rbtcPrice || rbtcPrice.currency !== currency) {
     return fallbackClassName ? <span className={fallbackClassName} /> : null;
