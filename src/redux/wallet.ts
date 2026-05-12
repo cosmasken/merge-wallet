@@ -7,6 +7,7 @@ interface WalletState {
   balance: string;
   name: string;
   seedBackedUp: boolean;
+  trackedNfts: string[];
 }
 
 const initialState: WalletState = {
@@ -14,12 +15,15 @@ const initialState: WalletState = {
   balance: "0",
   name: "My Wallet",
   seedBackedUp: false,
+  trackedNfts: [],
 };
 
 export const setWalletAddress = createAction<string>("wallet/setAddress");
 export const setWalletBalance = createAction<string>("wallet/setBalance");
 export const setWalletName = createAction<string>("wallet/setName");
 export const setSeedBackedUp = createAction<boolean>("wallet/setSeedBackedUp");
+export const addTrackedNft = createAction<string>("wallet/addTrackedNft");
+export const removeTrackedNft = createAction<string>("wallet/removeTrackedNft");
 export const hydrateWallet = createAction<Partial<WalletState>>("wallet/hydrate");
 
 export const walletReducer = createReducer(initialState, (builder) => {
@@ -35,6 +39,17 @@ export const walletReducer = createReducer(initialState, (builder) => {
     })
     .addCase(setSeedBackedUp, (state, action) => {
       state.seedBackedUp = action.payload;
+    })
+    .addCase(addTrackedNft, (state, action) => {
+      const addr = action.payload.toLowerCase();
+      if (!state.trackedNfts.some((a) => a.toLowerCase() === addr)) {
+        state.trackedNfts.push(action.payload);
+      }
+    })
+    .addCase(removeTrackedNft, (state, action) => {
+      state.trackedNfts = state.trackedNfts.filter(
+        (a) => a.toLowerCase() !== action.payload.toLowerCase(),
+      );
     })
     .addCase(hydrateWallet, (_state, action) => ({
       ...initialState,
@@ -62,4 +77,9 @@ export const selectWalletName = createSelector(
 export const selectSeedBackedUp = createSelector(
   selectWallet,
   (wallet) => wallet.seedBackedUp,
+);
+
+export const selectTrackedNfts = createSelector(
+  selectWallet,
+  (wallet) => wallet.trackedNfts,
 );
