@@ -40,7 +40,7 @@ export default function Button({
         `}
         disabled={disabled}
       >
-        {Icon && <Icon className="text-2xl" />}
+        {Icon && <Icon className="w-5 h-5" />}
         {label}
       </button>
     </div>

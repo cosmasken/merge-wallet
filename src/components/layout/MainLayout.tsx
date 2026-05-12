@@ -13,8 +13,8 @@ export default function MainLayout() {
   }, [isDark]);
 
   return (
-    <div className="min-h-screen bg-neutral-50 dark:bg-neutral-1000 text-neutral-800 dark:text-neutral-100">
-      <main className="pb-20">
+    <div className="flex flex-col h-full bg-neutral-50 dark:bg-neutral-1000 text-neutral-800 dark:text-neutral-100">
+      <main className="flex-1 overflow-y-auto pb-20">
         <Outlet />
       </main>
       <BottomNavigation />

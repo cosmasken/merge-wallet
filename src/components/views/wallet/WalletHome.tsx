@@ -60,9 +60,9 @@ export default function WalletHome() {
   }, [address, network]);
 
   return (
-    <div className="flex flex-col items-center gap-6 px-4 pt-8">
+    <div className="flex flex-col gap-6 px-4 pt-8">
       {!isConnected && (
-        <div className="w-full max-w-sm p-3 rounded-lg bg-error/10 border border-error/30 flex items-center gap-2">
+        <div className="w-full p-3 rounded-lg bg-error/10 border border-error/30 flex items-center gap-2">
           <svg viewBox="0 0 24 24" className="w-4 h-4 text-error shrink-0" fill="none" stroke="currentColor" strokeWidth="2">
             <path d="M1 1l22 22M16.72 11.06A10.94 10.94 0 0 1 19 12.55" />
             <path d="M5 12.55a10.94 10.94 0 0 1 5.17-2.39" />
@@ -76,7 +76,7 @@ export default function WalletHome() {
       )}
 
       {connectionError && isConnected && (
-        <div className="w-full max-w-sm p-3 rounded-lg bg-warn-light/20 border border-warn/30 flex items-center gap-2">
+        <div className="w-full p-3 rounded-lg bg-warn-light/20 border border-warn/30 flex items-center gap-2">
           <svg viewBox="0 0 24 24" className="w-4 h-4 text-warn-dark shrink-0" fill="none" stroke="currentColor" strokeWidth="2">
             <path d="M12 9v4" />
             <path d="M12 17h.01" />
@@ -87,7 +87,7 @@ export default function WalletHome() {
       )}
 
       {!seedBackedUp && (
-        <div className="w-full max-w-sm p-3 rounded-lg bg-warn-light/20 border border-warn/30 flex items-center justify-between">
+        <div className="w-full p-3 rounded-lg bg-warn-light/20 border border-warn/30 flex items-center justify-between">
           <p className="text-xs text-warn-dark">Back up your recovery phrase to protect your wallet.</p>
           <button
             onClick={() => navigate("/wallet/backup")}
@@ -98,7 +98,7 @@ export default function WalletHome() {
         </div>
       )}
 
-      <div className="text-center">
+      <div className="flex flex-col items-center gap-3">
         <div className="flex items-center justify-center gap-3">
           <div className="text-4xl font-bold text-neutral-800 dark:text-neutral-100">
             {isLoading ? (
@@ -124,11 +124,11 @@ export default function WalletHome() {
             )}
           </button>
         </div>
+
+        <Address address={address} short className="text-xs text-neutral-400" />
       </div>
 
-      <Address address={address} short className="text-xs text-neutral-400" />
-
-      <div className="flex gap-4 w-full max-w-sm">
+      <div className="flex gap-4 w-full">
         <Button
           label="Send"
           icon={SendIcon}
@@ -145,7 +145,7 @@ export default function WalletHome() {
         />
       </div>
 
-      <div className="w-full max-w-sm">
+      <div className="w-full">
         <Card className="p-4">
           <h2 className="text-sm font-semibold text-neutral-500 mb-3">Tokens</h2>
           <div className="flex items-center justify-between py-2">
