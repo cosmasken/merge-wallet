@@ -12,7 +12,7 @@ export default function WeiDisplay({
   className,
 }: WeiDisplayProps) {
   if (hideBalance) {
-    return <span className={className}>XXXXXXXXXX RBTC</span>;
+    return <span className={className}>XXXXX RBTC</span>;
   }
 
   const amount = typeof value === "string" ? BigInt(value) : value;

@@ -20,7 +20,7 @@ export default function FiatValue({
   const currency = useSelector(selectLocalCurrency);
 
   if (hideBalance) {
-    return <span className={className}>XXXXXXXXXX</span>;
+    return <span className={className}>XXXXX</span>;
   }
 
   if (!rbtcPrice || rbtcPrice.currency !== currency) {
