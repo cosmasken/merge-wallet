@@ -6,6 +6,7 @@ const sections = [
   { title: "Security", path: "/settings/security", desc: "PIN, biometric, recovery" },
   { title: "Network", path: "/settings/network", desc: "Mainnet, testnet, RPC" },
   { title: "Currency", path: "/settings/currency", desc: "Display currency, units" },
+  { title: "Import Wallet", path: "/wallet/import", desc: "Restore from recovery phrase" },
   { title: "About", path: "/settings/about", desc: "Version, links" },
 ];
 
