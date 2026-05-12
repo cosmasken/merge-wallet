@@ -6,6 +6,7 @@ import Button from "@/atoms/Button";
 import Card from "@/atoms/Card";
 import Address from "@/atoms/Address";
 import WeiDisplay from "@/atoms/WeiDisplay";
+import FiatValue from "@/atoms/FiatValue";
 import SendIcon from "@/icons/SendIcon";
 import ReceiveIcon from "@/icons/ReceiveIcon";
 import HistoryIcon from "@/icons/HistoryIcon";
@@ -125,6 +126,12 @@ export default function WalletHome() {
           </button>
         </div>
 
+        <FiatValue
+          value={BigInt(balance)}
+          hideBalance={hideBalance}
+          className="text-lg text-neutral-500"
+        />
+
         <Address address={address} short className="text-xs text-neutral-400" />
       </div>
 
@@ -167,7 +174,12 @@ export default function WalletHome() {
                 <div className="w-8 h-8 rounded-full bg-primary-200 dark:bg-primarydark-200 flex items-center justify-center text-xs font-bold text-primary-900 dark:text-primarydark-900">
                   {token.symbol.slice(0, 3)}
                 </div>
-                <span className="font-medium">{token.symbol}</span>
+                <div>
+                  <span className="font-medium">{token.symbol}</span>
+                  <div className="text-xs text-neutral-400">
+                    <FiatValue value={token.balance} hideBalance={hideBalance} fallbackClassName="inline" />
+                  </div>
+                </div>
               </div>
               <span className="font-mono text-sm">
                 <WeiDisplay value={token.balance} hideBalance={hideBalance} />

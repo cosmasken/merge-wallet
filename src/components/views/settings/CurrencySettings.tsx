@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 
 import ViewHeader from "@/layout/ViewHeader";
-import { selectLocalCurrency, setCurrency } from "@/redux/preferences";
+import { selectLocalCurrency, selectRbtcPrice, setCurrency, setRbtcPrice } from "@/redux/preferences";
 
 const CURRENCIES = [
   { code: "USD", label: "US Dollar", symbol: "$" },
@@ -22,7 +22,7 @@ const CURRENCIES = [
 export default function CurrencySettings() {
   const dispatch = useDispatch();
   const currentCurrency = useSelector(selectLocalCurrency);
-  const [price, setPrice] = useState<number | null>(null);
+  const rbtcPrice = useSelector(selectRbtcPrice);
   const [priceLoading, setPriceLoading] = useState(false);
 
   const fetchPrice = useCallback(async (currency: string) => {
@@ -33,15 +33,13 @@ export default function CurrencySettings() {
       );
       const data = await res.json();
       if (data.rootstock?.[currency.toLowerCase()] != null) {
-        setPrice(data.rootstock[currency.toLowerCase()]);
-      } else {
-        setPrice(null);
+        dispatch(setRbtcPrice({ price: data.rootstock[currency.toLowerCase()], currency }));
       }
     } catch {
-      setPrice(null);
+      /* price fetch failed silently */
     }
     setPriceLoading(false);
-  }, []);
+  }, [dispatch]);
 
   useEffect(() => {
     fetchPrice(currentCurrency);
@@ -55,13 +53,13 @@ export default function CurrencySettings() {
     <div>
       <ViewHeader title="Currency" subtitle="Display and fiat currency" showBack />
       <div className="flex flex-col gap-4 px-4">
-        {priceLoading ? (
+        {priceLoading && !rbtcPrice ? (
           <div className="p-3 rounded-lg bg-neutral-100 dark:bg-neutral-800 text-sm text-neutral-500 text-center">
             Loading price...
           </div>
-        ) : price !== null ? (
+        ) : rbtcPrice && rbtcPrice.currency === currentCurrency ? (
           <div className="p-3 rounded-lg bg-primary/10 text-primary text-sm text-center font-medium">
-            1 RBTC = {price.toLocaleString(undefined, {
+            1 RBTC = {rbtcPrice.price.toLocaleString(undefined, {
               style: "currency",
               currency: currentCurrency,
               minimumFractionDigits: 2,

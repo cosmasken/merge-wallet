@@ -10,6 +10,12 @@ export enum ThemeMode {
 
 export type ValidNetwork = "mainnet" | "testnet";
 
+interface RbtcPrice {
+  price: number;
+  currency: string;
+  lastUpdated: number;
+}
+
 interface PreferencesState {
   themeMode: ThemeMode;
   network: ValidNetwork;
@@ -19,6 +25,7 @@ interface PreferencesState {
   authMode: string;
   authActions: string;
   pinInputMode: string;
+  rbtcPrice: RbtcPrice | null;
 }
 
 const initialState: PreferencesState = {
@@ -30,6 +37,7 @@ const initialState: PreferencesState = {
   authMode: "none",
   authActions: "Any;SendTransaction;RevealBalance",
   pinInputMode: "true",
+  rbtcPrice: null,
 };
 
 export const setTheme = createAction<ThemeMode>("preferences/setTheme");
@@ -38,6 +46,7 @@ export const setCurrency = createAction<string>("preferences/setCurrency");
 export const toggleHideBalance = createAction("preferences/toggleHideBalance");
 export const setAuthMode = createAction<string>("preferences/setAuthMode");
 export const setAuthActions = createAction<string>("preferences/setAuthActions");
+export const setRbtcPrice = createAction<{ price: number; currency: string }>("preferences/setRbtcPrice");
 export const hydratePreferences = createAction<Partial<PreferencesState>>("preferences/hydrate");
 
 export const preferencesReducer = createReducer(initialState, (builder) => {
@@ -59,6 +68,13 @@ export const preferencesReducer = createReducer(initialState, (builder) => {
     })
     .addCase(setAuthActions, (state, action) => {
       state.authActions = action.payload;
+    })
+    .addCase(setRbtcPrice, (state, action) => {
+      state.rbtcPrice = {
+        price: action.payload.price,
+        currency: action.payload.currency,
+        lastUpdated: Date.now(),
+      };
     })
     .addCase(hydratePreferences, (_state, action) => ({
       ...initialState,
@@ -108,4 +124,9 @@ export const selectSecuritySettings = createSelector(
 export const selectAuthMode = createSelector(
   selectPreferences,
   (prefs) => prefs.authMode,
+);
+
+export const selectRbtcPrice = createSelector(
+  selectPreferences,
+  (prefs) => prefs.rbtcPrice,
 );

@@ -4,6 +4,7 @@ import { isAddress, formatEther } from "viem";
 
 import ViewHeader from "@/layout/ViewHeader";
 import WeiDisplay from "@/atoms/WeiDisplay";
+import FiatValue from "@/atoms/FiatValue";
 import Button from "@/atoms/Button";
 import { selectWalletAddress, selectWalletBalance, addTrackedNft, removeTrackedNft, selectTrackedNfts } from "@/redux/wallet";
 import { selectNetwork } from "@/redux/preferences";
@@ -118,6 +119,7 @@ export default function AssetsView() {
               <div>
                 <div className="font-medium text-sm">Rootstock RBTC</div>
                 <div className="text-xs text-neutral-500">Native</div>
+                <FiatValue value={BigInt(balance)} className="text-xs text-neutral-400" />
               </div>
             </div>
             <div className="font-mono text-sm">
@@ -142,6 +144,7 @@ export default function AssetsView() {
                   <div>
                     <div className="font-medium text-sm">{token.symbol}</div>
                     <div className="text-xs text-neutral-500">ERC-20</div>
+                    <FiatValue value={token.balance} className="text-xs text-neutral-400" />
                   </div>
                 </div>
                 <div className="font-mono text-sm">
