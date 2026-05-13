@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 
 import KeyManagerService from "@/kernel/evm/KeyManagerService";
+import NotificationService from "@/kernel/app/NotificationService";
 import { setWalletAddress, setSeedBackedUp, selectWalletAddress } from "@/redux/wallet";
 import { clearState } from "@/redux/persistence";
 
@@ -21,12 +22,18 @@ export default function WalletOnboarding() {
 
   const handleCreate = async () => {
     setCreating(true);
-    const KeyManager = KeyManagerService();
-    const { address } = KeyManager.generateWallet();
-    await KeyManager.storeWalletSecurely();
-    dispatch(setWalletAddress(address));
-    dispatch(setSeedBackedUp(false));
-    navigate("/wallet/backup", { replace: true });
+    try {
+      const KeyManager = KeyManagerService();
+      const { address } = KeyManager.generateWallet();
+      await KeyManager.storeWalletSecurely();
+      dispatch(setWalletAddress(address));
+      dispatch(setSeedBackedUp(false));
+      NotificationService().success("Wallet created successfully!");
+      navigate("/wallet/backup", { replace: true });
+    } catch (error) {
+      NotificationService().error("Failed to create wallet. Please try again.");
+      setCreating(false);
+    }
   };
 
   const handleImport = () => {
