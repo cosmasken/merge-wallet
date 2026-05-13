@@ -69,10 +69,17 @@ export default function NetworkSettings() {
             const isActive = currentNetwork === key;
             const testResult = testResults[key];
             return (
-              <button
+              <div
                 key={key}
                 onClick={() => handleSwitch(key)}
-                className={`w-full text-left p-4 rounded-lg border transition-colors ${isActive
+                role="button"
+                tabIndex={0}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    handleSwitch(key);
+                  }
+                }}
+                className={`w-full text-left p-4 rounded-lg border transition-colors cursor-pointer ${isActive
                   ? "bg-primary/10 border-primary"
                   : "bg-white dark:bg-neutral-800 border-neutral-200 dark:border-neutral-700"
                   }`}
@@ -115,11 +122,12 @@ export default function NetworkSettings() {
                     testConnection(key);
                   }}
                   disabled={testing}
-                  className="mt-2 text-xs text-primary font-medium disabled:opacity-50"
+                  className="mt-2 text-xs text-primary font-medium disabled:opacity-50 hover:underline"
                 >
                   {testing ? "Testing..." : "Test Connection"}
                 </button>
-              </button>
+              </div>
+
             );
           })}
         </div>

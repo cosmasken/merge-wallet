@@ -9,11 +9,12 @@ let walletClient: WalletClient | null = null;
 
 function buildClients(network: ValidNetwork) {
   const chain = getChain(network);
-  const transport = http();
+  const transport = http(chain.rpcUrls.default.http[0]);
 
   publicClient = createPublicClient({ chain, transport });
   walletClient = createWalletClient({ chain, transport });
 }
+
 
 export default function ClientService(network?: ValidNetwork) {
   const targetNetwork = network ?? currentNetwork;

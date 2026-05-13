@@ -3,10 +3,13 @@ import type { HDAccount } from "viem/accounts"
 import SecureStorageService from "../app/SecureStorageService"
 import SecurityService, { AuthActions } from "../app/SecurityService"
 
-const BIP44_PATH = "m/44'/60'/0'/0/0"
+const ETH_DERIVATION_PATH = "m/44'/60'/0'/0/"
+const RSK_DERIVATION_PATH = "m/44'/137'/0'/0/"
 
 let currentAccount: HDAccount | null = null
 let currentMnemonic: string | null = null
+let currentIndex = 0
+let currentIsRskPath = false
 
 export default function KeyManagerService() {
   const secureStorage = SecureStorageService()
@@ -19,26 +22,34 @@ export default function KeyManagerService() {
     return currentAccount!
   }
 
-  function generateWallet() {
+  function generateWallet(index = 0, isRskPath = false) {
     const mnemonic = generateMnemonic(english, 128)
-    const account = mnemonicToAccount(mnemonic, { path: BIP44_PATH })
-
+    const path = (isRskPath ? RSK_DERIVATION_PATH : ETH_DERIVATION_PATH) + index
+    const account = mnemonicToAccount(mnemonic, { path })
+    
     currentAccount = account
     currentMnemonic = mnemonic
+    currentIndex = index
+    currentIsRskPath = isRskPath
 
     return {
       mnemonic,
       address: account.address,
+      index,
     }
   }
 
-  function importFromMnemonic(mnemonic: string) {
-    const account = mnemonicToAccount(mnemonic, { path: BIP44_PATH })
+  function importFromMnemonic(mnemonic: string, index = 0, isRskPath = false) {
+    const path = (isRskPath ? RSK_DERIVATION_PATH : ETH_DERIVATION_PATH) + index
+    const account = mnemonicToAccount(mnemonic, { path })
     currentAccount = account
     currentMnemonic = mnemonic
+    currentIndex = index
+    currentIsRskPath = isRskPath
 
     return {
       address: account.address,
+      index,
     }
   }
 
@@ -60,13 +71,13 @@ export default function KeyManagerService() {
 
   async function storeMnemonicSecurely(): Promise<void> {
     if (!currentMnemonic) throw new Error("No mnemonic to store")
-    await secureStorage.storeMnemonic(currentMnemonic)
+    await secureStorage.storeMnemonic(currentMnemonic, currentIndex, currentIsRskPath)
   }
 
   async function loadMnemonicSecurely(): Promise<void> {
-    const mnemonic = await secureStorage.getMnemonic()
-    if (mnemonic) {
-      importFromMnemonic(mnemonic)
+    const result = await secureStorage.getMnemonic()
+    if (result) {
+      importFromMnemonic(result.mnemonic, result.index, result.isRskPath)
     } else {
       throw new Error("Failed to load mnemonic from secure storage")
     }

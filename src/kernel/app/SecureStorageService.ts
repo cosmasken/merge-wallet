@@ -8,14 +8,17 @@ export interface EncryptedMnemonic {
   storageMethod: 'keychain' | 'encrypted' | 'memory';
   createdAt: number;
   lastAccessed: number;
+  index?: number;
+  isRskPath?: boolean;
 }
+
 
 export default function SecureStorageService() {
   /**
    * Encrypts and stores the mnemonic using the current active encryption key.
    * Assumes initialize() has been called and the key is in memory.
    */
-  async function storeMnemonic(mnemonic: string): Promise<void> {
+  async function storeMnemonic(mnemonic: string, index = 0, isRskPath = false): Promise<void> {
     try {
       // Use the plugin's managed AES-256-GCM encryption
       const { data: encryptedValue } = await SimpleEncryption.encrypt({ 
@@ -26,7 +29,9 @@ export default function SecureStorageService() {
         encryptedData: encryptedValue,
         storageMethod: 'encrypted',
         createdAt: Date.now(),
-        lastAccessed: Date.now()
+        lastAccessed: Date.now(),
+        index,
+        isRskPath
       };
 
       await Preferences.set({
@@ -43,7 +48,7 @@ export default function SecureStorageService() {
    * Decrypts and retrieves the mnemonic using the current active encryption key.
    * Assumes initialize() has been called and the key is in memory.
    */
-  async function getMnemonic(): Promise<string | null> {
+  async function getMnemonic(): Promise<{ mnemonic: string; index: number; isRskPath: boolean } | null> {
     const { value } = await Preferences.get({ key: STORAGE_KEY });
     if (!value) return null;
 
@@ -61,10 +66,13 @@ export default function SecureStorageService() {
         value: JSON.stringify(storageData)
       });
 
-      return decrypted;
+      return {
+        mnemonic: decrypted,
+        index: storageData.index ?? 0,
+        isRskPath: storageData.isRskPath ?? false
+      };
     } catch (error) {
       console.error("Failed to decrypt mnemonic", error);
-      // If decryption fails, it likely means the key was lost or changed
       return null;
     }
   }

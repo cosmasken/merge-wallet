@@ -1,17 +1,22 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
+import { mnemonicToAccount } from "viem/accounts";
 
 import ViewHeader from "@/layout/ViewHeader";
 import KeyManagerService from "@/kernel/evm/KeyManagerService";
+import BalanceService from "@/kernel/evm/BalanceService";
 import { setWalletAddress } from "@/redux/wallet";
+import { selectNetwork, setNetwork } from "@/redux/preferences";
 
 export default function WalletImport() {
   const navigate = useNavigate();
   const dispatch = useDispatch();
+  const currentNetwork = useSelector(selectNetwork);
   const [mnemonic, setMnemonic] = useState("");
   const [error, setError] = useState("");
   const [isImporting, setIsImporting] = useState(false);
+  const [status, setStatus] = useState("");
 
   const handleImport = async () => {
     const trimmed = mnemonic.trim().toLowerCase();
@@ -24,18 +29,46 @@ export default function WalletImport() {
 
     setIsImporting(true);
     setError("");
+    setStatus("Discovering accounts...");
 
     try {
       const KeyManager = KeyManagerService();
-      const { address } = KeyManager.importFromMnemonic(trimmed);
+      
+      let bestIndex = 0;
+
+      // Scan first 5 accounts ONLY on the currently selected network
+      setStatus(`Scanning ${currentNetwork}...`);
+      const Balance = BalanceService(currentNetwork);
+      
+      for (let i = 0; i < 5; i++) {
+        const { address } = KeyManager.importFromMnemonic(trimmed, i);
+        try {
+          const balance = await Balance.getBalance(address as `0x${string}`);
+          if (balance > 0n) {
+            bestIndex = i;
+            console.log(`Found balance ${balance} at index ${i}`);
+            break;
+          }
+        } catch (e) {
+          console.error(`Failed to check balance for ${address}`, e);
+        }
+      }
+
+      setStatus("Finalizing...");
+      const { address } = KeyManager.importFromMnemonic(trimmed, bestIndex);
+
       await KeyManager.storeMnemonicSecurely();
       dispatch(setWalletAddress(address));
+      
       navigate("/wallet");
-    } catch {
-      setError("Invalid recovery phrase. Check the words and try again.");
+    } catch (e) {
+      console.error(e);
+      setError("Invalid recovery phrase or connection error. Please try again.");
     }
     setIsImporting(false);
+    setStatus("");
   };
+
 
   const handlePaste = async () => {
     try {
@@ -67,6 +100,12 @@ export default function WalletImport() {
         >
           Paste from clipboard
         </button>
+        {status && (
+          <p className="text-primary text-sm bg-primary/10 p-3 rounded-lg flex items-center gap-2">
+            <span className="w-4 h-4 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+            {status}
+          </p>
+        )}
         {error && (
           <p className="text-error text-sm bg-error-light/20 dark:bg-error-dark/30 p-3 rounded-lg">
             {error}
@@ -79,6 +118,7 @@ export default function WalletImport() {
         >
           {isImporting ? "Importing..." : "Import Wallet"}
         </button>
+
       </div>
     </div>
   );

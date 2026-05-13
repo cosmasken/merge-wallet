@@ -36,7 +36,8 @@ export default function WalletHome() {
 
     setIsLoading(true);
     setConnectionError(false);
-    const Balance = BalanceService();
+    const Balance = BalanceService(network);
+
 
     Balance.startAutoRefresh(
       address as `0x${string}`,
@@ -63,7 +64,8 @@ export default function WalletHome() {
 
   const refreshAll = useCallback(async () => {
     if (!address) return;
-    const Balance = BalanceService();
+    const Balance = BalanceService(network);
+
     const [b, t] = await Promise.all([
       Balance.getBalance(address as `0x${string}`),
       TokenManagerService(network).getAllTokenBalances(address as `0x${string}`, getTokenList(network)),
@@ -118,7 +120,7 @@ export default function WalletHome() {
             {isLoading ? (
               <div className="w-32 h-8 bg-neutral-200 dark:bg-neutral-800 rounded animate-pulse mx-auto" />
             ) : (
-              <WeiDisplay value={BigInt(balance)} hideBalance={hideBalance} />
+              <WeiDisplay wei={BigInt(balance)} hideBalance={hideBalance} />
             )}
           </div>
           <button
@@ -178,7 +180,7 @@ export default function WalletHome() {
               {isLoading ? (
                 <div className="w-16 h-4 bg-neutral-200 dark:bg-neutral-800 rounded animate-pulse" />
               ) : (
-                <WeiDisplay value={BigInt(balance)} hideBalance={hideBalance} />
+                <WeiDisplay wei={BigInt(balance)} hideBalance={hideBalance} />
               )}
             </span>
           </div>
@@ -192,13 +194,18 @@ export default function WalletHome() {
                   <span className="font-medium">{token.symbol}</span>
                   {!hideBalance && (
                     <div className="text-xs text-neutral-400">
-                      <FiatValue value={token.balance} fallbackClassName="inline" />
+                      <FiatValue wei={token.balance} fallbackClassName="inline" />
                     </div>
                   )}
                 </div>
               </div>
               <span className="font-mono text-sm">
-                <WeiDisplay value={token.balance} hideBalance={hideBalance} />
+                <WeiDisplay 
+                  wei={token.balance} 
+                  hideBalance={hideBalance} 
+                  symbol={token.symbol} 
+                  decimals={token.decimals} 
+                />
               </span>
             </div>
           ))}
