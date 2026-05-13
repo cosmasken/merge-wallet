@@ -41,14 +41,25 @@
     "section_import": "Ingiza Pochi",
     "section_import_desc": "Rejesha kutoka kwa maneno ya kurejesha",
     "section_about": "Kuhusu",
-    "section_about_desc": "Toleo, viungo"
+    "section_about_desc": "Toleo, viungo",
+    "choose_language": "Chagua lugha unayopendelea",
+    "about": {
+      "title": "Kuhusu",
+      "version": "Toleo",
+      "description": "Pochi ya simu ya RBTC ya Rootstock (RSK) inayojisimamia.",
+      "privacy_policy": "Sera ya Faragha"
+    }
   },
   "wallet": {
     "home": {
       "backup_reminder": "Tafadhali hifadhi maneno yako ya kurejesha!",
       "backup_now": "Hifadhi Sasa",
       "total_balance": "Jumla ya Salio",
-      "assets": "Mali"
+      "assets": "Mali",
+      "no_internet": "Hakuna muunganisho wa mtandao",
+      "network_error": "Imeshindwa kufikia mtandao wa Rootstock",
+      "add_token": "Ongeza Tokeni",
+      "history_button": "Historia ya Miamala"
     },
     "import": {
       "title": "Ingiza Pochi",
@@ -78,7 +89,63 @@
       "review_button": "Kagua na Tuma",
       "sending": "Inatuma...",
       "success_title": "Muamala Umetumwa",
-      "view_explorer": "Angalia kwenye Kichunguzi"
+      "view_explorer": "Angalia kwenye Kichunguzi",
+      "back_to_wallet": "Rudi kwenye Pochi",
+      "confirm_title": "Thibitisha",
+      "invalid_address": "Anwani si sahihi",
+      "token_label": "Tokeni",
+      "amount_label": "Kiasi",
+      "estimated_gas_label": "Gesi inayokadiriwa",
+      "max_fee_label": "Ada ya juu",
+      "authorization_required": "Idhini inahitajika"
+    },
+    "history": {
+      "title": "Historia",
+      "subtitle": "Historia yako ya miamala",
+      "failed_load": "Imeshindwa kupakia historia ya miamala",
+      "failed_refresh": "Imeshindwa kuonyesha upya historia ya miamala",
+      "no_transactions": "Hakuna miamala bado",
+      "no_transactions_desc": "Historia yako ya miamala itaonekana hapa unapotuma au kupokea RBTC",
+      "export_csv": "Hamisha CSV",
+      "exporting": "Inahamisha...",
+      "sent": "IMETUMWA",
+      "received": "IMREPOKELEWA",
+      "status_success": "MAFANIKIO",
+      "status_pending": "INASUBIRI",
+      "status_error": "HITILAFU",
+      "retry": "Jaribu tena"
+    },
+    "receive": {
+      "title": "Pokea",
+      "subtitle": "Shiriki anwani yako ili kupokea RBTC",
+      "copy_address": "Nakili Anwani",
+      "copied": "Imenakiliwa!",
+      "warning": "Tuma RSK (RBTC) pekee na tokeni zinazotegemea RSK kwa anwani hii. Kutuma mali nyingine kunaweza kusababisha hasara ya kudumu."
+    },
+    "contacts": {
+      "title": "Kitabu cha Anwani",
+      "subtitle": "Simamia anwani zako",
+      "new_contact": "Anwani Mpya",
+      "name": "Jina",
+      "address": "Anwani",
+      "name_placeholder": "Juma",
+      "save_contact": "Hifadhi Anwani",
+      "cancel": "Ghairi",
+      "add_new": "Ongeza Anwani Mpya",
+      "empty": "Kitabu chako cha anwani kiko tupu",
+      "name_required": "Jina linahitajika",
+      "invalid_address": "Anwani si sahihi"
+    },
+    "backup": {
+      "title": "Hifadhi Pochi",
+      "subtitle": "Linda maneno yako ya kurejesha",
+      "verify_title": "Thibitisha Hifadhi",
+      "warning": "Maneno yako ya kurejesha ndiyo njia pekee ya kurejesha pochi yako ukipoteza ufikiaji. Yaandike na uyahifadhi mahali salama. Usiyashiriki kamwe na mtu yeyote.",
+      "reveal_button": "Onyesha Maneno ya Kurejesha",
+      "no_mnemonic": "Hakuna maneno ya kurejesha yanayopatikana. Hii inaweza kuonyesha pochi iliyoingizwa au tayari ilifutwa kwenye kumbukumbu.",
+      "confirmation_label": "Nimehifadhi maneno yangu ya kurejesha mahali salama na ninaelewa kuwa nikiyapoteza, pesa zangu haziwezi kurejeshwa.",
+      "continue_button": "Endelea kwenye Uthibitishaji",
+      "verify_again": "Thibitisha Tena"
     }
   },
   "security": {

@@ -41,14 +41,25 @@
     "section_import": "Importer le portefeuille",
     "section_import_desc": "Restaurer depuis la phrase de récupération",
     "section_about": "À propos",
-    "section_about_desc": "Version, liens"
+    "section_about_desc": "Version, liens",
+    "choose_language": "Choisissez votre langue préférée",
+    "about": {
+      "title": "À propos",
+      "version": "Version",
+      "description": "Un portefeuille mobile RBTC Rootstock (RSK) auto-gardé.",
+      "privacy_policy": "Politique de confidentialité"
+    }
   },
   "wallet": {
     "home": {
       "backup_reminder": "Veuillez sauvegarder votre phrase de récupération !",
       "backup_now": "Sauvegarder maintenant",
       "total_balance": "Solde total",
-      "assets": "Actifs"
+      "assets": "Actifs",
+      "no_internet": "Pas de connexion internet",
+      "network_error": "Impossible de joindre le réseau Rootstock",
+      "add_token": "Ajouter un jeton",
+      "history_button": "Historique des transactions"
     },
     "import": {
       "title": "Importer le portefeuille",
@@ -78,7 +89,63 @@
       "review_button": "Réviser et envoyer",
       "sending": "Envoi...",
       "success_title": "Transaction envoyée",
-      "view_explorer": "Voir sur l'explorateur"
+      "view_explorer": "Voir sur l'explorateur",
+      "back_to_wallet": "Retour au portefeuille",
+      "confirm_title": "Confirmer",
+      "invalid_address": "Adresse invalide",
+      "token_label": "Jeton",
+      "amount_label": "Montant",
+      "estimated_gas_label": "Gaz estimé",
+      "max_fee_label": "Frais maximum",
+      "authorization_required": "Autorisation requise"
+    },
+    "history": {
+      "title": "Historique",
+      "subtitle": "Votre historique de transactions",
+      "failed_load": "Échec du chargement de l'historique des transactions",
+      "failed_refresh": "Échec de l'actualisation de l'historique des transactions",
+      "no_transactions": "Pas encore de transactions",
+      "no_transactions_desc": "Votre historique de transactions apparaîtra ici lorsque vous enverrez ou recevrez des RBTC",
+      "export_csv": "Exporter CSV",
+      "exporting": "Exportation...",
+      "sent": "ENVOYÉ",
+      "received": "REÇU",
+      "status_success": "SUCCÈS",
+      "status_pending": "EN ATTENTE",
+      "status_error": "ERREUR",
+      "retry": "Réessayer"
+    },
+    "receive": {
+      "title": "Recevoir",
+      "subtitle": "Partagez votre adresse pour recevoir des RBTC",
+      "copy_address": "Copier l'adresse",
+      "copied": "Copié !",
+      "warning": "Envoyez uniquement des RSK (RBTC) et des jetons basés sur RSK à cette adresse. L'envoi d'autres actifs peut entraîner une perte permanente."
+    },
+    "contacts": {
+      "title": "Carnet d'adresses",
+      "subtitle": "Gérez vos contacts",
+      "new_contact": "Nouveau contact",
+      "name": "Nom",
+      "address": "Adresse",
+      "name_placeholder": "Jean Dupont",
+      "save_contact": "Enregistrer le contact",
+      "cancel": "Annuler",
+      "add_new": "Ajouter un nouveau contact",
+      "empty": "Votre carnet d'adresses est vide",
+      "name_required": "Le nom est requis",
+      "invalid_address": "Adresse invalide"
+    },
+    "backup": {
+      "title": "Sauvegarder le portefeuille",
+      "subtitle": "Sécurisez votre phrase de récupération",
+      "verify_title": "Vérifier la sauvegarde",
+      "warning": "Votre phrase de récupération est le seul moyen de restaurer votre portefeuille si vous perdez l'accès. Notez-la et conservez-la dans un endroit sûr. Ne la partagez jamais avec personne.",
+      "reveal_button": "Révéler la phrase de récupération",
+      "no_mnemonic": "Aucune phrase de récupération disponible. Cela peut indiquer un portefeuille importé ou qu'elle a déjà été effacée de la mémoire.",
+      "confirmation_label": "J'ai enregistré ma phrase de récupération dans un endroit sûr et je comprends que si je la perds, mes fonds ne pourront pas être récupérés.",
+      "continue_button": "Continuer vers la vérification",
+      "verify_again": "Vérifier à nouveau"
     }
   },
   "security": {

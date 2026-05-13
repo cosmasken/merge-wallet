@@ -41,14 +41,25 @@
     "section_import": "Import Wallet",
     "section_import_desc": "Restore from recovery phrase",
     "section_about": "About",
-    "section_about_desc": "Version, links"
+    "section_about_desc": "Version, links",
+    "choose_language": "Choose your preferred language",
+    "about": {
+      "title": "About",
+      "version": "Version",
+      "description": "A self-custodial Rootstock (RSK) RBTC mobile wallet.",
+      "privacy_policy": "Privacy Policy"
+    }
   },
   "wallet": {
     "home": {
       "backup_reminder": "Please back up your seed phrase!",
       "backup_now": "Back Up Now",
       "total_balance": "Total Balance",
-      "assets": "Assets"
+      "assets": "Assets",
+      "no_internet": "No internet connection",
+      "network_error": "Unable to reach Rootstock network",
+      "add_token": "Add Token",
+      "history_button": "Transaction History"
     },
     "import": {
       "title": "Import Wallet",
@@ -78,7 +89,63 @@
       "review_button": "Review and Send",
       "sending": "Sending...",
       "success_title": "Transaction Sent",
-      "view_explorer": "View on Explorer"
+      "view_explorer": "View on Explorer",
+      "back_to_wallet": "Back to Wallet",
+      "confirm_title": "Confirm",
+      "invalid_address": "Invalid address",
+      "token_label": "Token",
+      "amount_label": "Amount",
+      "estimated_gas_label": "Estimated gas",
+      "max_fee_label": "Max fee",
+      "authorization_required": "Authorization required"
+    },
+    "history": {
+      "title": "History",
+      "subtitle": "Your transaction history",
+      "failed_load": "Failed to load transaction history",
+      "failed_refresh": "Failed to refresh transaction history",
+      "no_transactions": "No transactions yet",
+      "no_transactions_desc": "Your transaction history will appear here when you send or receive RBTC",
+      "export_csv": "Export CSV",
+      "exporting": "Exporting...",
+      "sent": "SENT",
+      "received": "RECEIVED",
+      "status_success": "SUCCESS",
+      "status_pending": "PENDING",
+      "status_error": "ERROR",
+      "retry": "Retry"
+    },
+    "receive": {
+      "title": "Receive",
+      "subtitle": "Share your address to receive RBTC",
+      "copy_address": "Copy Address",
+      "copied": "Copied!",
+      "warning": "Send only RSK (RBTC) and RSK-based tokens to this address. Sending other assets may result in permanent loss."
+    },
+    "contacts": {
+      "title": "Address Book",
+      "subtitle": "Manage your contacts",
+      "new_contact": "New Contact",
+      "name": "Name",
+      "address": "Address",
+      "name_placeholder": "John Doe",
+      "save_contact": "Save Contact",
+      "cancel": "Cancel",
+      "add_new": "Add New Contact",
+      "empty": "Your address book is empty",
+      "name_required": "Name is required",
+      "invalid_address": "Invalid address"
+    },
+    "backup": {
+      "title": "Backup Wallet",
+      "subtitle": "Secure your recovery phrase",
+      "verify_title": "Verify Backup",
+      "warning": "Your recovery phrase is the only way to restore your wallet if you lose access. Write it down and store it in a safe place. Never share it with anyone.",
+      "reveal_button": "Reveal Recovery Phrase",
+      "no_mnemonic": "No recovery phrase available. This may indicate an imported wallet or it was already cleared from memory.",
+      "confirmation_label": "I have saved my recovery phrase in a secure location and understand that if I lose it, my funds cannot be recovered.",
+      "continue_button": "Continue to Verification",
+      "verify_again": "Verify Again"
     }
   },
   "security": {

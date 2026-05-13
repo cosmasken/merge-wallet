@@ -12,6 +12,7 @@ import { selectNetwork } from "@/redux/preferences";
 import { buildTxUrl } from "@/util/networks";
 import TransactionHistoryService, { type TxHistoryEntry } from "@/kernel/evm/TransactionHistoryService";
 import TransactionExportService from "@/kernel/evm/TransactionExportService";
+import { useTranslation } from "@/translations";
 
 export default function WalletHistory() {
   const address = useSelector(selectWalletAddress);
@@ -20,6 +21,7 @@ export default function WalletHistory() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [exporting, setExporting] = useState(false);
+  const { t } = useTranslation();
 
   useEffect(function fetchHistory() {
     if (!address) return;
@@ -29,9 +31,9 @@ export default function WalletHistory() {
     TransactionHistoryService(network)
       .getHistory(address as `0x${string}`)
       .then(setTxs)
-      .catch(() => setError("Failed to load transaction history"))
+      .catch(() => setError(t("wallet.history.failed_load")))
       .finally(() => setIsLoading(false));
-  }, [address, network]);
+  }, [address, network, t]);
 
   const refreshHistory = useCallback(async () => {
     if (!address) return;
@@ -40,9 +42,9 @@ export default function WalletHistory() {
       const txs = await TransactionHistoryService(network).getHistory(address as `0x${string}`);
       setTxs(txs);
     } catch {
-      setError("Failed to refresh transaction history");
+      setError(t("wallet.history.failed_refresh"));
     }
-  }, [address, network]);
+  }, [address, network, t]);
 
   const handleExport = async () => {
     if (!address) return;
@@ -58,7 +60,7 @@ export default function WalletHistory() {
   return (
     <PullToRefresh onRefresh={refreshHistory}>
       <div>
-        <ViewHeader title="History" subtitle="Your transaction history" showBack />
+        <ViewHeader title={t("wallet.history.title")} subtitle={t("wallet.history.subtitle")} showBack />
         {isLoading ? (
           <div className="flex flex-col gap-3 px-4">
             {[1, 2, 3].map((i) => (
@@ -67,10 +69,10 @@ export default function WalletHistory() {
           </div>
         ) : error ? (
           <ErrorState
-            title="Failed to Load History"
+            title={t("common.error")}
             message={error}
             action={{
-              label: "Retry",
+              label: t("wallet.history.retry"),
               onClick: refreshHistory
             }}
           />
@@ -82,8 +84,8 @@ export default function WalletHistory() {
               </svg>
             </div>
             <div>
-              <p className="text-neutral-500 font-medium">No transactions yet</p>
-              <p className="text-xs text-neutral-400 mt-1 max-w-xs">Your transaction history will appear here when you send or receive RBTC</p>
+              <p className="text-neutral-500 font-medium">{t("wallet.history.no_transactions")}</p>
+              <p className="text-xs text-neutral-400 mt-1 max-w-xs">{t("wallet.history.no_transactions_desc")}</p>
             </div>
           </div>
         ) : (
@@ -93,7 +95,7 @@ export default function WalletHistory() {
               disabled={exporting}
               className="self-end px-3 py-1.5 rounded-full border border-primary text-primary text-xs font-medium active:bg-primary/10 disabled:opacity-50"
             >
-              {exporting ? "Exporting..." : "Export CSV"}
+              {exporting ? t("wallet.history.exporting") : t("wallet.history.export_csv")}
             </button>
             {txs.map((tx) => {
               const isOutgoing = tx.from.toLowerCase() === address.toLowerCase();
@@ -108,10 +110,10 @@ export default function WalletHistory() {
                   <div className="flex flex-col gap-1">
                     <div className="flex items-center gap-2">
                       <span className={`text-xs font-medium px-1.5 py-0.5 rounded ${isOutgoing ? "bg-warn-light text-warn-dark" : "bg-success-light text-success-dark"}`}>
-                        {isOutgoing ? "SENT" : "RECEIVED"}
+                        {isOutgoing ? t("wallet.history.sent") : t("wallet.history.received")}
                       </span>
                       <span className={`text-xs ${tx.status === "success" ? "text-success" : tx.status === "pending" ? "text-warn" : "text-error"}`}>
-                        {tx.status.toUpperCase()}
+                        {t(`wallet.history.status_${tx.status}`)}
                       </span>
                     </div>
                     <Address address={isOutgoing ? tx.to : tx.from} short className="text-xs text-neutral-500" />

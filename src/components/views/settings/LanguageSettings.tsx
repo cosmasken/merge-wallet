@@ -23,7 +23,7 @@ export default function LanguageSettings() {
 
   return (
     <div>
-      <ViewHeader title={t("common.settings")} subtitle="Choose your language" showBack />
+      <ViewHeader title={t("settings.section_language")} subtitle={t("settings.choose_language")} showBack />
       <div className="flex flex-col px-4 gap-2">
         {LANGUAGES.map((lang) => (
           <button

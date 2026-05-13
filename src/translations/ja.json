@@ -41,14 +41,25 @@
     "section_import": "ウォレットをインポート",
     "section_import_desc": "リカバリーフレーズから復元",
     "section_about": "このアプリについて",
-    "section_about_desc": "バージョン、リンク"
+    "section_about_desc": "バージョン、リンク",
+    "choose_language": "希望の言語を選択してください",
+    "about": {
+      "title": "情報",
+      "version": "バージョン",
+      "description": "自己管理型の Rootstock (RSK) RBTC モバイルウォレット。",
+      "privacy_policy": "プライバシーポリシー"
+    }
   },
   "wallet": {
     "home": {
       "backup_reminder": "シードフレーズをバックアップしてください！",
       "backup_now": "今すぐバックアップ",
       "total_balance": "合計残高",
-      "assets": "資産"
+      "assets": "資産",
+      "no_internet": "インターネットに接続されていません",
+      "network_error": "Rootstockネットワークに接続できません",
+      "add_token": "トークンを追加",
+      "history_button": "取引履歴"
     },
     "import": {
       "title": "ウォレットをインポート",
@@ -78,7 +89,63 @@
       "review_button": "確認して送金",
       "sending": "送金中...",
       "success_title": "取引が送信されました",
-      "view_explorer": "エクスプローラーで確認"
+      "view_explorer": "エクスプローラーで確認",
+      "back_to_wallet": "ウォレットに戻る",
+      "confirm_title": "確認",
+      "invalid_address": "無効なアドレス",
+      "token_label": "トークン",
+      "amount_label": "金額",
+      "estimated_gas_label": "予想ガス量",
+      "max_fee_label": "最大手数料",
+      "authorization_required": "承認が必要です"
+    },
+    "history": {
+      "title": "履歴",
+      "subtitle": "取引履歴",
+      "failed_load": "取引履歴の読み込みに失敗しました",
+      "failed_refresh": "取引履歴の更新に失敗しました",
+      "no_transactions": "取引はまだありません",
+      "no_transactions_desc": "RBTCを送信または受信すると、ここに取引履歴が表示されます",
+      "export_csv": "CSVエクスポート",
+      "exporting": "エクスポート中...",
+      "sent": "送金",
+      "received": "受信",
+      "status_success": "成功",
+      "status_pending": "保留中",
+      "status_error": "エラー",
+      "retry": "再試行"
+    },
+    "receive": {
+      "title": "受取",
+      "subtitle": "RBTCを受け取るためにアドレスを共有する",
+      "copy_address": "アドレスをコピー",
+      "copied": "コピーしました！",
+      "warning": "このアドレスにはRSK (RBTC)およびRSKベースのトークンのみを送信してください。他の資産を送信すると、永久に失われる可能性があります。"
+    },
+    "contacts": {
+      "title": "アドレス帳",
+      "subtitle": "連絡先を管理する",
+      "new_contact": "新しい連絡先",
+      "name": "名前",
+      "address": "アドレス",
+      "name_placeholder": "山田太郎",
+      "save_contact": "連絡先を保存",
+      "cancel": "キャンセル",
+      "add_new": "新しい連絡先を追加",
+      "empty": "アドレス帳は空です",
+      "name_required": "名前は必須です",
+      "invalid_address": "無効なアドレス"
+    },
+    "backup": {
+      "title": "ウォレットをバックアップ",
+      "subtitle": "リカバリーフレーズを安全に保管する",
+      "verify_title": "バックアップを確認",
+      "warning": "リカバリーフレーズは、アクセスできなくなった場合にウォレットを復元する唯一の方法です。書き留めて安全な場所に保管してください。誰にも教えないでください。",
+      "reveal_button": "リカバリーフレーズを表示",
+      "no_mnemonic": "リカバリーフレーズが利用できません。これはインポートされたウォレットであるか、メモリからすでに消去されている可能性があります。",
+      "confirmation_label": "リカバリーフレーズを安全な場所に保存しました。紛失した場合、資金を回収できないことを理解しています。",
+      "continue_button": "確認へ進む",
+      "verify_again": "もう一度確認"
     }
   },
   "security": {

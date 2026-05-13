@@ -41,14 +41,25 @@
     "section_import": "Importar Carteira",
     "section_import_desc": "Restaurar a partir da frase de recuperação",
     "section_about": "Sobre",
-    "section_about_desc": "Versão, links"
+    "section_about_desc": "Versão, links",
+    "choose_language": "Escolha o seu idioma preferido",
+    "about": {
+      "title": "Sobre",
+      "version": "Versão",
+      "description": "Uma carteira móvel autocustodial de RBTC para Rootstock (RSK).",
+      "privacy_policy": "Política de Privacidade"
+    }
   },
   "wallet": {
     "home": {
       "backup_reminder": "Por favor, faça backup da sua frase semente!",
       "backup_now": "Fazer Backup Agora",
       "total_balance": "Saldo Total",
-      "assets": "Ativos"
+      "assets": "Ativos",
+      "no_internet": "Sem conexão com a internet",
+      "network_error": "Não foi possível conectar à rede Rootstock",
+      "add_token": "Adicionar Token",
+      "history_button": "Histórico de Transações"
     },
     "import": {
       "title": "Importar Carteira",
@@ -66,7 +77,7 @@
     },
     "send": {
       "title": "Enviar",
-      "subtitle": "Enviar RBTC ou tokens",
+      "subtitle": "Enviar RBTC or tokens",
       "recipient": "Endereço do Destinatário",
       "from_contacts": "Dos Contatos",
       "close_contacts": "Fechar Contatos",
@@ -78,7 +89,63 @@
       "review_button": "Revisar e Enviar",
       "sending": "Enviando...",
       "success_title": "Transação Enviada",
-      "view_explorer": "Ver no Explorador"
+      "view_explorer": "Ver no Explorador",
+      "back_to_wallet": "Voltar para a Carteira",
+      "confirm_title": "Confirmar",
+      "invalid_address": "Endereço inválido",
+      "token_label": "Token",
+      "amount_label": "Valor",
+      "estimated_gas_label": "Gás estimado",
+      "max_fee_label": "Taxa máxima",
+      "authorization_required": "Autorização necessária"
+    },
+    "history": {
+      "title": "Histórico",
+      "subtitle": "Seu histórico de transações",
+      "failed_load": "Falha ao carregar o histórico de transações",
+      "failed_refresh": "Falha ao atualizar o histórico de transações",
+      "no_transactions": "Nenhuma transação ainda",
+      "no_transactions_desc": "Seu histórico de transações aparecerá aqui quando você enviar ou receber RBTC",
+      "export_csv": "Exportar CSV",
+      "exporting": "Exportando...",
+      "sent": "ENVIADO",
+      "received": "RECEBIDO",
+      "status_success": "SUCESSO",
+      "status_pending": "PENDENTE",
+      "status_error": "ERRO",
+      "retry": "Repetir"
+    },
+    "receive": {
+      "title": "Receber",
+      "subtitle": "Compartilhe seu endereço para receber RBTC",
+      "copy_address": "Copiar Endereço",
+      "copied": "Copiado!",
+      "warning": "Envie apenas RSK (RBTC) e tokens baseados em RSK para este endereço. O envio de outros ativos pode resultar em perda permanente."
+    },
+    "contacts": {
+      "title": "Agenda de Endereços",
+      "subtitle": "Gerencie seus contatos",
+      "new_contact": "Novo Contato",
+      "name": "Nome",
+      "address": "Endereço",
+      "name_placeholder": "João Silva",
+      "save_contact": "Salvar Contato",
+      "cancel": "Cancelar",
+      "add_new": "Adicionar Novo Contato",
+      "empty": "Sua agenda de endereços está vazia",
+      "name_required": "Nome é obrigatório",
+      "invalid_address": "Endereço inválido"
+    },
+    "backup": {
+      "title": "Backup da Carteira",
+      "subtitle": "Proteja sua frase de recuperação",
+      "verify_title": "Verificar Backup",
+      "warning": "Sua frase de recuperação é a única maneira de restaurar sua carteira se você perder o acesso. Anote-a e guarde-a em um lugar seguro. Nunca a compartilhe com ninguém.",
+      "reveal_button": "Revelar Frase de Recuperação",
+      "no_mnemonic": "Nenhuma frase de recuperação disponível. Isso pode indicar uma carteira importada ou que já foi limpa da memória.",
+      "confirmation_label": "Salvei minha frase de recuperação em um local seguro e entendo que, se a perder, meus fundos não poderão ser recuperados.",
+      "continue_button": "Continuar para Verificação",
+      "verify_again": "Verificar Novamente"
     }
   },
   "security": {

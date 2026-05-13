@@ -41,14 +41,25 @@
     "section_import": "导入钱包",
     "section_import_desc": "从助记词恢复",
     "section_about": "关于",
-    "section_about_desc": "版本，链接"
+    "section_about_desc": "版本，链接",
+    "choose_language": "选择您的首选语言",
+    "about": {
+      "title": "关于",
+      "version": "版本",
+      "description": "一个自托管的 Rootstock (RSK) RBTC 移动钱包。",
+      "privacy_policy": "隐私政策"
+    }
   },
   "wallet": {
     "home": {
       "backup_reminder": "请备份您的助记词！",
       "backup_now": "立即备份",
       "total_balance": "总余额",
-      "assets": "资产"
+      "assets": "资产",
+      "no_internet": "无网络连接",
+      "network_error": "无法连接到 Rootstock 网络",
+      "add_token": "添加代币",
+      "history_button": "交易历史"
     },
     "import": {
       "title": "导入钱包",
@@ -78,7 +89,63 @@
       "review_button": "审核并发送",
       "sending": "发送中...",
       "success_title": "交易已发送",
-      "view_explorer": "在浏览器中查看"
+      "view_explorer": "在浏览器中查看",
+      "back_to_wallet": "返回钱包",
+      "confirm_title": "确认",
+      "invalid_address": "无效地址",
+      "token_label": "代币",
+      "amount_label": "金额",
+      "estimated_gas_label": "预估 Gas",
+      "max_fee_label": "最大费用",
+      "authorization_required": "需要授权"
+    },
+    "history": {
+      "title": "历史",
+      "subtitle": "您的交易历史",
+      "failed_load": "加载交易历史失败",
+      "failed_refresh": "刷新交易历史失败",
+      "no_transactions": "暂无交易",
+      "no_transactions_desc": "当您发送或接收 RBTC 时，您的交易历史将显示在此处",
+      "export_csv": "导出 CSV",
+      "exporting": "导出中...",
+      "sent": "发送",
+      "received": "接收",
+      "status_success": "成功",
+      "status_pending": "等待中",
+      "status_error": "失败",
+      "retry": "重试"
+    },
+    "receive": {
+      "title": "接收",
+      "subtitle": "分享您的地址以接收 RBTC",
+      "copy_address": "复制地址",
+      "copied": "已复制！",
+      "warning": "仅向此地址发送 RSK (RBTC) 和基于 RSK 的代币。发送其他资产可能会导致永久丢失。"
+    },
+    "contacts": {
+      "title": "通讯录",
+      "subtitle": "管理您的联系人",
+      "new_contact": "新联系人",
+      "name": "名称",
+      "address": "地址",
+      "name_placeholder": "张三",
+      "save_contact": "保存联系人",
+      "cancel": "取消",
+      "add_new": "添加新联系人",
+      "empty": "您的通讯录为空",
+      "name_required": "名称必填",
+      "invalid_address": "无效地址"
+    },
+    "backup": {
+      "title": "备份钱包",
+      "subtitle": "确保您的助记词安全",
+      "verify_title": "验证备份",
+      "warning": "如果您失去访问权限，助记词是恢复钱包的唯一方法向。请将其写下并存放在安全的地方。切勿与任何人分享。",
+      "reveal_button": "显示助记词",
+      "no_mnemonic": "没有可用的助记词。这可能表示是导入的钱包，或者助记词已从内存中清除。",
+      "confirmation_label": "我已将助记词保存在安全的地方，并明白如果丢失，我的资金将无法找回。",
+      "continue_button": "继续验证",
+      "verify_again": "再次验证"
     }
   },
   "security": {

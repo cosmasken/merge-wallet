@@ -41,14 +41,25 @@
     "section_import": "Importar Billetera",
     "section_import_desc": "Restaurar desde frase de recuperación",
     "section_about": "Acerca de",
-    "section_about_desc": "Versión, enlaces"
+    "section_about_desc": "Versión, enlaces",
+    "choose_language": "Elige tu idioma preferido",
+    "about": {
+      "title": "Acerca de",
+      "version": "Versión",
+      "description": "Una billetera móvil autocustodiada de RBTC para Rootstock (RSK).",
+      "privacy_policy": "Política de Privacidad"
+    }
   },
   "wallet": {
     "home": {
       "backup_reminder": "¡Por favor, respalda tu frase semilla!",
       "backup_now": "Respaldar Ahora",
       "total_balance": "Saldo Total",
-      "assets": "Activos"
+      "assets": "Activos",
+      "no_internet": "Sin conexión a internet",
+      "network_error": "No se pudo conectar con la red Rootstock",
+      "add_token": "Añadir Token",
+      "history_button": "Historial de Transacciones"
     },
     "import": {
       "title": "Importar Billetera",
@@ -78,7 +89,63 @@
       "review_button": "Revisar y Enviar",
       "sending": "Enviando...",
       "success_title": "Transacción Enviada",
-      "view_explorer": "Ver en el Explorador"
+      "view_explorer": "Ver en el Explorador",
+      "back_to_wallet": "Volver a la Billetera",
+      "confirm_title": "Confirmar",
+      "invalid_address": "Dirección inválida",
+      "token_label": "Token",
+      "amount_label": "Monto",
+      "estimated_gas_label": "Gas estimado",
+      "max_fee_label": "Comisión máxima",
+      "authorization_required": "Se requiere autorización"
+    },
+    "history": {
+      "title": "Historial",
+      "subtitle": "Tu historial de transacciones",
+      "failed_load": "No se pudo cargar el historial de transacciones",
+      "failed_refresh": "No se pudo actualizar el historial de transacciones",
+      "no_transactions": "Aún no hay transacciones",
+      "no_transactions_desc": "Tu historial de transacciones aparecerá aquí cuando envíes o recibas RBTC",
+      "export_csv": "Exportar CSV",
+      "exporting": "Exportando...",
+      "sent": "ENVIADO",
+      "received": "RECIBIDO",
+      "status_success": "ÉXITO",
+      "status_pending": "PENDIENTE",
+      "status_error": "ERROR",
+      "retry": "Reintentar"
+    },
+    "receive": {
+      "title": "Recibir",
+      "subtitle": "Comparte tu dirección para recibir RBTC",
+      "copy_address": "Copiar Dirección",
+      "copied": "¡Copiado!",
+      "warning": "Envía solo RSK (RBTC) y tokens basados en RSK a esta dirección. Enviar otros activos puede resultar en una pérdida permanente."
+    },
+    "contacts": {
+      "title": "Libreta de Direcciones",
+      "subtitle": "Gestiona tus contactos",
+      "new_contact": "Nuevo Contacto",
+      "name": "Nombre",
+      "address": "Dirección",
+      "name_placeholder": "Juan Pérez",
+      "save_contact": "Guardar Contacto",
+      "cancel": "Cancelar",
+      "add_new": "Agregar Nuevo Contacto",
+      "empty": "Tu libreta de direcciones está vacía",
+      "name_required": "El nombre es requerido",
+      "invalid_address": "Dirección inválida"
+    },
+    "backup": {
+      "title": "Respaldar Billetera",
+      "subtitle": "Asegura tu frase de recuperación",
+      "verify_title": "Verificar Respaldo",
+      "warning": "Tu frase de recuperación es la única forma de restaurar tu billetera si pierdes el acceso. Anótala y guárdala en un lugar seguro. Nunca la compartas con nadie.",
+      "reveal_button": "Revelar Frase de Recuperación",
+      "no_mnemonic": "No hay frase de recuperación disponible. Esto puede indicar una billetera importada o que ya fue borrada de la memoria.",
+      "confirmation_label": "He guardado mi frase de recuperación en un lugar seguro y entiendo que si la pierdo, mis fondos no podrán ser recuperados.",
+      "continue_button": "Continuar a la Verificación",
+      "verify_again": "Verificar de Nuevo"
     }
   },
   "security": {

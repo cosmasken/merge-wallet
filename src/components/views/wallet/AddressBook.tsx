@@ -6,6 +6,7 @@ import ViewHeader from "@/layout/ViewHeader";
 import { selectContacts, addContact, removeContact } from "@/redux/wallet";
 import Address from "@/atoms/Address";
 import Button from "@/atoms/Button";
+import { useTranslation } from "@/translations";
 
 export default function AddressBook() {
   const dispatch = useDispatch();
@@ -14,14 +15,15 @@ export default function AddressBook() {
   const [newName, setNewName] = useState("");
   const [newAddress, setNewAddress] = useState("");
   const [error, setError] = useState("");
+  const { t } = useTranslation();
 
   const handleAdd = () => {
     if (!newName.trim()) {
-      setError("Name is required");
+      setError(t("wallet.contacts.name_required"));
       return;
     }
     if (!isAddress(newAddress)) {
-      setError("Invalid address");
+      setError(t("wallet.contacts.invalid_address"));
       return;
     }
     dispatch(addContact({ name: newName, address: newAddress }));
@@ -33,24 +35,24 @@ export default function AddressBook() {
 
   return (
     <div>
-      <ViewHeader title="Address Book" subtitle="Manage your contacts" showBack />
+      <ViewHeader title={t("wallet.contacts.title")} subtitle={t("wallet.contacts.subtitle")} showBack />
       <div className="flex flex-col gap-4 px-4">
         {isAdding ? (
           <div className="p-4 rounded-2xl bg-neutral-50 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 animate-in fade-in slide-in-from-top-4 duration-300">
-            <h3 className="font-bold mb-4">New Contact</h3>
+            <h3 className="font-bold mb-4">{t("wallet.contacts.new_contact")}</h3>
             <div className="flex flex-col gap-3">
               <div>
-                <label className="text-xs text-neutral-500 mb-1 block">Name</label>
+                <label className="text-xs text-neutral-500 mb-1 block">{t("wallet.contacts.name")}</label>
                 <input
                   type="text"
                   value={newName}
                   onChange={(e) => { setNewName(e.target.value); setError(""); }}
-                  placeholder="John Doe"
+                  placeholder={t("wallet.contacts.name_placeholder")}
                   className="w-full p-2.5 rounded-lg border border-neutral-300 dark:border-neutral-600 bg-white dark:bg-neutral-900"
                 />
               </div>
               <div>
-                <label className="text-xs text-neutral-500 mb-1 block">Address</label>
+                <label className="text-xs text-neutral-500 mb-1 block">{t("wallet.contacts.address")}</label>
                 <input
                   type="text"
                   value={newAddress}
@@ -65,9 +67,9 @@ export default function AddressBook() {
                   onClick={() => setIsAdding(false)}
                   className="flex-1 p-2 rounded-lg text-neutral-500 font-medium"
                 >
-                  Cancel
+                  {t("wallet.contacts.cancel")}
                 </button>
-                <Button onClick={handleAdd} className="flex-[2] py-2">Save Contact</Button>
+                <Button onClick={handleAdd} className="flex-[2] py-2">{t("wallet.contacts.save_contact")}</Button>
               </div>
             </div>
           </div>
@@ -79,14 +81,14 @@ export default function AddressBook() {
             <svg viewBox="0 0 24 24" className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2">
               <path d="M12 5v14M5 12h14" />
             </svg>
-            Add New Contact
+            {t("wallet.contacts.add_new")}
           </button>
         )}
 
         <div className="flex flex-col gap-3 mt-2">
           {contacts.length === 0 && !isAdding && (
             <div className="py-20 text-center opacity-50">
-              <p className="text-sm">Your address book is empty</p>
+              <p className="text-sm">{t("wallet.contacts.empty")}</p>
             </div>
           )}
           {contacts.map((contact) => (

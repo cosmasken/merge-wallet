@@ -6,6 +6,7 @@ import ViewHeader from "@/layout/ViewHeader";
 import KeyManagerService from "@/kernel/evm/KeyManagerService";
 import { selectSeedBackedUp, setSeedBackedUp } from "@/redux/wallet";
 import BackupVerification from "@/components/composite/BackupVerification";
+import { useTranslation } from "@/translations";
 
 export default function SeedBackup() {
   const navigate = useNavigate();
@@ -14,6 +15,7 @@ export default function SeedBackup() {
   const [revealed, setRevealed] = useState(alreadyBackedUp);
   const [confirmed, setConfirmed] = useState(alreadyBackedUp);
   const [isVerifying, setIsVerifying] = useState(false);
+  const { t } = useTranslation();
 
   const mnemonic = KeyManagerService().getMnemonic();
 
@@ -30,7 +32,7 @@ export default function SeedBackup() {
   if (isVerifying && mnemonic) {
     return (
       <div>
-        <ViewHeader title="Verify Backup" showBack onBack={() => setIsVerifying(false)} />
+        <ViewHeader title={t("wallet.backup.verify_title")} showBack onBack={() => setIsVerifying(false)} />
         <BackupVerification 
           mnemonic={mnemonic}
           onSuccess={handleVerificationSuccess}
@@ -43,12 +45,11 @@ export default function SeedBackup() {
 
   return (
     <div>
-      <ViewHeader title="Backup Wallet" subtitle="Secure your recovery phrase" showBack />
+      <ViewHeader title={t("wallet.backup.title")} subtitle={t("wallet.backup.subtitle")} showBack />
       <div className="flex flex-col gap-4 px-4 pb-10">
         <div className="bg-amber-900/10 border border-amber-900/20 p-4 rounded-xl">
           <p className="text-sm text-amber-600 dark:text-amber-400">
-            Your recovery phrase is the only way to restore your wallet if you lose access.
-            Write it down and store it in a safe place. Never share it with anyone.
+            {t("wallet.backup.warning")}
           </p>
         </div>
 
@@ -57,7 +58,7 @@ export default function SeedBackup() {
             onClick={() => setRevealed(true)}
             className="w-full p-4 rounded-2xl bg-primary text-white font-bold shadow-lg shadow-primary/20 transition-transform active:scale-95"
           >
-            Reveal Recovery Phrase
+            {t("wallet.backup.reveal_button")}
           </button>
         ) : mnemonic ? (
           <div className="grid grid-cols-2 gap-2 p-4 rounded-2xl bg-neutral-100 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 animate-in zoom-in-95 duration-300">
@@ -72,7 +73,7 @@ export default function SeedBackup() {
             ))}
           </div>
         ) : (
-          <p className="text-error text-sm p-4 bg-error/10 rounded-xl">No recovery phrase available. This may indicate an imported wallet or it was already cleared from memory.</p>
+          <p className="text-error text-sm p-4 bg-error/10 rounded-xl">{t("wallet.backup.no_mnemonic")}</p>
         )}
 
         {revealed && mnemonic && (
@@ -84,7 +85,7 @@ export default function SeedBackup() {
                 onChange={() => setConfirmed(!confirmed)}
                 className="mt-1 h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
               />
-              <span className="select-none">I have saved my recovery phrase in a secure location and understand that if I lose it, my funds cannot be recovered.</span>
+              <span className="select-none">{t("wallet.backup.confirmation_label")}</span>
             </label>
 
             <button
@@ -92,7 +93,7 @@ export default function SeedBackup() {
               disabled={!confirmed}
               className="w-full p-4 rounded-2xl bg-primary text-white font-bold disabled:opacity-50 shadow-lg shadow-primary/20 transition-all active:scale-95"
             >
-              {alreadyBackedUp ? "Verify Again" : "Continue to Verification"}
+              {alreadyBackedUp ? t("wallet.backup.verify_again") : t("wallet.backup.continue_button")}
             </button>
           </div>
         )}

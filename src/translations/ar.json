@@ -41,14 +41,25 @@
     "section_import": "استيراد المحفظة",
     "section_import_desc": "استعادة من عبارة الاسترداد",
     "section_about": "حول",
-    "section_about_desc": "الإصدار ، الروابط"
+    "section_about_desc": "الإصدار ، الروابط",
+    "choose_language": "اختر لغتك المفضلة",
+    "about": {
+      "title": "حول",
+      "version": "الإصدار",
+      "description": "محفظة RBTC للهاتف المحمول من Rootstock (RSK) ذاتية الوصاية.",
+      "privacy_policy": "سياسة الخصوصية"
+    }
   },
   "wallet": {
     "home": {
       "backup_reminder": "يرجى نسخ عبارة الاسترداد احتياطيًا!",
       "backup_now": "النسخ الاحتياطي الآن",
       "total_balance": "إجمالي الرصيد",
-      "assets": "الأصول"
+      "assets": "الأصول",
+      "no_internet": "لا يوجد اتصال بالإنترنت",
+      "network_error": "تعذر الوصول إلى شبكة Rootstock",
+      "add_token": "إضافة رمز",
+      "history_button": "سجل المعاملات"
     },
     "import": {
       "title": "استيراد المحفظة",
@@ -78,7 +89,63 @@
       "review_button": "مراجعة وإرسال",
       "sending": "جارٍ الإرسال...",
       "success_title": "تمت المعاملة",
-      "view_explorer": "عرض في المستكشف"
+      "view_explorer": "عرض في المستكشف",
+      "back_to_wallet": "العودة إلى المحفظة",
+      "confirm_title": "تأكيد",
+      "invalid_address": "عنوان غير صالح",
+      "token_label": "الرمز",
+      "amount_label": "المبلغ",
+      "estimated_gas_label": "الغاز المقدر",
+      "max_fee_label": "الرسوم القصوى",
+      "authorization_required": "التفويض مطلوب"
+    },
+    "history": {
+      "title": "السجل",
+      "subtitle": "سجل المعاملات الخاص بك",
+      "failed_load": "فشل تحميل سجل المعاملات",
+      "failed_refresh": "فشل تحديث سجل المعاملات",
+      "no_transactions": "لا توجد معاملات بعد",
+      "no_transactions_desc": "سيظهر سجل معاملاتك هنا عند إرسال أو استقبال RBTC",
+      "export_csv": "تصدير CSV",
+      "exporting": "جاري التصدير...",
+      "sent": "تم الإرسال",
+      "received": "تم الاستلام",
+      "status_success": "ناجح",
+      "status_pending": "قيد الانتظار",
+      "status_error": "فشل",
+      "retry": "إعادة المحاولة"
+    },
+    "receive": {
+      "title": "استلام",
+      "subtitle": "شارك عنوانك لاستلام RBTC",
+      "copy_address": "نسخ العنوان",
+      "copied": "تم النسخ!",
+      "warning": "أرسل فقط RSK (RBTC) والرموز المميزة القائمة على RSK إلى هذا العنوان. قد يؤدي إرسال أصول أخرى إلى خسارة دائمة."
+    },
+    "contacts": {
+      "title": "دفتر العناوين",
+      "subtitle": "إدارة جهات الاتصال الخاصة بك",
+      "new_contact": "جهة اتصال جديدة",
+      "name": "الاسم",
+      "address": "العنوان",
+      "name_placeholder": "محمد",
+      "save_contact": "حفظ جهة الاتصال",
+      "cancel": "إلغاء",
+      "add_new": "إضافة جهة اتصال جديدة",
+      "empty": "دفتر العناوين الخاص بك فارغ",
+      "name_required": "الاسم مطلوب",
+      "invalid_address": "عنوان غير صالح"
+    },
+    "backup": {
+      "title": "نسخ احتياطي للمحفظة",
+      "subtitle": "تأمين عبارة الاسترداد الخاصة بك",
+      "verify_title": "التحقق من النسخ الاحتياطي",
+      "warning": "عبارة الاسترداد الخاصة بك هي الطريقة الوحيدة لاستعادة محفظتك إذا فقدت الوصول إليها. اكتبها واحفظها في مكان آمن. لا تشاركها أبداً مع أي شخص.",
+      "reveal_button": "كشف عبارة الاسترداد",
+      "no_mnemonic": "لا توجد عبارة استرداد متاحة. قد يشير هذا إلى محفظة مستوردة أو أنه تم مسحها بالفعل من الذاكرة.",
+      "confirmation_label": "لقد قمت بحفظ عبارة الاسترداد الخاصة بي في مكان آمن وأفهم أنه إذا فقدتها، فلا يمكن استرداد أموالي.",
+      "continue_button": "المتابعة إلى التحقق",
+      "verify_again": "التحقق مرة أخرى"
     }
   },
   "security": {

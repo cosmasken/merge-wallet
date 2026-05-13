@@ -18,6 +18,7 @@ import { selectIsConnected } from "@/redux/device";
 import BalanceService from "@/kernel/evm/BalanceService";
 import TokenManagerService, { getTokenList } from "@/kernel/evm/TokenManagerService";
 import type { TokenBalance } from "@/kernel/evm/TokenManagerService";
+import { useTranslation } from "@/translations";
 
 export default function WalletHome() {
   const navigate = useNavigate();
@@ -33,6 +34,7 @@ export default function WalletHome() {
   const [isAddTokenOpen, setIsAddTokenOpen] = useState(false);
   const [connectionError, setConnectionError] = useState(false);
   const [tokens, setTokens] = useState<TokenBalance[]>([]);
+  const { t } = useTranslation();
 
   useEffect(function fetchBalance() {
     if (!address) return;
@@ -94,7 +96,7 @@ export default function WalletHome() {
             <path d="M8.53 16.11a6 6 0 0 1 6.95 0" />
             <line x1="12" y1="20" x2="12.01" y2="20" />
           </svg>
-          <p className="text-xs text-error">No internet connection</p>
+          <p className="text-xs text-error">{t("common.error")}: {t("wallet.home.no_internet")}</p>
         </div>
       )}
 
@@ -105,18 +107,18 @@ export default function WalletHome() {
             <path d="M12 17h.01" />
             <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
           </svg>
-          <p className="text-xs text-warn-dark">Unable to reach Rootstock network</p>
+          <p className="text-xs text-warn-dark">{t("wallet.home.network_error")}</p>
         </div>
       )}
 
       {!seedBackedUp && (
         <div className="w-full p-3 rounded-lg bg-warn-light/20 border border-warn/30 flex items-center justify-between">
-          <p className="text-xs text-warn-dark">Back up your recovery phrase to protect your wallet.</p>
+          <p className="text-xs text-warn-dark">{t("wallet.home.backup_reminder")}</p>
           <button
             onClick={() => navigate("/wallet/backup")}
             className="text-xs font-semibold text-primary ml-2 shrink-0"
           >
-            Back Up
+            {t("wallet.home.backup_now")}
           </button>
         </div>
       )}
@@ -160,14 +162,14 @@ export default function WalletHome() {
 
       <div className="flex gap-4 w-full">
         <Button
-          label="Send"
+          label={t("common.send")}
           icon={SendIcon}
           variant="primary"
           fullWidth
           onClick={() => navigate("/wallet/send")}
         />
         <Button
-          label="Receive"
+          label={t("common.receive")}
           icon={ReceiveIcon}
           variant="secondary"
           fullWidth
@@ -178,12 +180,12 @@ export default function WalletHome() {
       <div className="w-full">
         <Card className="p-4">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-sm font-semibold text-neutral-500">Tokens</h2>
+            <h2 className="text-sm font-semibold text-neutral-500">{t("common.tokens")}</h2>
             <button 
               onClick={() => setIsAddTokenOpen(true)}
               className="text-xs font-semibold text-primary px-2 py-1 rounded-md hover:bg-primary/5 transition-colors"
             >
-              + Add Token
+              + {t("wallet.home.add_token")}
             </button>
           </div>
           <div className="flex items-center justify-between py-2">
@@ -228,7 +230,7 @@ export default function WalletHome() {
       </div>
 
       <Button
-        label="Transaction History"
+        label={t("wallet.home.history_button") || t("common.history")}
         icon={HistoryIcon}
         variant="ghost"
         onClick={() => navigate("/wallet/history")}
