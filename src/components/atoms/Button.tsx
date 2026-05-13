@@ -1,11 +1,13 @@
 interface ButtonProps {
   label?: React.ReactNode;
+  children?: React.ReactNode;
   icon?: React.ComponentType<{ className?: string }>;
   onClick?: React.MouseEventHandler;
   disabled?: boolean;
   fullWidth?: boolean;
   variant?: "primary" | "secondary" | "ghost";
   className?: string;
+  size?: "sm" | "md" | "lg"; // added size prop as used in components
 }
 
 const variantStyles = {
@@ -19,30 +21,36 @@ const variantStyles = {
 
 export default function Button({
   label = "",
+  children,
   icon: Icon,
   onClick = () => null,
   disabled = false,
   fullWidth = false,
   variant = "primary",
   className = "",
+  size = "md",
 }: ButtonProps) {
+  const sizeClass = size === "sm" ? "p-2 text-sm" : size === "lg" ? "p-4 text-lg" : "p-3";
+
   return (
     <div className={`${fullWidth ? "w-full" : ""} ${className}`}>
       <button
         type="button"
         onClick={(e) => { e.stopPropagation(); onClick(e); }}
         className={`
-          flex items-center justify-center gap-2 p-3 mx-auto
+          flex items-center justify-center gap-2 mx-auto
           border-2 rounded-full shadow-md
           ${fullWidth ? "w-full" : ""}
+          ${sizeClass}
           ${variantStyles[variant]}
           ${disabled ? "opacity-50 shadow-none cursor-default" : "cursor-pointer active:shadow-none"}
         `}
         disabled={disabled}
       >
         {Icon && <Icon className="w-5 h-5" />}
-        {label}
+        {children || label}
       </button>
     </div>
   );
 }
+

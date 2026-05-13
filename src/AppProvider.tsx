@@ -89,6 +89,20 @@ export default function AppProvider({ children }: AppProviderProps) {
   const boot = async () => {
     try {
       const KeyManager = KeyManagerService();
+      
+      // If not initialized in memory, try to load from secure storage
+      if (!KeyManager.isInitialized()) {
+        const isStored = await KeyManager.isMnemonicStored();
+        if (isStored) {
+          try {
+            await KeyManager.loadMnemonicSecurely();
+          } catch (e) {
+            console.error("Failed to load mnemonic from secure storage", e);
+            // We don't fail boot here, user might need to re-import or it's a fresh app
+          }
+        }
+      }
+
       if (KeyManager.isInitialized()) {
         dispatch(setWalletAddress(KeyManager.getAddress()));
       }
@@ -98,6 +112,7 @@ export default function AppProvider({ children }: AppProviderProps) {
       setPhase("STARTUP_ERROR");
     }
   };
+
 
   let content: ReactNode = null;
   switch (phase) {

@@ -1,29 +1,40 @@
-import { formatEther } from "viem";
+import { formatUnits } from "viem";
 
 interface WeiDisplayProps {
-  value?: bigint | string;
+  wei?: bigint | string;
+  value?: bigint | string; // legacy alias
+  decimals?: number;
+  symbol?: string;
   hideBalance?: boolean;
   className?: string;
 }
 
 export default function WeiDisplay({
-  value = 0n,
+  wei,
+  value,
+  decimals = 18,
+  symbol = "RBTC",
   hideBalance = false,
   className,
 }: WeiDisplayProps) {
+  const amount = wei ?? value ?? 0n;
+  
   if (hideBalance) {
-    return <span className={className}>XXXXX RBTC</span>;
+    return <span className={className}>XXXXX {symbol}</span>;
   }
 
-  const amount = typeof value === "string" ? BigInt(value) : value;
-  const formatted = formatEther(amount);
+  const bigAmount = typeof amount === "string" ? BigInt(amount) : amount;
+  const formatted = formatUnits(bigAmount, decimals);
 
   const [whole, fraction] = formatted.split(".");
   const displayFraction = fraction ? fraction.slice(0, 6) : "0";
 
   return (
     <span className={className}>
-      {whole}<span className="text-neutral-400">.{displayFraction}</span> RBTC
+      {whole}
+      {displayFraction !== "0" && <span className="text-neutral-400">.{displayFraction}</span>}{" "}
+      {symbol}
     </span>
   );
 }
+

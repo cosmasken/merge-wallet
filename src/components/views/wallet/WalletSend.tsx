@@ -14,6 +14,7 @@ import TokenManagerService, { getTokenList } from "@/kernel/evm/TokenManagerServ
 import { classifyError, InsufficientFundsError } from "@/kernel/evm/errors";
 import SecurityService, { AuthActions } from "@/kernel/app/SecurityService";
 import SlideToAction from "@/atoms/SlideToAction";
+import TransactionConfirmation from "@/components/composite/TransactionConfirmation";
 
 interface TokenOption {
   type: "native" | "erc20";
@@ -34,6 +35,7 @@ export default function WalletSend() {
   const [gasPrice, setGasPrice] = useState<bigint | null>(null);
   const [isEstimating, setIsEstimating] = useState(false);
   const [isSending, setIsSending] = useState(false);
+  const [isConfirming, setIsConfirming] = useState(false);
   const [error, setError] = useState("");
   const [txHash, setTxHash] = useState("");
   const [selectedToken, setSelectedToken] = useState<TokenOption>({
@@ -83,6 +85,10 @@ export default function WalletSend() {
     setError("");
     try {
       const builder = TransactionBuilderService(network);
+      const publicClient = getPublicClient(network);
+      const gPrice = await publicClient.getGasPrice();
+      setGasPrice(gPrice);
+
       if (selectedToken.type === "native") {
         const gas = await builder.estimateGas(
           to as `0x${string}`,
@@ -91,22 +97,17 @@ export default function WalletSend() {
         );
         setGasEstimate(gas);
       } else {
-        const publicClient = getPublicClient(network);
         const data = encodeFunctionData({
           abi: erc20Abi,
           functionName: "transfer",
           args: [to as `0x${string}`, valueWei],
         });
-        const [gas, gPrice] = await Promise.all([
-          publicClient.estimateGas({
-            to: selectedToken.address,
-            data,
-            account: address as `0x${string}`,
-          }),
-          publicClient.getGasPrice(),
-        ]);
+        const gas = await publicClient.estimateGas({
+          to: selectedToken.address,
+          data,
+          account: address as `0x${string}`,
+        });
         setGasEstimate(gas);
-        setGasPrice(gPrice);
       }
     } catch (e) {
       setError(classifyError(e).message);
@@ -114,20 +115,30 @@ export default function WalletSend() {
     setIsEstimating(false);
   };
 
-  const handleSend = async () => {
+  const handleInitiateSend = async () => {
     if (!isValidAddress || !isValidAmount) return;
     if (isInsufficientFunds) {
       setError(new InsufficientFundsError(valueWei, balanceBigInt).message);
       return;
     }
 
+    if (gasEstimate === null) {
+      await handleEstimateGas();
+    }
+    
+    setIsConfirming(true);
+  };
+
+  const handleSend = async () => {
     const authorized = await SecurityService().authorize(AuthActions.SendTransaction);
     if (!authorized) {
       setError("Authorization required");
+      setIsConfirming(false);
       return;
     }
 
     setIsSending(true);
+    setIsConfirming(false);
     setError("");
     try {
       const txManager = TransactionManagerService(network);
@@ -160,7 +171,7 @@ export default function WalletSend() {
 
   if (txHash) {
     return (
-      <div>
+      <div className="animate-in fade-in duration-500">
         <ViewHeader title="Send" />
         <div className="flex flex-col items-center gap-4 px-4 pt-16 text-center">
           <div className="w-16 h-16 rounded-full bg-success flex items-center justify-center">
@@ -185,6 +196,35 @@ export default function WalletSend() {
             Back to Wallet
           </button>
         </div>
+      </div>
+    );
+  }
+
+  if (isConfirming) {
+    return (
+      <div>
+        <ViewHeader title="Confirm" showBack onBack={() => setIsConfirming(false)} />
+        <TransactionConfirmation 
+          transaction={{
+            to: to as `0x${string}`,
+            value: valueWei,
+            gasEstimate: gasEstimate ?? 0n,
+            gasPrice: gasPrice ?? 0n,
+            total: valueWei + (gasEstimate ?? 0n) * (gasPrice ?? 0n),
+            token: {
+              symbol: selectedToken.symbol,
+              decimals: selectedToken.decimals,
+              type: selectedToken.type,
+              address: selectedToken.address,
+            }
+          }}
+          onConfirm={handleSend}
+          onEdit={() => setIsConfirming(false)}
+          onCancel={() => setIsConfirming(false)}
+        />
+        {error && (
+          <p className="text-error text-sm bg-error/10 p-3 m-4 rounded-lg">{error}</p>
+        )}
       </div>
     );
   }
@@ -277,8 +317,8 @@ export default function WalletSend() {
 
         <div className="mt-4">
           <SlideToAction
-            label={isSending ? "Sending..." : `Slide to send ${selectedToken.symbol}`}
-            onSlide={handleSend}
+            label={isSending ? "Sending..." : `Review and Send`}
+            onSlide={handleInitiateSend}
             disabled={!isConnected || !isValidAddress || !isValidAmount || isSending || isInsufficientFunds}
           />
         </div>
@@ -286,3 +326,4 @@ export default function WalletSend() {
     </div>
   );
 }
+

@@ -28,6 +28,7 @@ export default function WalletImport() {
     try {
       const KeyManager = KeyManagerService();
       const { address } = KeyManager.importFromMnemonic(trimmed);
+      await KeyManager.storeMnemonicSecurely();
       dispatch(setWalletAddress(address));
       navigate("/wallet");
     } catch {

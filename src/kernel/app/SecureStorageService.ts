@@ -1,0 +1,110 @@
+import { SimpleEncryption } from "capacitor-simple-encryption";
+import { Preferences } from "@capacitor/preferences";
+
+const STORAGE_KEY = "encrypted_mnemonic";
+
+export interface EncryptedMnemonic {
+  encryptedData: string;
+  storageMethod: 'keychain' | 'encrypted' | 'memory';
+  createdAt: number;
+  lastAccessed: number;
+}
+
+export default function SecureStorageService() {
+  /**
+   * Encrypts and stores the mnemonic using the current active encryption key.
+   * Assumes initialize() has been called and the key is in memory.
+   */
+  async function storeMnemonic(mnemonic: string): Promise<void> {
+    try {
+      // Use the plugin's managed AES-256-GCM encryption
+      const { data: encryptedValue } = await SimpleEncryption.encrypt({ 
+        data: mnemonic 
+      });
+
+      const storageData: EncryptedMnemonic = {
+        encryptedData: encryptedValue,
+        storageMethod: 'encrypted',
+        createdAt: Date.now(),
+        lastAccessed: Date.now()
+      };
+
+      await Preferences.set({
+        key: STORAGE_KEY,
+        value: JSON.stringify(storageData)
+      });
+    } catch (error) {
+      console.error("Failed to store mnemonic securely", error);
+      throw new Error("SECURE_STORAGE_ERROR: Failed to encrypt and persist mnemonic");
+    }
+  }
+
+  /**
+   * Decrypts and retrieves the mnemonic using the current active encryption key.
+   * Assumes initialize() has been called and the key is in memory.
+   */
+  async function getMnemonic(): Promise<string | null> {
+    const { value } = await Preferences.get({ key: STORAGE_KEY });
+    if (!value) return null;
+
+    try {
+      const storageData: EncryptedMnemonic = JSON.parse(value);
+      
+      const { data: decrypted } = await SimpleEncryption.decrypt({ 
+        data: storageData.encryptedData 
+      });
+
+      // Update last accessed metadata
+      storageData.lastAccessed = Date.now();
+      await Preferences.set({
+        key: STORAGE_KEY,
+        value: JSON.stringify(storageData)
+      });
+
+      return decrypted;
+    } catch (error) {
+      console.error("Failed to decrypt mnemonic", error);
+      // If decryption fails, it likely means the key was lost or changed
+      return null;
+    }
+  }
+
+  async function hasStoredMnemonic(): Promise<boolean> {
+    const { value } = await Preferences.get({ key: STORAGE_KEY });
+    return !!value;
+  }
+
+  /**
+   * In the context of capacitor-simple-encryption, changing the PIN 
+   * doesn't necessarily change the underlying encryption key, 
+   * just the protection around it. 
+   */
+  async function rekeyMnemonic(_oldPin: string, _newPin: string): Promise<void> {
+    // Re-verify we can still decrypt
+    const mnemonic = await getMnemonic();
+    if (!mnemonic) {
+      throw new Error("DECRYPTION_FAILED: Could not access mnemonic with current key state");
+    }
+    // The underlying key is persisted by the plugin, so we just re-save to be sure
+    await storeMnemonic(mnemonic);
+  }
+
+  async function deleteMnemonic(): Promise<void> {
+    await Preferences.remove({ key: STORAGE_KEY });
+  }
+
+  function clearFromMemory(): void {
+    SimpleEncryption.clearKeyFromMemory();
+  }
+
+  return {
+    storeMnemonic,
+    getMnemonic,
+    hasStoredMnemonic,
+    rekeyMnemonic,
+    deleteMnemonic,
+    clearFromMemory
+  };
+}
+
+

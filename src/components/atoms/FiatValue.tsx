@@ -4,25 +4,30 @@ import { useSelector } from "react-redux";
 import { selectLocalCurrency, selectRbtcPrice } from "@/redux/preferences";
 
 interface FiatValueProps {
+  wei?: bigint | string;
   value?: bigint | string;
   className?: string;
   fallbackClassName?: string;
 }
 
 export default function FiatValue({
-  value = 0n,
+  wei,
+  value,
   className,
   fallbackClassName,
 }: FiatValueProps) {
   const rbtcPrice = useSelector(selectRbtcPrice);
   const currency = useSelector(selectLocalCurrency);
 
+  const amount = wei ?? value ?? 0n;
+
   if (!rbtcPrice || rbtcPrice.currency !== currency) {
     return fallbackClassName ? <span className={fallbackClassName} /> : null;
   }
 
-  const amount = typeof value === "string" ? BigInt(value) : value;
-  const rbtcAmount = parseFloat(formatEther(amount));
+  const bigAmount = typeof amount === "string" ? BigInt(amount) : amount;
+  const rbtcAmount = parseFloat(formatEther(bigAmount));
+
   const fiatValue = rbtcAmount * rbtcPrice.price;
 
   const formatted = fiatValue.toLocaleString(undefined, {

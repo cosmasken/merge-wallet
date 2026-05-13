@@ -1,4 +1,4 @@
-import { SimpleEncryption } from "capacitor-plugin-simple-encryption";
+import { SimpleEncryption } from "capacitor-simple-encryption";
 
 import { store } from "@/redux/store";
 import { selectSecuritySettings } from "@/redux/preferences";
