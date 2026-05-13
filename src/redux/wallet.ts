@@ -8,6 +8,25 @@ interface WalletState {
   name: string;
   seedBackedUp: boolean;
   trackedNfts: string[];
+  trackedTokens: {
+    address: string;
+    symbol: string;
+    decimals: number;
+    network: string;
+  }[];
+  contacts: {
+    name: string;
+    address: string;
+  }[];
+  pendingTransactions: {
+    hash: string;
+    type: "send" | "receive" | "contract";
+    amount: string;
+    symbol: string;
+    status: "pending" | "success" | "failed";
+    timestamp: number;
+    network: string;
+  }[];
 }
 
 const initialState: WalletState = {
@@ -16,6 +35,9 @@ const initialState: WalletState = {
   name: "My Wallet",
   seedBackedUp: false,
   trackedNfts: [],
+  trackedTokens: [],
+  contacts: [],
+  pendingTransactions: [],
 };
 
 export const setWalletAddress = createAction<string>("wallet/setAddress");
@@ -24,6 +46,12 @@ export const setWalletName = createAction<string>("wallet/setName");
 export const setSeedBackedUp = createAction<boolean>("wallet/setSeedBackedUp");
 export const addTrackedNft = createAction<string>("wallet/addTrackedNft");
 export const removeTrackedNft = createAction<string>("wallet/removeTrackedNft");
+export const addTrackedToken = createAction<{ address: string; symbol: string; decimals: number; network: string }>("wallet/addTrackedToken");
+export const removeTrackedToken = createAction<{ address: string; network: string }>("wallet/removeTrackedToken");
+export const addContact = createAction<{ name: string; address: string }>("wallet/addContact");
+export const removeContact = createAction<string>("wallet/removeContact");
+export const addPendingTransaction = createAction<{ hash: string; type: "send" | "receive" | "contract"; amount: string; symbol: string; network: string }>("wallet/addPendingTransaction");
+export const updatePendingTransaction = createAction<{ hash: string; status: "success" | "failed" }>("wallet/updatePendingTransaction");
 export const hydrateWallet = createAction<Partial<WalletState>>("wallet/hydrate");
 
 export const walletReducer = createReducer(initialState, (builder) => {
@@ -50,6 +78,41 @@ export const walletReducer = createReducer(initialState, (builder) => {
       state.trackedNfts = state.trackedNfts.filter(
         (a) => a.toLowerCase() !== action.payload.toLowerCase(),
       );
+    })
+    .addCase(addTrackedToken, (state, action) => {
+      const addr = action.payload.address.toLowerCase();
+      if (!state.trackedTokens.some((t) => t.address.toLowerCase() === addr && t.network === action.payload.network)) {
+        state.trackedTokens.push(action.payload);
+      }
+    })
+    .addCase(removeTrackedToken, (state, action) => {
+      state.trackedTokens = state.trackedTokens.filter(
+        (t) => !(t.address.toLowerCase() === action.payload.address.toLowerCase() && t.network === action.payload.network)
+      );
+    })
+    .addCase(addContact, (state, action) => {
+      const addr = action.payload.address.toLowerCase();
+      if (!state.contacts.some((c) => c.address.toLowerCase() === addr)) {
+        state.contacts.push(action.payload);
+      }
+    })
+    .addCase(removeContact, (state, action) => {
+      state.contacts = state.contacts.filter(
+        (c) => c.address.toLowerCase() !== action.payload.toLowerCase()
+      );
+    })
+    .addCase(addPendingTransaction, (state, action) => {
+      state.pendingTransactions.unshift({
+        ...action.payload,
+        status: "pending",
+        timestamp: Date.now(),
+      });
+    })
+    .addCase(updatePendingTransaction, (state, action) => {
+      const tx = state.pendingTransactions.find((t) => t.hash === action.payload.hash);
+      if (tx) {
+        tx.status = action.payload.status;
+      }
     })
     .addCase(hydrateWallet, (_state, action) => ({
       ...initialState,
@@ -82,4 +145,19 @@ export const selectSeedBackedUp = createSelector(
 export const selectTrackedNfts = createSelector(
   selectWallet,
   (wallet) => wallet.trackedNfts,
+);
+
+export const selectTrackedTokens = createSelector(
+  selectWallet,
+  (wallet) => wallet.trackedTokens,
+);
+
+export const selectContacts = createSelector(
+  selectWallet,
+  (wallet) => wallet.contacts,
+);
+
+export const selectPendingTransactions = createSelector(
+  selectWallet,
+  (wallet) => wallet.pendingTransactions,
 );

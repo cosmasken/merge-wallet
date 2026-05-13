@@ -11,6 +11,7 @@ import { setWalletAddress, setSeedBackedUp, hydrateWallet } from "@/redux/wallet
 import { hydratePreferences } from "@/redux/preferences";
 import { setConnected } from "@/redux/device";
 import { loadState } from "@/redux/persistence";
+import TransactionTracker from "./components/composite/TransactionTracker";
 
 type Phase = "PREFLIGHT" | "LOCKED" | "RUNNING" | "PAUSED" | "STARTUP_ERROR";
 
@@ -89,7 +90,7 @@ export default function AppProvider({ children }: AppProviderProps) {
   const boot = async () => {
     try {
       const KeyManager = KeyManagerService();
-      
+
       // If not initialized in memory, try to load from secure storage
       if (!KeyManager.isInitialized()) {
         const isStored = await KeyManager.isWalletStored();
@@ -135,5 +136,10 @@ export default function AppProvider({ children }: AppProviderProps) {
       break;
   }
 
-  return <div id="container">{content}</div>;
+  return (
+    <div id="container">
+      {content}
+      {phase === "RUNNING" && <TransactionTracker />}
+    </div>
+  );
 }

@@ -1,0 +1,73 @@
+{
+  "common": {
+    "send": "Enviar",
+    "receive": "Receber",
+    "history": "Histórico",
+    "settings": "Configurações",
+    "confirm": "Confirmar",
+    "cancel": "Cancelar",
+    "save": "Salvar",
+    "delete": "Excluir",
+    "add": "Adicionar",
+    "address": "Endereço",
+    "amount": "Valor",
+    "balance": "Saldo",
+    "tokens": "Tokens",
+    "back": "Voltar",
+    "next": "Próximo",
+    "loading": "Carregando...",
+    "error": "Erro",
+    "success": "Sucesso"
+  },
+  "wallet": {
+    "home": {
+      "backup_reminder": "Por favor, faça backup da sua frase semente!",
+      "backup_now": "Fazer Backup Agora",
+      "total_balance": "Saldo Total",
+      "assets": "Ativos"
+    },
+    "import": {
+      "title": "Importar Carteira",
+      "subtitle": "Restaure o acesso aos seus fundos",
+      "mnemonic_tab": "Frase de Recuperação",
+      "private_key_tab": "Chave Privada",
+      "mnemonic_label": "Digite sua frase de recuperação de 12 ou 24 palavras",
+      "private_key_label": "Digite sua chave privada (64 caracteres hex)",
+      "placeholder_mnemonic": "palavra1 palavra2 palavra3 ...",
+      "placeholder_pk": "0x...",
+      "paste": "Colar da área de transferência",
+      "button": "Importar Carteira",
+      "scanning": "Descobrindo contas...",
+      "finalizing": "Finalizando..."
+    },
+    "send": {
+      "title": "Enviar",
+      "subtitle": "Enviar RBTC ou tokens",
+      "recipient": "Endereço do Destinatário",
+      "from_contacts": "Dos Contatos",
+      "close_contacts": "Fechar Contatos",
+      "save_contact": "Salvar este endereço nos contatos",
+      "contact_name": "Nome do contato (ex. Alice)",
+      "estimate_gas": "Estimar Gás",
+      "estimating": "Estimando...",
+      "insufficient": "Saldo insuficiente de {{symbol}}.",
+      "review_button": "Revisar e Enviar",
+      "sending": "Enviando...",
+      "success_title": "Transação Enviada",
+      "view_explorer": "Ver no Explorador"
+    }
+  },
+  "security": {
+    "settings": {
+      "title": "Segurança",
+      "subtitle": "Proteja sua carteira",
+      "app_lock": "Bloqueio do App",
+      "app_lock_desc": "Exigir PIN/Biometria para abrir o app",
+      "tx_lock": "Segurança de Transação",
+      "tx_lock_desc": "Sempre pedir PIN/Biometría antes de enviar",
+      "use_biometrics": "Usar Biometria",
+      "use_biometrics_desc": "Usar FaceID/TouchID se disponível",
+      "warning": "Nota: Desativar recursos de segurança facilita o uso do app, mas aumenta o risco se o seu telefone for roubado ou acessado por terceiros."
+    }
+  }
+}

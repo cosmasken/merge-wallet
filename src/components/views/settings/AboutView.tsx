@@ -22,6 +22,14 @@ export default function AboutView() {
         >
           rootstock.io
         </a>
+        <a
+          href="http://privacypolicy.septemlabs.com/"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-neutral-400 text-xs mt-8"
+        >
+          Privacy Policy
+        </a>
       </div>
     </div>
   );

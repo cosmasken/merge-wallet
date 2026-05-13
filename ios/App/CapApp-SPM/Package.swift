@@ -22,7 +22,7 @@ let package = Package(
         .package(name: "CapacitorPreferences", path: "../../../node_modules/.pnpm/@capacitor+preferences@8.0.1_@capacitor+core@8.3.3/node_modules/@capacitor/preferences"),
         .package(name: "CapacitorShare", path: "../../../node_modules/.pnpm/@capacitor+share@8.0.1_@capacitor+core@8.3.3/node_modules/@capacitor/share"),
         .package(name: "CapacitorSplashScreen", path: "../../../node_modules/.pnpm/@capacitor+splash-screen@8.0.1_@capacitor+core@8.3.3/node_modules/@capacitor/splash-screen"),
-        .package(name: "CapacitorPluginSimpleEncryption", path: "../../../node_modules/.pnpm/capacitor-plugin-simple-encryption@file+plugins+capacitor-plugin-simple-encryption_@capacitor+core@8.3.3/node_modules/capacitor-plugin-simple-encryption")
+        .package(name: "CapacitorSimpleEncryption", path: "../../../node_modules/.pnpm/capacitor-simple-encryption@https+++codeload.github.com+cosmasken+capacitor-simple-encr_4f54461f8ad63cd5d5cd3d9824e04e03/node_modules/capacitor-simple-encryption")
     ],
     targets: [
         .target(
@@ -40,7 +40,7 @@ let package = Package(
                 .product(name: "CapacitorPreferences", package: "CapacitorPreferences"),
                 .product(name: "CapacitorShare", package: "CapacitorShare"),
                 .product(name: "CapacitorSplashScreen", package: "CapacitorSplashScreen"),
-                .product(name: "CapacitorPluginSimpleEncryption", package: "CapacitorPluginSimpleEncryption")
+                .product(name: "CapacitorSimpleEncryption", package: "CapacitorSimpleEncryption")
             ]
         )
     ]

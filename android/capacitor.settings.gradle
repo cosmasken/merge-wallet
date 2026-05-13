@@ -32,5 +32,5 @@ project(':capacitor-share').projectDir = new File('../node_modules/.pnpm/@capaci
 include ':capacitor-splash-screen'
 project(':capacitor-splash-screen').projectDir = new File('../node_modules/.pnpm/@capacitor+splash-screen@8.0.1_@capacitor+core@8.3.3/node_modules/@capacitor/splash-screen/android')
 
-include ':capacitor-plugin-simple-encryption'
-project(':capacitor-plugin-simple-encryption').projectDir = new File('../node_modules/.pnpm/capacitor-plugin-simple-encryption@file+plugins+capacitor-plugin-simple-encryption_@capacitor+core@8.3.3/node_modules/capacitor-plugin-simple-encryption/android')
+include ':capacitor-simple-encryption'
+project(':capacitor-simple-encryption').projectDir = new File('../node_modules/.pnpm/capacitor-simple-encryption@https+++codeload.github.com+cosmasken+capacitor-simple-encr_4f54461f8ad63cd5d5cd3d9824e04e03/node_modules/capacitor-simple-encryption/android')

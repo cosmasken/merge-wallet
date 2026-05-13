@@ -11,8 +11,9 @@ import PullToRefresh from "@/atoms/PullToRefresh";
 import SendIcon from "@/icons/SendIcon";
 import ReceiveIcon from "@/icons/ReceiveIcon";
 import HistoryIcon from "@/icons/HistoryIcon";
-import { selectWalletAddress, selectWalletBalance, selectSeedBackedUp, setWalletBalance } from "@/redux/wallet";
+import { selectWalletAddress, selectWalletBalance, selectSeedBackedUp, setWalletBalance, selectTrackedTokens } from "@/redux/wallet";
 import { selectShouldHideBalance, toggleHideBalance, selectNetwork } from "@/redux/preferences";
+import AddTokenModal from "@/components/composite/AddTokenModal";
 import { selectIsConnected } from "@/redux/device";
 import BalanceService from "@/kernel/evm/BalanceService";
 import TokenManagerService, { getTokenList } from "@/kernel/evm/TokenManagerService";
@@ -27,7 +28,9 @@ export default function WalletHome() {
   const seedBackedUp = useSelector(selectSeedBackedUp);
   const isConnected = useSelector(selectIsConnected);
   const hideBalance = useSelector(selectShouldHideBalance);
+  const trackedTokens = useSelector(selectTrackedTokens);
   const [isLoading, setIsLoading] = useState(true);
+  const [isAddTokenOpen, setIsAddTokenOpen] = useState(false);
   const [connectionError, setConnectionError] = useState(false);
   const [tokens, setTokens] = useState<TokenBalance[]>([]);
 
@@ -57,22 +60,26 @@ export default function WalletHome() {
 
   useEffect(function fetchTokens() {
     if (!address) return;
+    const allTokens = [...getTokenList(network), ...trackedTokens.filter(t => t.network === network)];
     TokenManagerService(network)
-      .getAllTokenBalances(address as `0x${string}`, getTokenList(network))
+      .getAllTokenBalances(address as `0x${string}`, allTokens)
       .then(setTokens);
-  }, [address, network]);
+  }, [address, network, trackedTokens]);
 
   const refreshAll = useCallback(async () => {
     if (!address) return;
+    setIsLoading(true);
     const Balance = BalanceService(network);
+    const allTokens = [...getTokenList(network), ...trackedTokens.filter(t => t.network === network)];
 
     const [b, t] = await Promise.all([
       Balance.getBalance(address as `0x${string}`),
-      TokenManagerService(network).getAllTokenBalances(address as `0x${string}`, getTokenList(network)),
+      TokenManagerService(network).getAllTokenBalances(address as `0x${string}`, allTokens),
     ]);
     dispatch(setWalletBalance(b.toString()));
     setTokens(t);
-  }, [address, network, dispatch]);
+    setIsLoading(false);
+  }, [address, network, dispatch, trackedTokens]);
 
   return (
     <PullToRefresh onRefresh={refreshAll}>
@@ -170,7 +177,15 @@ export default function WalletHome() {
 
       <div className="w-full">
         <Card className="p-4">
-          <h2 className="text-sm font-semibold text-neutral-500 mb-3">Tokens</h2>
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-sm font-semibold text-neutral-500">Tokens</h2>
+            <button 
+              onClick={() => setIsAddTokenOpen(true)}
+              className="text-xs font-semibold text-primary px-2 py-1 rounded-md hover:bg-primary/5 transition-colors"
+            >
+              + Add Token
+            </button>
+          </div>
           <div className="flex items-center justify-between py-2">
             <div className="flex items-center gap-2">
               <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center text-white text-xs font-bold">RBTC</div>
@@ -219,6 +234,10 @@ export default function WalletHome() {
         onClick={() => navigate("/wallet/history")}
       />
     </div>
+      <AddTokenModal 
+        isOpen={isAddTokenOpen} 
+        onClose={() => setIsAddTokenOpen(false)} 
+      />
     </PullToRefresh>
   );
 }

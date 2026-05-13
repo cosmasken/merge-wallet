@@ -3,6 +3,8 @@ import SecuritySettings from "@/views/settings/SecuritySettings";
 import NetworkSettings from "@/views/settings/NetworkSettings";
 import CurrencySettings from "@/views/settings/CurrencySettings";
 import AboutView from "@/views/settings/AboutView";
+import LanguageSettings from "@/views/settings/LanguageSettings";
+import AddressBook from "@/views/wallet/AddressBook";
 
 export const routeSettings = [
   {
@@ -24,5 +26,13 @@ export const routeSettings = [
   {
     path: "/settings/about",
     element: <AboutView />,
+  },
+  {
+    path: "/settings/language",
+    element: <LanguageSettings />,
+  },
+  {
+    path: "/settings/contacts",
+    element: <AddressBook />,
   },
 ];

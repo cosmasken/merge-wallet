@@ -15,6 +15,8 @@ import { classifyError, InsufficientFundsError } from "@/kernel/evm/errors";
 import SecurityService, { AuthActions } from "@/kernel/app/SecurityService";
 import SlideToAction from "@/atoms/SlideToAction";
 import TransactionConfirmation from "@/components/composite/TransactionConfirmation";
+import { selectContacts, addContact, addPendingTransaction } from "@/redux/wallet";
+import { useDispatch } from "react-redux";
 
 interface TokenOption {
   type: "native" | "erc20";
@@ -25,11 +27,16 @@ interface TokenOption {
 }
 
 export default function WalletSend() {
+  const dispatch = useDispatch();
   const address = useSelector(selectWalletAddress);
   const balance = useSelector(selectWalletBalance);
   const network = useSelector(selectNetwork);
   const isConnected = useSelector(selectIsConnected);
+  const contacts = useSelector(selectContacts);
   const [to, setTo] = useState("");
+  const [contactName, setContactName] = useState("");
+  const [shouldSaveContact, setShouldSaveContact] = useState(false);
+  const [isPickerOpen, setIsPickerOpen] = useState(false);
   const [amount, setAmount] = useState("");
   const [gasEstimate, setGasEstimate] = useState<bigint | null>(null);
   const [gasPrice, setGasPrice] = useState<bigint | null>(null);
@@ -125,7 +132,7 @@ export default function WalletSend() {
     if (gasEstimate === null) {
       await handleEstimateGas();
     }
-    
+
     setIsConfirming(true);
   };
 
@@ -142,6 +149,11 @@ export default function WalletSend() {
     setError("");
     try {
       const txManager = TransactionManagerService(network);
+
+      if (shouldSaveContact && contactName) {
+        dispatch(addContact({ name: contactName, address: to }));
+      }
+
       if (selectedToken.type === "native") {
         const { hash } = await txManager.sendTransaction(
           to as `0x${string}`,
@@ -149,6 +161,13 @@ export default function WalletSend() {
           gasEstimate ?? undefined,
         );
         setTxHash(hash);
+        dispatch(addPendingTransaction({
+          hash,
+          type: "send",
+          amount,
+          symbol: selectedToken.symbol,
+          network,
+        }));
       } else {
         const data = encodeFunctionData({
           abi: erc20Abi,
@@ -162,6 +181,13 @@ export default function WalletSend() {
           gasEstimate ?? undefined,
         );
         setTxHash(hash);
+        dispatch(addPendingTransaction({
+          hash,
+          type: "contract",
+          amount,
+          symbol: selectedToken.symbol,
+          network,
+        }));
       }
     } catch (e) {
       setError(classifyError(e).message);
@@ -204,7 +230,7 @@ export default function WalletSend() {
     return (
       <div>
         <ViewHeader title="Confirm" showBack onBack={() => setIsConfirming(false)} />
-        <TransactionConfirmation 
+        <TransactionConfirmation
           transaction={{
             to: to as `0x${string}`,
             value: valueWei,
@@ -240,11 +266,10 @@ export default function WalletSend() {
               <button
                 key={token.symbol}
                 onClick={() => { setSelectedToken(token); setGasEstimate(null); setError(""); }}
-                className={`flex-1 p-3 rounded-lg border-2 text-sm font-medium transition-colors ${
-                  selectedToken.symbol === token.symbol
+                className={`flex-1 p-3 rounded-lg border-2 text-sm font-medium transition-colors ${selectedToken.symbol === token.symbol
                     ? "border-primary bg-primary/10 text-primary"
                     : "border-neutral-300 dark:border-neutral-600 text-neutral-600 dark:text-neutral-300"
-                }`}
+                  }`}
               >
                 <div>{token.symbol}</div>
                 <div className="text-xs opacity-70 font-mono mt-0.5">
@@ -256,7 +281,32 @@ export default function WalletSend() {
         </div>
 
         <div>
-          <label className="text-sm text-neutral-500 mb-1 block">Recipient Address</label>
+          <div className="flex items-center justify-between mb-1">
+            <label className="text-sm text-neutral-500 block">Recipient Address</label>
+            {contacts.length > 0 && (
+              <button
+                onClick={() => setIsPickerOpen(!isPickerOpen)}
+                className="text-xs text-primary font-semibold"
+              >
+                {isPickerOpen ? "Close Contacts" : "From Contacts"}
+              </button>
+            )}
+          </div>
+
+          {isPickerOpen && (
+            <div className="mb-3 flex flex-wrap gap-2 animate-in fade-in slide-in-from-top-2 duration-200">
+              {contacts.map(c => (
+                <button
+                  key={c.address}
+                  onClick={() => { setTo(c.address); setIsPickerOpen(false); }}
+                  className="px-3 py-1.5 rounded-full bg-neutral-100 dark:bg-neutral-800 text-xs font-medium text-neutral-700 dark:text-neutral-300 border border-neutral-200 dark:border-neutral-700 hover:border-primary/50"
+                >
+                  {c.name}
+                </button>
+              ))}
+            </div>
+          )}
+
           <input
             type="text"
             placeholder="0x..."
@@ -266,6 +316,29 @@ export default function WalletSend() {
           />
           {to && !isValidAddress && (
             <p className="text-error text-xs mt-1">Invalid address</p>
+          )}
+
+          {isValidAddress && !contacts.some(c => c.address.toLowerCase() === to.toLowerCase()) && (
+            <div className="mt-3 p-3 rounded-xl bg-neutral-50 dark:bg-neutral-800 border border-neutral-100 dark:border-neutral-700">
+              <label className="flex items-center gap-2 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={shouldSaveContact}
+                  onChange={(e) => setShouldSaveContact(e.target.checked)}
+                  className="rounded border-neutral-300 text-primary focus:ring-primary"
+                />
+                <span className="text-xs font-medium text-neutral-600 dark:text-neutral-400">Save this address to contacts</span>
+              </label>
+              {shouldSaveContact && (
+                <input
+                  type="text"
+                  placeholder="Contact name (e.g. Alice)"
+                  value={contactName}
+                  onChange={(e) => setContactName(e.target.value)}
+                  className="mt-2 w-full p-2 text-xs rounded-lg border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-900"
+                />
+              )}
+            </div>
           )}
         </div>
 

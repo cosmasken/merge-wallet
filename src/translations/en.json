@@ -1,0 +1,73 @@
+{
+  "common": {
+    "send": "Send",
+    "receive": "Receive",
+    "history": "History",
+    "settings": "Settings",
+    "confirm": "Confirm",
+    "cancel": "Cancel",
+    "save": "Save",
+    "delete": "Delete",
+    "add": "Add",
+    "address": "Address",
+    "amount": "Amount",
+    "balance": "Balance",
+    "tokens": "Tokens",
+    "back": "Back",
+    "next": "Next",
+    "loading": "Loading...",
+    "error": "Error",
+    "success": "Success"
+  },
+  "wallet": {
+    "home": {
+      "backup_reminder": "Please back up your seed phrase!",
+      "backup_now": "Back Up Now",
+      "total_balance": "Total Balance",
+      "assets": "Assets"
+    },
+    "import": {
+      "title": "Import Wallet",
+      "subtitle": "Restore access to your funds",
+      "mnemonic_tab": "Recovery Phrase",
+      "private_key_tab": "Private Key",
+      "mnemonic_label": "Enter your 12 or 24 word recovery phrase",
+      "private_key_label": "Enter your private key (64 hex characters)",
+      "placeholder_mnemonic": "word1 word2 word3 ...",
+      "placeholder_pk": "0x...",
+      "paste": "Paste from clipboard",
+      "button": "Import Wallet",
+      "scanning": "Discovering accounts...",
+      "finalizing": "Finalizing..."
+    },
+    "send": {
+      "title": "Send",
+      "subtitle": "Send RBTC or tokens",
+      "recipient": "Recipient Address",
+      "from_contacts": "From Contacts",
+      "close_contacts": "Close Contacts",
+      "save_contact": "Save this address to contacts",
+      "contact_name": "Contact name (e.g. Alice)",
+      "estimate_gas": "Estimate Gas",
+      "estimating": "Estimating...",
+      "insufficient": "Insufficient {{symbol}} balance.",
+      "review_button": "Review and Send",
+      "sending": "Sending...",
+      "success_title": "Transaction Sent",
+      "view_explorer": "View on Explorer"
+    }
+  },
+  "security": {
+    "settings": {
+      "title": "Security",
+      "subtitle": "Protect your wallet",
+      "app_lock": "App Lock",
+      "app_lock_desc": "Require PIN/Biometrics to open the app",
+      "tx_lock": "Transaction Security",
+      "tx_lock_desc": "Always ask for PIN/Biometrics before sending",
+      "use_biometrics": "Use Biometrics",
+      "use_biometrics_desc": "Use FaceID/TouchID if available",
+      "warning": "Note: Disabling security features makes it easier to use the app but increases the risk if your phone is stolen or accessed by others."
+    }
+  }
+}

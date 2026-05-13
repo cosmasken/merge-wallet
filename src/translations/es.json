@@ -1,0 +1,73 @@
+{
+  "common": {
+    "send": "Enviar",
+    "receive": "Recibir",
+    "history": "Historial",
+    "settings": "Ajustes",
+    "confirm": "Confirmar",
+    "cancel": "Cancelar",
+    "save": "Guardar",
+    "delete": "Eliminar",
+    "add": "Añadir",
+    "address": "Dirección",
+    "amount": "Monto",
+    "balance": "Saldo",
+    "tokens": "Tokens",
+    "back": "Atrás",
+    "next": "Siguiente",
+    "loading": "Cargando...",
+    "error": "Error",
+    "success": "Éxito"
+  },
+  "wallet": {
+    "home": {
+      "backup_reminder": "¡Por favor, respalda tu frase semilla!",
+      "backup_now": "Respaldar Ahora",
+      "total_balance": "Saldo Total",
+      "assets": "Activos"
+    },
+    "import": {
+      "title": "Importar Billetera",
+      "subtitle": "Restaura el acceso a tus fondos",
+      "mnemonic_tab": "Frase de Recuperación",
+      "private_key_tab": "Clave Privada",
+      "mnemonic_label": "Ingresa tu frase de recuperación de 12 o 24 palabras",
+      "private_key_label": "Ingresa tu clave privada (64 caracteres hex)",
+      "placeholder_mnemonic": "palabra1 palabra2 palabra3 ...",
+      "placeholder_pk": "0x...",
+      "paste": "Pegar desde el portapapeles",
+      "button": "Importar Billetera",
+      "scanning": "Descubriendo cuentas...",
+      "finalizing": "Finalizando..."
+    },
+    "send": {
+      "title": "Enviar",
+      "subtitle": "Enviar RBTC o tokens",
+      "recipient": "Dirección del Destinatario",
+      "from_contacts": "Desde Contactos",
+      "close_contacts": "Cerrar Contactos",
+      "save_contact": "Guardar esta dirección en contactos",
+      "contact_name": "Nombre del contacto (ej. Alice)",
+      "estimate_gas": "Estimar Gas",
+      "estimating": "Estimando...",
+      "insufficient": "Saldo insuficiente de {{symbol}}.",
+      "review_button": "Revisar y Enviar",
+      "sending": "Enviando...",
+      "success_title": "Transacción Enviada",
+      "view_explorer": "Ver en el Explorador"
+    }
+  },
+  "security": {
+    "settings": {
+      "title": "Seguridad",
+      "subtitle": "Protege tu billetera",
+      "app_lock": "Bloqueo de App",
+      "app_lock_desc": "Requerir PIN/Biometría para abrir la app",
+      "tx_lock": "Seguridad de Transacción",
+      "tx_lock_desc": "Pedir siempre PIN/Biometría antes de enviar",
+      "use_biometrics": "Usar Biometría",
+      "use_biometrics_desc": "Usar FaceID/TouchID si está disponible",
+      "warning": "Nota: Deshabilitar las funciones de seguridad facilita el uso de la app pero aumenta el riesgo si tu teléfono es robado o accedido por otros."
+    }
+  }
+}

@@ -22,6 +22,11 @@ interface PreferencesState {
   languageCode: string;
   localCurrency: string;
   hideBalance: boolean;
+  security: {
+    lockOnAppStart: boolean;
+    requireAuthForSend: boolean;
+    useBiometrics: boolean;
+  };
   authMode: string;
   authActions: string;
   pinInputMode: string;
@@ -34,6 +39,11 @@ const initialState: PreferencesState = {
   languageCode: "en",
   localCurrency: "USD",
   hideBalance: false,
+  security: {
+    lockOnAppStart: true,
+    requireAuthForSend: true,
+    useBiometrics: true,
+  },
   authMode: "none",
   authActions: "Any;SendTransaction;RevealBalance",
   pinInputMode: "true",
@@ -43,7 +53,9 @@ const initialState: PreferencesState = {
 export const setTheme = createAction<ThemeMode>("preferences/setTheme");
 export const setNetwork = createAction<ValidNetwork>("preferences/setNetwork");
 export const setCurrency = createAction<string>("preferences/setCurrency");
+export const setLanguage = createAction<string>("preferences/setLanguage");
 export const toggleHideBalance = createAction("preferences/toggleHideBalance");
+export const updateSecuritySettings = createAction<Partial<PreferencesState["security"]>>("preferences/updateSecuritySettings");
 export const setAuthMode = createAction<string>("preferences/setAuthMode");
 export const setAuthActions = createAction<string>("preferences/setAuthActions");
 export const setRbtcPrice = createAction<{ price: number; currency: string }>("preferences/setRbtcPrice");
@@ -60,8 +72,14 @@ export const preferencesReducer = createReducer(initialState, (builder) => {
     .addCase(setCurrency, (state, action) => {
       state.localCurrency = action.payload;
     })
+    .addCase(setLanguage, (state, action) => {
+      state.languageCode = action.payload;
+    })
     .addCase(toggleHideBalance, (state) => {
       state.hideBalance = !state.hideBalance;
+    })
+    .addCase(updateSecuritySettings, (state, action) => {
+      state.security = { ...state.security, ...action.payload };
     })
     .addCase(setAuthMode, (state, action) => {
       state.authMode = action.payload;
@@ -99,9 +117,19 @@ export const selectLocalCurrency = createSelector(
   (prefs) => prefs.localCurrency,
 );
 
+export const selectLanguageCode = createSelector(
+  selectPreferences,
+  (prefs) => prefs.languageCode,
+);
+
 export const selectShouldHideBalance = createSelector(
   selectPreferences,
   (prefs) => prefs.hideBalance,
+);
+
+export const selectSecurityPreferences = createSelector(
+  selectPreferences,
+  (prefs) => prefs.security,
 );
 
 export const selectIsDarkMode = createSelector(

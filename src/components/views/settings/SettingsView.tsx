@@ -6,6 +6,8 @@ import { selectThemeMode, selectShouldHideBalance, setTheme, toggleHideBalance, 
 
 const sections = [
   { title: "Security", path: "/settings/security", desc: "PIN, biometric, recovery" },
+  { title: "Language", path: "/settings/language", desc: "English, Spanish, Portuguese" },
+  { title: "Address Book", path: "/settings/contacts", desc: "Manage saved addresses" },
   { title: "Network", path: "/settings/network", desc: "Mainnet, testnet, RPC" },
   { title: "Currency", path: "/settings/currency", desc: "Display currency, units" },
   { title: "Import Wallet", path: "/wallet/import", desc: "Restore from recovery phrase" },

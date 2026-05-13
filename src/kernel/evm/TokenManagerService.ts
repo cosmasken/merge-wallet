@@ -122,9 +122,37 @@ export default function TokenManagerService(network?: ValidNetwork) {
   }
 
 
+  async function getTokenMetadata(tokenAddress: string): Promise<{ symbol: string; decimals: number } | null> {
+    try {
+      const normalized = getAddress(tokenAddress);
+      
+      const [symbol, decimals] = await Promise.all([
+        publicClient.readContract({
+          address: normalized,
+          abi: [{ name: 'symbol', type: 'function', stateMutability: 'view', inputs: [], outputs: [{ type: 'string' }] }],
+          functionName: 'symbol',
+        }),
+        publicClient.readContract({
+          address: normalized,
+          abi: [{ name: 'decimals', type: 'function', stateMutability: 'view', inputs: [], outputs: [{ type: 'uint8' }] }],
+          functionName: 'decimals',
+        }),
+      ]);
+
+      return {
+        symbol: symbol as string,
+        decimals: Number(decimals),
+      };
+    } catch (e) {
+      console.error("Failed to fetch token metadata:", e);
+      return null;
+    }
+  }
+
   return {
     getTokenBalance,
     getTokenBalances,
     getAllTokenBalances,
+    getTokenMetadata,
   }
 }
