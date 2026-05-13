@@ -23,12 +23,19 @@ export default function TransactionBuilderService(network?: ValidNetwork) {
     amount: string,
   ) {
     const publicClient = getPublicClient(network)
-    const [gas, gasPrice, nonce, chainId] = await Promise.all([
+    
+    // Get fresh nonce each time to avoid stale nonce issues
+    const [gas, gasPrice, chainId] = await Promise.all([
       estimateGas(to, amount, from),
       publicClient.getGasPrice(),
-      publicClient.getTransactionCount({ address: from }),
       publicClient.getChainId(),
     ])
+    
+    // Get nonce separately to ensure it's fresh
+    const nonce = await publicClient.getTransactionCount({ 
+      address: from,
+      blockTag: 'pending' // Include pending transactions
+    })
 
     return {
       to,
