@@ -1,0 +1,73 @@
+{
+  "common": {
+    "send": "发送",
+    "receive": "接收",
+    "history": "历史",
+    "settings": "设置",
+    "confirm": "确认",
+    "cancel": "取消",
+    "save": "保存",
+    "delete": "删除",
+    "add": "添加",
+    "address": "地址",
+    "amount": "金额",
+    "balance": "余额",
+    "tokens": "代币",
+    "back": "返回",
+    "next": "下一步",
+    "loading": "加载中...",
+    "error": "错误",
+    "success": "成功"
+  },
+  "wallet": {
+    "home": {
+      "backup_reminder": "请备份您的助记词！",
+      "backup_now": "立即备份",
+      "total_balance": "总余额",
+      "assets": "资产"
+    },
+    "import": {
+      "title": "导入钱包",
+      "subtitle": "恢复对您资金的访问",
+      "mnemonic_tab": "助记词",
+      "private_key_tab": "私钥",
+      "mnemonic_label": "输入您的12或24个助记词",
+      "private_key_label": "输入您的私钥（64位十六进制字符）",
+      "placeholder_mnemonic": "单词1 单词2 单词3 ...",
+      "placeholder_pk": "0x...",
+      "paste": "从剪贴板粘贴",
+      "button": "导入钱包",
+      "scanning": "正在发现账户...",
+      "finalizing": "正在完成..."
+    },
+    "send": {
+      "title": "发送",
+      "subtitle": "发送 RBTC 或代币",
+      "recipient": "收款地址",
+      "from_contacts": "从联系人选择",
+      "close_contacts": "关闭联系人",
+      "save_contact": "将此地址保存到联系人",
+      "contact_name": "联系人名称（例如 张三）",
+      "estimate_gas": "估算 Gas",
+      "estimating": "估算中...",
+      "insufficient": "{{symbol}} 余额不足。",
+      "review_button": "审核并发送",
+      "sending": "发送中...",
+      "success_title": "交易已发送",
+      "view_explorer": "在浏览器中查看"
+    }
+  },
+  "security": {
+    "settings": {
+      "title": "安全",
+      "subtitle": "保护您的钱包",
+      "app_lock": "应用锁定",
+      "app_lock_desc": "打开应用时需要 PIN/生物识别",
+      "tx_lock": "交易安全",
+      "tx_lock_desc": "发送前始终要求 PIN/生物识别",
+      "use_biometrics": "使用生物识别",
+      "use_biometrics_desc": "如可用，请使用 Face ID/Touch ID",
+      "warning": "注意：禁用安全功能会使应用更易使用，但如果您的手机丢失或被他人访问，风险会增加。"
+    }
+  }
+}

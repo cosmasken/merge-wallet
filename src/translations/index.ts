@@ -4,11 +4,23 @@ import { RootState } from "@/redux/store";
 import en from "./en.json";
 import es from "./es.json";
 import pt from "./pt.json";
+import fr from "./fr.json";
+import sw from "./sw.json";
+import ar from "./ar.json";
+import zh from "./zh.json";
+import ja from "./ja.json";
+import hi from "./hi.json";
 
 const translations: Record<string, any> = {
   en,
   es,
   pt,
+  fr,
+  sw,
+  ar,
+  zh,
+  ja,
+  hi,
 };
 
 export function useTranslation() {

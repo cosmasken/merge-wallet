@@ -1,0 +1,73 @@
+{
+  "common": {
+    "send": "送金",
+    "receive": "受け取る",
+    "history": "履歴",
+    "settings": "設定",
+    "confirm": "確認",
+    "cancel": "キャンセル",
+    "save": "保存",
+    "delete": "削除",
+    "add": "追加",
+    "address": "アドレス",
+    "amount": "金額",
+    "balance": "残高",
+    "tokens": "トークン",
+    "back": "戻る",
+    "next": "次へ",
+    "loading": "読み込み中...",
+    "error": "エラー",
+    "success": "成功"
+  },
+  "wallet": {
+    "home": {
+      "backup_reminder": "シードフレーズをバックアップしてください！",
+      "backup_now": "今すぐバックアップ",
+      "total_balance": "合計残高",
+      "assets": "資産"
+    },
+    "import": {
+      "title": "ウォレットをインポート",
+      "subtitle": "資金へのアクセスを回復",
+      "mnemonic_tab": "リカバリーフレーズ",
+      "private_key_tab": "秘密鍵",
+      "mnemonic_label": "12語または24語のリカバリーフレーズを入力してください",
+      "private_key_label": "秘密鍵を入力してください（64文字の16進数）",
+      "placeholder_mnemonic": "単語1 単語2 単語3 ...",
+      "placeholder_pk": "0x...",
+      "paste": "クリップボードから貼り付け",
+      "button": "ウォレットをインポート",
+      "scanning": "アカウントを検索中...",
+      "finalizing": "完了中..."
+    },
+    "send": {
+      "title": "送金",
+      "subtitle": "RBTCまたはトークンを送信",
+      "recipient": "受取人アドレス",
+      "from_contacts": "連絡先から選択",
+      "close_contacts": "連絡先を閉じる",
+      "save_contact": "このアドレスを連絡先に保存",
+      "contact_name": "連絡先名（例：田中さん）",
+      "estimate_gas": "ガスを見積もる",
+      "estimating": "見積もり中...",
+      "insufficient": "{{symbol}} の残高が不足しています。",
+      "review_button": "確認して送金",
+      "sending": "送金中...",
+      "success_title": "取引が送信されました",
+      "view_explorer": "エクスプローラーで確認"
+    }
+  },
+  "security": {
+    "settings": {
+      "title": "セキュリティ",
+      "subtitle": "ウォレットを保護する",
+      "app_lock": "アプリロック",
+      "app_lock_desc": "アプリを開く際にPIN/生体認証が必要",
+      "tx_lock": "取引セキュリティ",
+      "tx_lock_desc": "送金前に必ずPIN/生体認証を求める",
+      "use_biometrics": "生体認証を使用",
+      "use_biometrics_desc": "利用可能な場合はFace ID/Touch IDを使用",
+      "warning": "注意：セキュリティ機能を無効にするとアプリが使いやすくなりますが、スマートフォンが盗まれたり他人にアクセスされたりするリスクが高まります。"
+    }
+  }
+}

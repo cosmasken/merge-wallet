@@ -6,10 +6,16 @@ interface PersistedState {
   preferences: {
     network: string;
     localCurrency: string;
+    languageCode: string;
     hideBalance: boolean;
     authMode: string;
     authActions: string;
     themeMode: string;
+    security: {
+      lockOnAppStart: boolean;
+      requireAuthForSend: boolean;
+      useBiometrics: boolean;
+    };
   };
   wallet: {
     address: string;
@@ -17,6 +23,25 @@ interface PersistedState {
     balance?: string;
     seedBackedUp?: boolean;
     trackedNfts?: string[];
+    trackedTokens?: {
+      address: string;
+      symbol: string;
+      decimals: number;
+      network: string;
+    }[];
+    contacts?: {
+      name: string;
+      address: string;
+    }[];
+    pendingTransactions?: {
+      hash: string;
+      type: string;
+      amount: string;
+      symbol: string;
+      status: string;
+      timestamp: number;
+      network: string;
+    }[];
   };
 }
 
@@ -24,14 +49,21 @@ export async function saveState(state: {
   preferences: Record<string, unknown>;
   wallet: Record<string, unknown>;
 }): Promise<void> {
+  const security = (state.preferences.security as Record<string, boolean>) ?? {};
   const data: PersistedState = {
     preferences: {
       network: String(state.preferences.network ?? "testnet"),
       localCurrency: String(state.preferences.localCurrency ?? "USD"),
+      languageCode: String(state.preferences.languageCode ?? "en"),
       hideBalance: Boolean(state.preferences.hideBalance),
       authMode: String(state.preferences.authMode ?? "none"),
       authActions: String(state.preferences.authActions ?? ""),
       themeMode: String(state.preferences.themeMode ?? "system"),
+      security: {
+        lockOnAppStart: security.lockOnAppStart ?? true,
+        requireAuthForSend: security.requireAuthForSend ?? true,
+        useBiometrics: security.useBiometrics ?? true,
+      },
     },
     wallet: {
       address: String(state.wallet.address ?? ""),
@@ -40,6 +72,15 @@ export async function saveState(state: {
       seedBackedUp: Boolean(state.wallet.seedBackedUp),
       trackedNfts: Array.isArray(state.wallet.trackedNfts)
         ? state.wallet.trackedNfts
+        : [],
+      trackedTokens: Array.isArray(state.wallet.trackedTokens)
+        ? state.wallet.trackedTokens
+        : [],
+      contacts: Array.isArray(state.wallet.contacts)
+        ? state.wallet.contacts
+        : [],
+      pendingTransactions: Array.isArray(state.wallet.pendingTransactions)
+        ? state.wallet.pendingTransactions
         : [],
     },
   };

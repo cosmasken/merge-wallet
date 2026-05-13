@@ -1,0 +1,73 @@
+{
+  "common": {
+    "send": "إرسال",
+    "receive": "استقبال",
+    "history": "السجل",
+    "settings": "الإعدادات",
+    "confirm": "تأكيد",
+    "cancel": "إلغاء",
+    "save": "حفظ",
+    "delete": "حذف",
+    "add": "إضافة",
+    "address": "العنوان",
+    "amount": "المبلغ",
+    "balance": "الرصيد",
+    "tokens": "الرموز",
+    "back": "رجوع",
+    "next": "التالي",
+    "loading": "جارٍ التحميل...",
+    "error": "خطأ",
+    "success": "نجح"
+  },
+  "wallet": {
+    "home": {
+      "backup_reminder": "يرجى نسخ عبارة الاسترداد احتياطيًا!",
+      "backup_now": "النسخ الاحتياطي الآن",
+      "total_balance": "إجمالي الرصيد",
+      "assets": "الأصول"
+    },
+    "import": {
+      "title": "استيراد المحفظة",
+      "subtitle": "استعادة الوصول إلى أموالك",
+      "mnemonic_tab": "عبارة الاسترداد",
+      "private_key_tab": "المفتاح الخاص",
+      "mnemonic_label": "أدخل عبارة الاسترداد المكونة من 12 أو 24 كلمة",
+      "private_key_label": "أدخل مفتاحك الخاص (64 حرفًا سداسيًا عشريًا)",
+      "placeholder_mnemonic": "كلمة1 كلمة2 كلمة3 ...",
+      "placeholder_pk": "0x...",
+      "paste": "لصق من الحافظة",
+      "button": "استيراد المحفظة",
+      "scanning": "جارٍ اكتشاف الحسابات...",
+      "finalizing": "جارٍ الإنهاء..."
+    },
+    "send": {
+      "title": "إرسال",
+      "subtitle": "إرسال RBTC أو الرموز",
+      "recipient": "عنوان المستلم",
+      "from_contacts": "من جهات الاتصال",
+      "close_contacts": "إغلاق جهات الاتصال",
+      "save_contact": "حفظ هذا العنوان في جهات الاتصال",
+      "contact_name": "اسم جهة الاتصال (مثال: أحمد)",
+      "estimate_gas": "تقدير الغاز",
+      "estimating": "جارٍ التقدير...",
+      "insufficient": "رصيد {{symbol}} غير كافٍ.",
+      "review_button": "مراجعة وإرسال",
+      "sending": "جارٍ الإرسال...",
+      "success_title": "تمت المعاملة",
+      "view_explorer": "عرض في المستكشف"
+    }
+  },
+  "security": {
+    "settings": {
+      "title": "الأمان",
+      "subtitle": "احمِ محفظتك",
+      "app_lock": "قفل التطبيق",
+      "app_lock_desc": "طلب رمز PIN / بيومتري لفتح التطبيق",
+      "tx_lock": "أمان المعاملات",
+      "tx_lock_desc": "طلب رمز PIN / بيومتري دائمًا قبل الإرسال",
+      "use_biometrics": "استخدام البيومتري",
+      "use_biometrics_desc": "استخدام Face ID / Touch ID إن توفّر",
+      "warning": "ملاحظة: تعطيل ميزات الأمان يجعل استخدام التطبيق أسهل لكنه يزيد من المخاطر إذا سُرق هاتفك أو وصل إليه شخص آخر."
+    }
+  }
+}

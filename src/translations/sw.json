@@ -1,0 +1,73 @@
+{
+  "common": {
+    "send": "Tuma",
+    "receive": "Pokea",
+    "history": "Historia",
+    "settings": "Mipangilio",
+    "confirm": "Thibitisha",
+    "cancel": "Ghairi",
+    "save": "Hifadhi",
+    "delete": "Futa",
+    "add": "Ongeza",
+    "address": "Anwani",
+    "amount": "Kiasi",
+    "balance": "Salio",
+    "tokens": "Tokeni",
+    "back": "Rudi",
+    "next": "Endelea",
+    "loading": "Inapakia...",
+    "error": "Hitilafu",
+    "success": "Imefanikiwa"
+  },
+  "wallet": {
+    "home": {
+      "backup_reminder": "Tafadhali hifadhi maneno yako ya kurejesha!",
+      "backup_now": "Hifadhi Sasa",
+      "total_balance": "Jumla ya Salio",
+      "assets": "Mali"
+    },
+    "import": {
+      "title": "Ingiza Pochi",
+      "subtitle": "Rejesha ufikiaji wa fedha zako",
+      "mnemonic_tab": "Maneno ya Kurejesha",
+      "private_key_tab": "Ufunguo wa Siri",
+      "mnemonic_label": "Ingiza maneno yako 12 au 24 ya kurejesha",
+      "private_key_label": "Ingiza ufunguo wako wa siri (herufi 64 za hex)",
+      "placeholder_mnemonic": "neno1 neno2 neno3 ...",
+      "placeholder_pk": "0x...",
+      "paste": "Bandika kutoka klipu",
+      "button": "Ingiza Pochi",
+      "scanning": "Inatafuta akaunti...",
+      "finalizing": "Inakamilisha..."
+    },
+    "send": {
+      "title": "Tuma",
+      "subtitle": "Tuma RBTC au tokeni",
+      "recipient": "Anwani ya Mpokeaji",
+      "from_contacts": "Kutoka Anwani",
+      "close_contacts": "Funga Anwani",
+      "save_contact": "Hifadhi anwani hii katika anwani",
+      "contact_name": "Jina la mtumiaji (mfano Alice)",
+      "estimate_gas": "Kadiria Gesi",
+      "estimating": "Inakadiriwa...",
+      "insufficient": "Salio la {{symbol}} halitoshi.",
+      "review_button": "Kagua na Tuma",
+      "sending": "Inatuma...",
+      "success_title": "Muamala Umetumwa",
+      "view_explorer": "Angalia kwenye Kichunguzi"
+    }
+  },
+  "security": {
+    "settings": {
+      "title": "Usalama",
+      "subtitle": "Linda pochi yako",
+      "app_lock": "Kufunga Programu",
+      "app_lock_desc": "Hitaji PIN/Biometriki kufungua programu",
+      "tx_lock": "Usalama wa Muamala",
+      "tx_lock_desc": "Daima omba PIN/Biometriki kabla ya kutuma",
+      "use_biometrics": "Tumia Biometriki",
+      "use_biometrics_desc": "Tumia FaceID/TouchID ikiwa inapatikana",
+      "warning": "Kumbuka: Kuzima vipengele vya usalama kunarahisisha matumizi ya programu lakini kunaongeza hatari ikiwa simu yako itaibiwa."
+    }
+  }
+}

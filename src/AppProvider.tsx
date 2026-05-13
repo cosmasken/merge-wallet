@@ -1,5 +1,5 @@
 import { ReactNode, useEffect, useRef, useState } from "react";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { App } from "@capacitor/app";
 import { SplashScreen } from "@capacitor/splash-screen";
 
@@ -8,7 +8,7 @@ import ErrorBoundary from "@/layout/ErrorBoundary";
 import KeyManagerService from "@/kernel/evm/KeyManagerService";
 import SecurityService from "@/kernel/app/SecurityService";
 import { setWalletAddress, setSeedBackedUp, hydrateWallet } from "@/redux/wallet";
-import { hydratePreferences } from "@/redux/preferences";
+import { hydratePreferences, selectLanguageCode } from "@/redux/preferences";
 import { setConnected } from "@/redux/device";
 import { loadState } from "@/redux/persistence";
 import TransactionTracker from "./components/composite/TransactionTracker";
@@ -21,10 +21,18 @@ interface AppProviderProps {
 
 export default function AppProvider({ children }: AppProviderProps) {
   const dispatch = useDispatch();
+  const languageCode = useSelector(selectLanguageCode);
   const [phase, setPhase] = useState<Phase>("PREFLIGHT");
   const [startupError, setStartupError] = useState<Error | null>(null);
   const phaseRef = useRef<Phase>("PREFLIGHT");
   phaseRef.current = phase;
+
+  // RTL support: set document direction based on language
+  useEffect(() => {
+    const RTL_LANGUAGES = ["ar"];
+    document.documentElement.dir = RTL_LANGUAGES.includes(languageCode) ? "rtl" : "ltr";
+    document.documentElement.lang = languageCode;
+  }, [languageCode]);
 
   useEffect(function mount() {
     let mounted = true;

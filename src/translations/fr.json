@@ -1,0 +1,73 @@
+{
+  "common": {
+    "send": "Envoyer",
+    "receive": "Recevoir",
+    "history": "Historique",
+    "settings": "Paramètres",
+    "confirm": "Confirmer",
+    "cancel": "Annuler",
+    "save": "Enregistrer",
+    "delete": "Supprimer",
+    "add": "Ajouter",
+    "address": "Adresse",
+    "amount": "Montant",
+    "balance": "Solde",
+    "tokens": "Jetons",
+    "back": "Retour",
+    "next": "Suivant",
+    "loading": "Chargement...",
+    "error": "Erreur",
+    "success": "Succès"
+  },
+  "wallet": {
+    "home": {
+      "backup_reminder": "Veuillez sauvegarder votre phrase de récupération !",
+      "backup_now": "Sauvegarder maintenant",
+      "total_balance": "Solde total",
+      "assets": "Actifs"
+    },
+    "import": {
+      "title": "Importer le portefeuille",
+      "subtitle": "Restaurer l'accès à vos fonds",
+      "mnemonic_tab": "Phrase de récupération",
+      "private_key_tab": "Clé privée",
+      "mnemonic_label": "Entrez votre phrase de récupération de 12 ou 24 mots",
+      "private_key_label": "Entrez votre clé privée (64 caractères hex)",
+      "placeholder_mnemonic": "mot1 mot2 mot3 ...",
+      "placeholder_pk": "0x...",
+      "paste": "Coller depuis le presse-papiers",
+      "button": "Importer le portefeuille",
+      "scanning": "Découverte des comptes...",
+      "finalizing": "Finalisation..."
+    },
+    "send": {
+      "title": "Envoyer",
+      "subtitle": "Envoyer des RBTC ou des jetons",
+      "recipient": "Adresse du destinataire",
+      "from_contacts": "Depuis les contacts",
+      "close_contacts": "Fermer les contacts",
+      "save_contact": "Enregistrer cette adresse dans les contacts",
+      "contact_name": "Nom du contact (ex. Alice)",
+      "estimate_gas": "Estimer le gaz",
+      "estimating": "Estimation...",
+      "insufficient": "Solde {{symbol}} insuffisant.",
+      "review_button": "Réviser et envoyer",
+      "sending": "Envoi...",
+      "success_title": "Transaction envoyée",
+      "view_explorer": "Voir sur l'explorateur"
+    }
+  },
+  "security": {
+    "settings": {
+      "title": "Sécurité",
+      "subtitle": "Protégez votre portefeuille",
+      "app_lock": "Verrouillage de l'application",
+      "app_lock_desc": "Exiger un code PIN/biométrie pour ouvrir l'application",
+      "tx_lock": "Sécurité des transactions",
+      "tx_lock_desc": "Toujours demander un code PIN/biométrie avant l'envoi",
+      "use_biometrics": "Utiliser la biométrie",
+      "use_biometrics_desc": "Utiliser FaceID/TouchID si disponible",
+      "warning": "Remarque : La désactivation des fonctions de sécurité facilite l'utilisation de l'application mais augmente les risques si votre téléphone est volé ou consulté par des tiers."
+    }
+  }
+}
