@@ -1,4 +1,4 @@
-import { erc20Abi } from "viem"
+import { erc20Abi, getAddress } from "viem"
 import { getPublicClient } from "@/kernel/evm/ClientService"
 import type { ValidNetwork } from "@/redux/preferences"
 
@@ -42,19 +42,22 @@ export default function TokenManagerService(network?: ValidNetwork) {
   const publicClient = getPublicClient(network)
 
   async function getTokenBalance(
-    tokenAddress: `0x${string}`,
-    walletAddress: `0x${string}`,
+    tokenAddress: string,
+    walletAddress: string,
   ): Promise<TokenBalance | null> {
     try {
+      const normalizedToken = getAddress(tokenAddress);
+      const normalizedWallet = getAddress(walletAddress);
+
       const balance = await publicClient.readContract({
-        address: tokenAddress,
+        address: normalizedToken,
         abi: erc20Abi,
         functionName: "balanceOf",
-        args: [walletAddress],
+        args: [normalizedWallet],
       })
 
       return {
-        address: tokenAddress,
+        address: normalizedToken,
         symbol: "ERC-20",
         decimals: 18,
         balance: balance as bigint,
@@ -78,24 +81,35 @@ export default function TokenManagerService(network?: ValidNetwork) {
     walletAddress: `0x${string}`,
     tokens: TokenInfo[],
   ): Promise<TokenBalance[]> {
+    const abi = [{
+      name: 'balanceOf',
+      type: 'function',
+      stateMutability: 'view',
+      inputs: [{ name: 'account', type: 'address' }],
+      outputs: [{ name: 'balance', type: 'uint256' }],
+    }];
+
+    const normalizedWallet = getAddress(walletAddress);
     const results = await Promise.all(
       tokens.map(async (token) => {
         try {
+          const normalizedToken = getAddress(token.address);
           const balance = await publicClient.readContract({
-            address: token.address,
-            abi: erc20Abi,
+            address: normalizedToken,
+            abi: abi,
             functionName: "balanceOf",
-            args: [walletAddress],
+            args: [normalizedWallet],
           })
           return {
-            address: token.address,
+            address: normalizedToken,
             symbol: token.symbol,
             decimals: token.decimals,
             balance: balance as bigint,
           }
-        } catch {
+        } catch (e) {
+          console.error(`Failed to fetch balance for token ${token.symbol} (${token.address}):`, e);
           return {
-            address: token.address,
+            address: getAddress(token.address),
             symbol: token.symbol,
             decimals: token.decimals,
             balance: 0n,
@@ -103,8 +117,10 @@ export default function TokenManagerService(network?: ValidNetwork) {
         }
       }),
     )
+
     return results
   }
+
 
   return {
     getTokenBalance,
