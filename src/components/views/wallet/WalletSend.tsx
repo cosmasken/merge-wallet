@@ -13,6 +13,7 @@ import TransactionManagerService from "@/kernel/evm/TransactionManagerService";
 import TokenManagerService, { getTokenList } from "@/kernel/evm/TokenManagerService";
 import { classifyError, InsufficientFundsError } from "@/kernel/evm/errors";
 import SecurityService, { AuthActions } from "@/kernel/app/SecurityService";
+import NotificationService from "@/kernel/app/NotificationService";
 import SlideToAction from "@/atoms/SlideToAction";
 import TransactionConfirmation from "@/components/composite/TransactionConfirmation";
 import LoadingSpinner from "@/atoms/LoadingSpinner";
@@ -142,7 +143,7 @@ export default function WalletSend() {
   const handleSend = async () => {
     const authorized = await SecurityService().authorize(AuthActions.SendTransaction);
     if (!authorized) {
-      setError(t("wallet.send.authorization_required"));
+      NotificationService().error(t("wallet.send.authorization_required"));
       setIsConfirming(false);
       return;
     }
@@ -155,6 +156,7 @@ export default function WalletSend() {
 
       if (shouldSaveContact && contactName) {
         dispatch(addContact({ name: contactName, address: to }));
+        NotificationService().success(`Contact "${contactName}" saved`);
       }
 
       if (selectedToken.type === "native") {
@@ -171,6 +173,7 @@ export default function WalletSend() {
           symbol: selectedToken.symbol,
           network,
         }));
+        NotificationService().success("Transaction sent successfully!");
       } else {
         const data = encodeFunctionData({
           abi: erc20Abi,
@@ -191,9 +194,12 @@ export default function WalletSend() {
           symbol: selectedToken.symbol,
           network,
         }));
+        NotificationService().success("Token transfer sent successfully!");
       }
     } catch (e) {
-      setError(classifyError(e).message);
+      const error = classifyError(e);
+      setError(error.message);
+      NotificationService().error(error.message);
     }
     setIsSending(false);
   };
