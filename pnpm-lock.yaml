@@ -44,9 +44,9 @@ importers:
       '@reduxjs/toolkit':
         specifier: ^2.0.0
         version: 2.11.2(react-redux@9.2.0(@types/react@19.2.14)(react@19.2.6)(redux@5.0.1))(react@19.2.6)
-      capacitor-plugin-simple-encryption:
-        specifier: file:./plugins/capacitor-plugin-simple-encryption
-        version: file:plugins/capacitor-plugin-simple-encryption(@capacitor/core@8.3.3)
+      capacitor-simple-encryption:
+        specifier: https://github.com/cosmasken/capacitor-simple-encryption.git
+        version: https://codeload.github.com/cosmasken/capacitor-simple-encryption/tar.gz/5fee7dcace3e1ad58107c7b21e828704cb592598(@capacitor/core@8.3.3)
       qrcode:
         specifier: ^1.5.4
         version: 1.5.4
@@ -840,8 +840,9 @@ packages:
   caniuse-lite@1.0.30001792:
     resolution: {integrity: sha512-hVLMUZFgR4JJ6ACt1uEESvQN1/dBVqPAKY0hgrV70eN3391K6juAfTjKZLKvOMsx8PxA7gsY1/tLMMTcfFLLpw==}
 
-  capacitor-plugin-simple-encryption@file:plugins/capacitor-plugin-simple-encryption:
-    resolution: {directory: plugins/capacitor-plugin-simple-encryption, type: directory}
+  capacitor-simple-encryption@https://codeload.github.com/cosmasken/capacitor-simple-encryption/tar.gz/5fee7dcace3e1ad58107c7b21e828704cb592598:
+    resolution: {tarball: https://codeload.github.com/cosmasken/capacitor-simple-encryption/tar.gz/5fee7dcace3e1ad58107c7b21e828704cb592598}
+    version: 0.1.0
     peerDependencies:
       '@capacitor/core': ^8.0.0
 
@@ -2408,7 +2409,7 @@ snapshots:
 
   caniuse-lite@1.0.30001792: {}
 
-  capacitor-plugin-simple-encryption@file:plugins/capacitor-plugin-simple-encryption(@capacitor/core@8.3.3):
+  capacitor-simple-encryption@https://codeload.github.com/cosmasken/capacitor-simple-encryption/tar.gz/5fee7dcace3e1ad58107c7b21e828704cb592598(@capacitor/core@8.3.3):
     dependencies:
       '@capacitor/core': 8.3.3
 

@@ -31,7 +31,7 @@
     "@capacitor/share": "^8.0.1",
     "@capacitor/splash-screen": "^8.0.1",
     "@reduxjs/toolkit": "^2.0.0",
-    "capacitor-plugin-simple-encryption": "file:./plugins/capacitor-plugin-simple-encryption",
+    "capacitor-simple-encryption": "https://github.com/cosmasken/capacitor-simple-encryption.git",
     "qrcode": "^1.5.4",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
