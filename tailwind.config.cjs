@@ -8,7 +8,8 @@ module.exports = {
       md: "640px",
     },
     fontFamily: {
-      sans: ["Archivo", "sans-serif"],
+      sans: ["Inter", "Archivo", "sans-serif"],
+      display: ["'Space Grotesk'", "sans-serif"],
       mono: ['"Chivo Mono"', "monospace"],
     },
     colors: {

@@ -125,7 +125,7 @@ export default function WalletHome() {
 
       <div className="flex flex-col items-center gap-3">
         <div className="flex items-center justify-center gap-3">
-          <div className="text-4xl font-bold text-neutral-800 dark:text-neutral-100">
+          <div className="text-4xl font-bold font-display text-neutral-800 dark:text-neutral-100">
             {isLoading ? (
               <div className="w-32 h-8 bg-neutral-200 dark:bg-neutral-800 rounded animate-pulse mx-auto" />
             ) : (

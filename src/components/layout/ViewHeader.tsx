@@ -31,7 +31,7 @@ export default function ViewHeader({ title, subtitle, showBack, onBack }: ViewHe
         </button>
       )}
       <div>
-        <h1 className="text-xl font-bold text-neutral-800 dark:text-neutral-100">
+        <h1 className="text-xl font-bold font-display text-neutral-800 dark:text-neutral-100">
           {title}
         </h1>
         {subtitle && (
