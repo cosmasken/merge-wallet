@@ -189,7 +189,10 @@ export default function WalletHome() {
               + {t("wallet.home.add_token")}
             </button>
           </div>
-          <div className="flex items-center justify-between py-2">
+          <div 
+            onClick={() => navigate("/wallet/token/RBTC")}
+            className="flex items-center justify-between py-2 cursor-pointer active:opacity-70"
+          >
             <div className="flex items-center gap-2">
               <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center text-white text-xs font-bold">RBTC</div>
               <span className="font-medium">Rootstock RBTC</span>
@@ -203,7 +206,11 @@ export default function WalletHome() {
             </span>
           </div>
           {tokens.map((token) => (
-            <div key={token.symbol} className="flex items-center justify-between py-2 border-t border-neutral-100 dark:border-neutral-700">
+            <div 
+              key={token.symbol} 
+              onClick={() => navigate(`/wallet/token/${token.symbol}`)}
+              className="flex items-center justify-between py-2 border-t border-neutral-100 dark:border-neutral-700 cursor-pointer active:opacity-70"
+            >
               <div className="flex items-center gap-2">
                 <div className="w-8 h-8 rounded-full bg-primary-200 dark:bg-primarydark-200 flex items-center justify-center text-xs font-bold text-primary-900 dark:text-primarydark-900">
                   {token.symbol.slice(0, 3)}
