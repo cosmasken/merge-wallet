@@ -35,6 +35,7 @@ export default function TokenDetailView() {
   useEffect(() => {
     if (symbol === "RBTC") {
       setToken({
+        address: "0x0000000000000000000000000000000000000000" as `0x${string}`,
         symbol: "RBTC",
         name: "Rootstock RBTC",
         balance: BigInt(nativeBalance),

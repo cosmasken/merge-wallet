@@ -98,12 +98,12 @@ export default function SecureStorageService() {
    */
   async function rekeyMnemonic(_oldPin: string, _newPin: string): Promise<void> {
     // Re-verify we can still decrypt
-    const mnemonic = await getMnemonic();
-    if (!mnemonic) {
-      throw new Error("DECRYPTION_FAILED: Could not access mnemonic with current key state");
+    const wallet = await getWallet();
+    if (!wallet) {
+      throw new Error("DECRYPTION_FAILED: Could not access wallet with current key state");
     }
     // The underlying key is persisted by the plugin, so we just re-save to be sure
-    await storeMnemonic(mnemonic);
+    await storeWallet(wallet.data, wallet.importType, wallet.index, wallet.isRskPath);
   }
 
   async function deleteMnemonic(): Promise<void> {

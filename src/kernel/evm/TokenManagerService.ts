@@ -7,12 +7,14 @@ export interface TokenBalance {
   symbol: string
   decimals: number
   balance: bigint
+  name?: string
 }
 
 export interface TokenInfo {
   address: `0x${string}`
   symbol: string
   decimals: number
+  network?: string
 }
 
 const TOKEN_MAP: Record<string, { mainnet: string; testnet: string; symbol: string; decimals: number }> = {
