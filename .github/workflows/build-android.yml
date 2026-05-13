@@ -53,12 +53,6 @@ jobs:
       run: |
         # Decode keystore from base64 secret
         echo "${{ secrets.KEYSTORE_FILE }}" | base64 -d > android/app/release-key.keystore
-        
-        # Verify keystore was created successfully
-        if [ ! -f android/app/release-key.keystore ]; then
-          echo "ERROR: Failed to create keystore file"
-          exit 1
-        fi
 
     - name: Prepare Gradle signing properties
       if: github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/')
@@ -67,11 +61,11 @@ jobs:
         KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
         KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
       run: |
-        cat <<EOF >> android/gradle.properties
-        android.injected.signing.store.file=app/release-key.keystore
-        android.injected.signing.store.password=$KEYSTORE_PASSWORD
-        android.injected.signing.key.alias=$KEY_ALIAS
-        android.injected.signing.key.password=$KEY_PASSWORD
+        cat <<EOF >> android/local.properties
+        RELEASE_STORE_FILE=app/release-key.keystore
+        RELEASE_STORE_PASSWORD=$KEYSTORE_PASSWORD
+        RELEASE_KEY_ALIAS=$KEY_ALIAS
+        RELEASE_KEY_PASSWORD=$KEY_PASSWORD
         EOF
 
     - name: Build Android APK (Release - Signed)
