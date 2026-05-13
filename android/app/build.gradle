@@ -29,15 +29,16 @@ android {
     }
 
     buildTypes {
+        debug {
+            // Debug builds use default debug signing
+            debuggable true
+        }
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
             if (signingConfigs.release.storeFile?.exists()) {
                 signingConfig signingConfigs.release
             }
-        }
-        debug {
-            // Debug builds don't need signing
         }
     }
 }
