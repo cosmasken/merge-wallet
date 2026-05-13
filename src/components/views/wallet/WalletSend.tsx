@@ -15,6 +15,7 @@ import { classifyError, InsufficientFundsError } from "@/kernel/evm/errors";
 import SecurityService, { AuthActions } from "@/kernel/app/SecurityService";
 import SlideToAction from "@/atoms/SlideToAction";
 import TransactionConfirmation from "@/components/composite/TransactionConfirmation";
+import LoadingSpinner from "@/atoms/LoadingSpinner";
 import { selectContacts, addContact, addPendingTransaction } from "@/redux/wallet";
 import { useDispatch } from "react-redux";
 import { useTranslation } from "@/translations";
@@ -392,7 +393,12 @@ export default function WalletSend() {
 
         <div className="mt-4">
           <SlideToAction
-            label={isSending ? t("wallet.send.sending") : t("wallet.send.review_button")}
+            label={isSending ? (
+              <div className="flex items-center gap-2">
+                <LoadingSpinner size="sm" color="white" />
+                <span>{t("wallet.send.sending")}</span>
+              </div>
+            ) : t("wallet.send.review_button")}
             onSlide={handleInitiateSend}
             disabled={!isConnected || !isValidAddress || !isValidAmount || isSending || isInsufficientFunds}
           />

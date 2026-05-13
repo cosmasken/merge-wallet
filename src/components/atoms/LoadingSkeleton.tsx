@@ -11,7 +11,8 @@ export default function LoadingSkeleton({
     width,
     height
 }: LoadingSkeletonProps) {
-    const baseClasses = "bg-neutral-200 dark:bg-neutral-700 animate-pulse";
+    const baseClasses = "relative overflow-hidden bg-neutral-200 dark:bg-neutral-800";
+    const shimmerOverlay = "after:absolute after:inset-0 after:shimmer";
 
     const variantClasses = {
         text: "rounded",
@@ -26,7 +27,7 @@ export default function LoadingSkeleton({
 
     return (
         <div
-            className={`${baseClasses} ${variantClasses[variant]} ${className}`}
+            className={`${baseClasses} ${variantClasses[variant]} ${shimmerOverlay} ${className}`}
             style={style}
         />
     );

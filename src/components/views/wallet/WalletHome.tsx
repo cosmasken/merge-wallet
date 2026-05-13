@@ -8,6 +8,7 @@ import Address from "@/atoms/Address";
 import WeiDisplay from "@/atoms/WeiDisplay";
 import FiatValue from "@/atoms/FiatValue";
 import PullToRefresh from "@/atoms/PullToRefresh";
+import LoadingSkeleton from "@/atoms/LoadingSkeleton";
 import SendIcon from "@/icons/SendIcon";
 import ReceiveIcon from "@/icons/ReceiveIcon";
 import HistoryIcon from "@/icons/HistoryIcon";
@@ -127,7 +128,7 @@ export default function WalletHome() {
         <div className="flex items-center justify-center gap-3">
           <div className="text-4xl font-bold font-display text-neutral-800 dark:text-neutral-100">
             {isLoading ? (
-              <div className="w-32 h-8 bg-neutral-200 dark:bg-neutral-800 rounded animate-pulse mx-auto" />
+              <LoadingSkeleton variant="text" className="w-32 h-8 mx-auto" />
             ) : (
               <WeiDisplay wei={BigInt(balance)} hideBalance={hideBalance} />
             )}
@@ -195,7 +196,7 @@ export default function WalletHome() {
             </div>
             <span className="font-mono text-sm">
               {isLoading ? (
-                <div className="w-16 h-4 bg-neutral-200 dark:bg-neutral-800 rounded animate-pulse" />
+                <LoadingSkeleton variant="text" className="w-16 h-4" />
               ) : (
                 <WeiDisplay wei={BigInt(balance)} hideBalance={hideBalance} />
               )}
