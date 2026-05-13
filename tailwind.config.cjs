@@ -8,9 +8,9 @@ module.exports = {
       md: "640px",
     },
     fontFamily: {
-      sans: ["Inter", "Archivo", "sans-serif"],
-      display: ["'Space Grotesk'", "sans-serif"],
-      mono: ['"Chivo Mono"', "monospace"],
+      sans: ["Inter", "system-ui", "sans-serif"],
+      display: ["'Space Grotesk'", "Inter", "system-ui", "sans-serif"],
+      mono: ["Inter", "monospace"],
     },
     colors: {
       transparent: "rgba(0,0,0,0)",

@@ -29,11 +29,11 @@
 @layer base {
   html {
     -webkit-tap-highlight-color: transparent;
-    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    font-family: 'Space Grotesk', 'Inter', system-ui, -apple-system, sans-serif;
   }
 
   body {
-    @apply bg-neutral-50 dark:bg-neutral-1000 text-neutral-800 dark:text-neutral-100 font-sans;
+    @apply bg-neutral-50 dark:bg-neutral-1000 text-neutral-800 dark:text-neutral-100 font-display;
     overscroll-behavior: none;
     -webkit-font-smoothing: antialiased;
   }
