@@ -2,10 +2,12 @@ import { useDispatch, useSelector } from "react-redux";
 
 import ViewHeader from "@/layout/ViewHeader";
 import { selectSecurityPreferences, updateSecuritySettings } from "@/redux/preferences";
+import { useTranslation } from "@/translations";
 
 export default function SecuritySettings() {
   const dispatch = useDispatch();
   const settings = useSelector(selectSecurityPreferences);
+  const { t } = useTranslation();
 
   const toggleSetting = (key: keyof typeof settings) => {
     dispatch(updateSecuritySettings({ [key]: !settings[key] }));
@@ -13,13 +15,13 @@ export default function SecuritySettings() {
 
   return (
     <div>
-      <ViewHeader title="Security" subtitle="Protect your wallet" showBack />
+      <ViewHeader title={t("security.settings.title")} subtitle={t("security.settings.subtitle")} showBack />
       <div className="flex flex-col px-4 gap-4">
         <div className="p-4 rounded-2xl bg-white dark:bg-neutral-800 shadow-sm border border-neutral-100 dark:border-neutral-700">
           <div className="flex items-center justify-between py-2">
             <div>
-              <p className="font-bold text-neutral-800 dark:text-neutral-100">App Lock</p>
-              <p className="text-xs text-neutral-500">Require PIN/Biometrics to open the app</p>
+              <p className="font-bold text-neutral-800 dark:text-neutral-100">{t("security.settings.app_lock")}</p>
+              <p className="text-xs text-neutral-500">{t("security.settings.app_lock_desc")}</p>
             </div>
             <label className="relative inline-flex items-center cursor-pointer">
               <input 
@@ -36,8 +38,8 @@ export default function SecuritySettings() {
           
           <div className="flex items-center justify-between py-2">
             <div>
-              <p className="font-bold text-neutral-800 dark:text-neutral-100">Transaction Security</p>
-              <p className="text-xs text-neutral-500">Always ask for PIN/Biometrics before sending</p>
+              <p className="font-bold text-neutral-800 dark:text-neutral-100">{t("security.settings.tx_lock")}</p>
+              <p className="text-xs text-neutral-500">{t("security.settings.tx_lock_desc")}</p>
             </div>
             <label className="relative inline-flex items-center cursor-pointer">
               <input 
@@ -54,8 +56,8 @@ export default function SecuritySettings() {
 
           <div className="flex items-center justify-between py-2">
             <div>
-              <p className="font-bold text-neutral-800 dark:text-neutral-100">Use Biometrics</p>
-              <p className="text-xs text-neutral-500">Use FaceID/TouchID if available</p>
+              <p className="font-bold text-neutral-800 dark:text-neutral-100">{t("security.settings.use_biometrics")}</p>
+              <p className="text-xs text-neutral-500">{t("security.settings.use_biometrics_desc")}</p>
             </div>
             <label className="relative inline-flex items-center cursor-pointer">
               <input 
@@ -71,7 +73,7 @@ export default function SecuritySettings() {
 
         <div className="p-4 rounded-2xl bg-warn-light/10 border border-warn-light/20">
           <p className="text-xs text-warn-dark font-medium leading-relaxed">
-            Note: Disabling security features makes it easier to use the app but increases the risk if your phone is stolen or accessed by others.
+            {t("security.settings.warning")}
           </p>
         </div>
       </div>

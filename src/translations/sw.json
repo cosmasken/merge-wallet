@@ -19,6 +19,30 @@
     "error": "Hitilafu",
     "success": "Imefanikiwa"
   },
+  "settings": {
+    "title": "Mipangilio",
+    "appearance": "Muonekano",
+    "appearance_desc": "Mapendeleo ya mandhari",
+    "theme_system": "Mfumo",
+    "theme_light": "Mwangaza",
+    "theme_dark": "Giza",
+    "hide_balance": "Ficha Salio",
+    "hide_balance_desc": "Ficha salio la pochi isionekane",
+    "section_security": "Usalama",
+    "section_security_desc": "PIN, biometriki, kurejesha",
+    "section_language": "Lugha",
+    "section_language_desc": "Badilisha lugha ya kuonyesha",
+    "section_contacts": "Kitabu cha Anwani",
+    "section_contacts_desc": "Dhibiti anwani zilizohifadhiwa",
+    "section_network": "Mtandao",
+    "section_network_desc": "Mainnet, testnet, RPC",
+    "section_currency": "Sarafu",
+    "section_currency_desc": "Sarafu ya kuonyesha, vitengo",
+    "section_import": "Ingiza Pochi",
+    "section_import_desc": "Rejesha kutoka kwa maneno ya kurejesha",
+    "section_about": "Kuhusu",
+    "section_about_desc": "Toleo, viungo"
+  },
   "wallet": {
     "home": {
       "backup_reminder": "Tafadhali hifadhi maneno yako ya kurejesha!",

@@ -19,6 +19,30 @@
     "error": "エラー",
     "success": "成功"
   },
+  "settings": {
+    "title": "設定",
+    "appearance": "外観",
+    "appearance_desc": "テーマの設定",
+    "theme_system": "システム",
+    "theme_light": "ライト",
+    "theme_dark": "ダーク",
+    "hide_balance": "残高を隠す",
+    "hide_balance_desc": "ウォレットの残高を表示しない",
+    "section_security": "セキュリティ",
+    "section_security_desc": "PIN、生体認証、復元",
+    "section_language": "言語",
+    "section_language_desc": "表示言語を変更する",
+    "section_contacts": "アドレス帳",
+    "section_contacts_desc": "保存されたアドレスを管理する",
+    "section_network": "ネットワーク",
+    "section_network_desc": "メインネット、テストネット、RPC",
+    "section_currency": "通貨",
+    "section_currency_desc": "表示通貨、単位",
+    "section_import": "ウォレットをインポート",
+    "section_import_desc": "リカバリーフレーズから復元",
+    "section_about": "このアプリについて",
+    "section_about_desc": "バージョン、リンク"
+  },
   "wallet": {
     "home": {
       "backup_reminder": "シードフレーズをバックアップしてください！",

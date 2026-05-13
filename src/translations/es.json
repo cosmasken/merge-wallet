@@ -19,6 +19,30 @@
     "error": "Error",
     "success": "Éxito"
   },
+  "settings": {
+    "title": "Ajustes",
+    "appearance": "Apariencia",
+    "appearance_desc": "Preferencia de tema",
+    "theme_system": "Sistema",
+    "theme_light": "Claro",
+    "theme_dark": "Oscuro",
+    "hide_balance": "Ocultar Saldo",
+    "hide_balance_desc": "Ocultar saldos de la billetera",
+    "section_security": "Seguridad",
+    "section_security_desc": "PIN, biométrico, recuperación",
+    "section_language": "Idioma",
+    "section_language_desc": "Cambiar idioma de visualización",
+    "section_contacts": "Libreta de Direcciones",
+    "section_contacts_desc": "Gestionar direcciones guardadas",
+    "section_network": "Red",
+    "section_network_desc": "Mainnet, testnet, RPC",
+    "section_currency": "Moneda",
+    "section_currency_desc": "Moneda de visualización, unidades",
+    "section_import": "Importar Billetera",
+    "section_import_desc": "Restaurar desde frase de recuperación",
+    "section_about": "Acerca de",
+    "section_about_desc": "Versión, enlaces"
+  },
   "wallet": {
     "home": {
       "backup_reminder": "¡Por favor, respalda tu frase semilla!",

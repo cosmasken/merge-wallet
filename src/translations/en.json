@@ -19,6 +19,30 @@
     "error": "Error",
     "success": "Success"
   },
+  "settings": {
+    "title": "Settings",
+    "appearance": "Appearance",
+    "appearance_desc": "Theme preference",
+    "theme_system": "System",
+    "theme_light": "Light",
+    "theme_dark": "Dark",
+    "hide_balance": "Hide Balance",
+    "hide_balance_desc": "Hide wallet balances from view",
+    "section_security": "Security",
+    "section_security_desc": "PIN, biometric, recovery",
+    "section_language": "Language",
+    "section_language_desc": "Change display language",
+    "section_contacts": "Address Book",
+    "section_contacts_desc": "Manage saved addresses",
+    "section_network": "Network",
+    "section_network_desc": "Mainnet, testnet, RPC",
+    "section_currency": "Currency",
+    "section_currency_desc": "Display currency, units",
+    "section_import": "Import Wallet",
+    "section_import_desc": "Restore from recovery phrase",
+    "section_about": "About",
+    "section_about_desc": "Version, links"
+  },
   "wallet": {
     "home": {
       "backup_reminder": "Please back up your seed phrase!",

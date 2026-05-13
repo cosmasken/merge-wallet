@@ -19,6 +19,30 @@
     "error": "Erro",
     "success": "Sucesso"
   },
+  "settings": {
+    "title": "Configurações",
+    "appearance": "Aparência",
+    "appearance_desc": "Preferência de tema",
+    "theme_system": "Sistema",
+    "theme_light": "Claro",
+    "theme_dark": "Escuro",
+    "hide_balance": "Ocultar Saldo",
+    "hide_balance_desc": "Ocultar saldos da carteira",
+    "section_security": "Segurança",
+    "section_security_desc": "PIN, biometria, recuperação",
+    "section_language": "Idioma",
+    "section_language_desc": "Alterar idioma de exibição",
+    "section_contacts": "Livro de Endereços",
+    "section_contacts_desc": "Gerenciar endereços salvos",
+    "section_network": "Rede",
+    "section_network_desc": "Mainnet, testnet, RPC",
+    "section_currency": "Moeda",
+    "section_currency_desc": "Moeda de exibição, unidades",
+    "section_import": "Importar Carteira",
+    "section_import_desc": "Restaurar a partir da frase de recuperação",
+    "section_about": "Sobre",
+    "section_about_desc": "Versão, links"
+  },
   "wallet": {
     "home": {
       "backup_reminder": "Por favor, faça backup da sua frase semente!",

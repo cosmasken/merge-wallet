@@ -3,37 +3,39 @@ import { useNavigate } from "react-router-dom";
 
 import ViewHeader from "@/layout/ViewHeader";
 import { selectThemeMode, selectShouldHideBalance, setTheme, toggleHideBalance, ThemeMode } from "@/redux/preferences";
-
-const sections = [
-  { title: "Security", path: "/settings/security", desc: "PIN, biometric, recovery" },
-  { title: "Language", path: "/settings/language", desc: "English, Spanish, Portuguese" },
-  { title: "Address Book", path: "/settings/contacts", desc: "Manage saved addresses" },
-  { title: "Network", path: "/settings/network", desc: "Mainnet, testnet, RPC" },
-  { title: "Currency", path: "/settings/currency", desc: "Display currency, units" },
-  { title: "Import Wallet", path: "/wallet/import", desc: "Restore from recovery phrase" },
-  { title: "About", path: "/settings/about", desc: "Version, links" },
-];
-
-const themes = [
-  { value: ThemeMode.System, label: "System" },
-  { value: ThemeMode.Light, label: "Light" },
-  { value: ThemeMode.Dark, label: "Dark" },
-] as const;
+import { useTranslation } from "@/translations";
 
 export default function SettingsView() {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const currentTheme = useSelector(selectThemeMode);
   const hideBalance = useSelector(selectShouldHideBalance);
+  const { t } = useTranslation();
+
+  const sections = [
+    { title: t("settings.section_security"), path: "/settings/security", desc: t("settings.section_security_desc") },
+    { title: t("settings.section_language"), path: "/settings/language", desc: t("settings.section_language_desc") },
+    { title: t("settings.section_contacts"), path: "/settings/contacts", desc: t("settings.section_contacts_desc") },
+    { title: t("settings.section_network"), path: "/settings/network", desc: t("settings.section_network_desc") },
+    { title: t("settings.section_currency"), path: "/settings/currency", desc: t("settings.section_currency_desc") },
+    { title: t("settings.section_import"), path: "/wallet/import", desc: t("settings.section_import_desc") },
+    { title: t("settings.section_about"), path: "/settings/about", desc: t("settings.section_about_desc") },
+  ];
+
+  const themes = [
+    { value: ThemeMode.System, label: t("settings.theme_system") },
+    { value: ThemeMode.Light, label: t("settings.theme_light") },
+    { value: ThemeMode.Dark, label: t("settings.theme_dark") },
+  ] as const;
 
   return (
     <div>
-      <ViewHeader title="Settings" />
+      <ViewHeader title={t("settings.title")} />
       <div className="flex flex-col px-4 gap-1">
         <div className="rounded-lg bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 overflow-hidden">
           <div className="p-4 border-b border-neutral-200 dark:border-neutral-700">
-            <div className="font-medium text-neutral-800 dark:text-neutral-100">Appearance</div>
-            <div className="text-xs text-neutral-500">Theme preference</div>
+            <div className="font-medium text-neutral-800 dark:text-neutral-100">{t("settings.appearance")}</div>
+            <div className="text-xs text-neutral-500">{t("settings.appearance_desc")}</div>
           </div>
           <div className="flex">
             {themes.map(({ value, label }, i) => (
@@ -58,8 +60,8 @@ export default function SettingsView() {
             className="flex items-center justify-between w-full p-4 text-left"
           >
             <div>
-              <div className="font-medium text-neutral-800 dark:text-neutral-100">Hide Balance</div>
-              <div className="text-xs text-neutral-500">Hide wallet balances from view</div>
+              <div className="font-medium text-neutral-800 dark:text-neutral-100">{t("settings.hide_balance")}</div>
+              <div className="text-xs text-neutral-500">{t("settings.hide_balance_desc")}</div>
             </div>
             <div className={`w-10 h-6 rounded-full transition-colors ${hideBalance ? "bg-primary" : "bg-neutral-300 dark:bg-neutral-600"} relative`}>
               <div className={`w-5 h-5 rounded-full bg-white absolute top-0.5 transition-transform ${hideBalance ? "translate-x-[18px]" : "translate-x-0.5"}`} />
@@ -71,7 +73,7 @@ export default function SettingsView() {
           <button
             key={path}
             onClick={() => navigate(path)}
-            className="flex items-center justify-between p-4 rounded-lg bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 text-left"
+            className="flex items-center justify-between p-4 rounded-lg bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 text-left mt-1"
           >
             <div>
               <div className="font-medium text-neutral-800 dark:text-neutral-100">{title}</div>

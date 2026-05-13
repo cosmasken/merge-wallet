@@ -19,6 +19,30 @@
     "error": "错误",
     "success": "成功"
   },
+  "settings": {
+    "title": "设置",
+    "appearance": "外观",
+    "appearance_desc": "主题偏好",
+    "theme_system": "系统",
+    "theme_light": "浅色",
+    "theme_dark": "深色",
+    "hide_balance": "隐藏余额",
+    "hide_balance_desc": "在视图中隐藏钱包余额",
+    "section_security": "安全",
+    "section_security_desc": "PIN，生物识别，恢复",
+    "section_language": "语言",
+    "section_language_desc": "更改显示语言",
+    "section_contacts": "通讯录",
+    "section_contacts_desc": "管理已保存的地址",
+    "section_network": "网络",
+    "section_network_desc": "主网，测试网，RPC",
+    "section_currency": "货币",
+    "section_currency_desc": "显示货币，单位",
+    "section_import": "导入钱包",
+    "section_import_desc": "从助记词恢复",
+    "section_about": "关于",
+    "section_about_desc": "版本，链接"
+  },
   "wallet": {
     "home": {
       "backup_reminder": "请备份您的助记词！",

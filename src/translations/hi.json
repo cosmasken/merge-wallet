@@ -19,6 +19,30 @@
     "error": "त्रुटि",
     "success": "सफल"
   },
+  "settings": {
+    "title": "सेटिंग्स",
+    "appearance": "दिखावट",
+    "appearance_desc": "थीम वरीयता",
+    "theme_system": "सिस्टम",
+    "theme_light": "लाइट",
+    "theme_dark": "डार्क",
+    "hide_balance": "शेष राशि छुपाएं",
+    "hide_balance_desc": "वॉलेट बैलेंस को व्यू से छुपाएं",
+    "section_security": "सुरक्षा",
+    "section_security_desc": "PIN, बायोमेट्रिक, रिकवरी",
+    "section_language": "भाषा",
+    "section_language_desc": "डिस्प्ले भाषा बदलें",
+    "section_contacts": "एड्रेस बुक",
+    "section_contacts_desc": "सहेजे गए पतों को प्रबंधित करें",
+    "section_network": "नेटवर्क",
+    "section_network_desc": "Mainnet, testnet, RPC",
+    "section_currency": "मुद्रा",
+    "section_currency_desc": "डिस्प्ले मुद्रा, इकाइयाँ",
+    "section_import": "वॉलेट आयात करें",
+    "section_import_desc": "रिकवरी फ्रेज़ से पुनर्स्थापित करें",
+    "section_about": "के बारे में",
+    "section_about_desc": "संस्करण, लिंक"
+  },
   "wallet": {
     "home": {
       "backup_reminder": "कृपया अपना सीड फ्रेज़ बैकअप करें!",

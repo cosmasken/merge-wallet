@@ -19,6 +19,30 @@
     "error": "Erreur",
     "success": "Succès"
   },
+  "settings": {
+    "title": "Paramètres",
+    "appearance": "Apparence",
+    "appearance_desc": "Préférence de thème",
+    "theme_system": "Système",
+    "theme_light": "Clair",
+    "theme_dark": "Sombre",
+    "hide_balance": "Masquer le solde",
+    "hide_balance_desc": "Masquer les soldes du portefeuille",
+    "section_security": "Sécurité",
+    "section_security_desc": "Code PIN, biométrie, récupération",
+    "section_language": "Langue",
+    "section_language_desc": "Changer la langue d'affichage",
+    "section_contacts": "Carnet d'adresses",
+    "section_contacts_desc": "Gérer les adresses enregistrées",
+    "section_network": "Réseau",
+    "section_network_desc": "Mainnet, testnet, RPC",
+    "section_currency": "Devise",
+    "section_currency_desc": "Devise d'affichage, unités",
+    "section_import": "Importer le portefeuille",
+    "section_import_desc": "Restaurer depuis la phrase de récupération",
+    "section_about": "À propos",
+    "section_about_desc": "Version, liens"
+  },
   "wallet": {
     "home": {
       "backup_reminder": "Veuillez sauvegarder votre phrase de récupération !",

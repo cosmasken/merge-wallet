@@ -19,6 +19,30 @@
     "error": "خطأ",
     "success": "نجح"
   },
+  "settings": {
+    "title": "الإعدادات",
+    "appearance": "المظهر",
+    "appearance_desc": "تفضيلات المظهر",
+    "theme_system": "النظام",
+    "theme_light": "فاتح",
+    "theme_dark": "داكن",
+    "hide_balance": "إخفاء الرصيد",
+    "hide_balance_desc": "إخفاء أرصدة المحفظة عن العرض",
+    "section_security": "الأمان",
+    "section_security_desc": "PIN ، بيومتري ، استرداد",
+    "section_language": "اللغة",
+    "section_language_desc": "تغيير لغة العرض",
+    "section_contacts": "دفتر العناوين",
+    "section_contacts_desc": "إدارة العناوين المحفوظة",
+    "section_network": "الشبكة",
+    "section_network_desc": "Mainnet ، testnet ، RPC",
+    "section_currency": "العملة",
+    "section_currency_desc": "عرض العملة ، الوحدات",
+    "section_import": "استيراد المحفظة",
+    "section_import_desc": "استعادة من عبارة الاسترداد",
+    "section_about": "حول",
+    "section_about_desc": "الإصدار ، الروابط"
+  },
   "wallet": {
     "home": {
       "backup_reminder": "يرجى نسخ عبارة الاسترداد احتياطيًا!",
