@@ -30,13 +30,14 @@ android {
 
     buildTypes {
         debug {
-            // Debug builds use default debug signing
             debuggable true
+            // No signing config for debug builds - use default debug keystore
         }
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
-            if (signingConfigs.release.storeFile?.exists()) {
+            // Only apply signing if properties are available (CI/CD)
+            if (project.hasProperty('android.injected.signing.store.file')) {
                 signingConfig signingConfigs.release
             }
         }
