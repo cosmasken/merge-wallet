@@ -3,14 +3,16 @@ import { Preferences } from "@capacitor/preferences";
 
 const STORAGE_KEY = "encrypted_mnemonic";
 
-export interface EncryptedMnemonic {
+export interface EncryptedWallet {
   encryptedData: string;
   storageMethod: 'keychain' | 'encrypted' | 'memory';
   createdAt: number;
   lastAccessed: number;
+  importType: 'mnemonic' | 'privateKey';
   index?: number;
   isRskPath?: boolean;
 }
+
 
 
 export default function SecureStorageService() {
@@ -18,16 +20,21 @@ export default function SecureStorageService() {
    * Encrypts and stores the mnemonic using the current active encryption key.
    * Assumes initialize() has been called and the key is in memory.
    */
-  async function storeMnemonic(mnemonic: string, index = 0, isRskPath = false): Promise<void> {
+  async function storeWallet(
+    data: string, 
+    importType: 'mnemonic' | 'privateKey',
+    index = 0, 
+    isRskPath = false
+  ): Promise<void> {
     try {
-      // Use the plugin's managed AES-256-GCM encryption
       const { data: encryptedValue } = await SimpleEncryption.encrypt({ 
-        data: mnemonic 
+        data 
       });
 
-      const storageData: EncryptedMnemonic = {
+      const storageData: EncryptedWallet = {
         encryptedData: encryptedValue,
         storageMethod: 'encrypted',
+        importType,
         createdAt: Date.now(),
         lastAccessed: Date.now(),
         index,
@@ -39,27 +46,27 @@ export default function SecureStorageService() {
         value: JSON.stringify(storageData)
       });
     } catch (error) {
-      console.error("Failed to store mnemonic securely", error);
-      throw new Error("SECURE_STORAGE_ERROR: Failed to encrypt and persist mnemonic");
+      console.error("Failed to store wallet securely", error);
+      throw new Error("SECURE_STORAGE_ERROR: Failed to encrypt and persist wallet");
     }
   }
+
 
   /**
    * Decrypts and retrieves the mnemonic using the current active encryption key.
    * Assumes initialize() has been called and the key is in memory.
    */
-  async function getMnemonic(): Promise<{ mnemonic: string; index: number; isRskPath: boolean } | null> {
+  async function getWallet(): Promise<{ data: string; importType: 'mnemonic' | 'privateKey'; index: number; isRskPath: boolean } | null> {
     const { value } = await Preferences.get({ key: STORAGE_KEY });
     if (!value) return null;
 
     try {
-      const storageData: EncryptedMnemonic = JSON.parse(value);
+      const storageData: EncryptedWallet = JSON.parse(value);
       
       const { data: decrypted } = await SimpleEncryption.decrypt({ 
         data: storageData.encryptedData 
       });
 
-      // Update last accessed metadata
       storageData.lastAccessed = Date.now();
       await Preferences.set({
         key: STORAGE_KEY,
@@ -67,15 +74,17 @@ export default function SecureStorageService() {
       });
 
       return {
-        mnemonic: decrypted,
+        data: decrypted,
+        importType: storageData.importType ?? 'mnemonic', // Default to mnemonic for backward compatibility
         index: storageData.index ?? 0,
         isRskPath: storageData.isRskPath ?? false
       };
     } catch (error) {
-      console.error("Failed to decrypt mnemonic", error);
+      console.error("Failed to decrypt wallet", error);
       return null;
     }
   }
+
 
   async function hasStoredMnemonic(): Promise<boolean> {
     const { value } = await Preferences.get({ key: STORAGE_KEY });
@@ -106,13 +115,13 @@ export default function SecureStorageService() {
   }
 
   return {
-    storeMnemonic,
-    getMnemonic,
-    hasStoredMnemonic,
-    rekeyMnemonic,
-    deleteMnemonic,
+    storeWallet,
+    getWallet,
+    hasStoredWallet: hasStoredMnemonic,
+    deleteWallet: deleteMnemonic,
     clearFromMemory
   };
+
 }
 
 

@@ -1,13 +1,14 @@
-import { generateMnemonic, mnemonicToAccount, english } from "viem/accounts"
-import type { HDAccount } from "viem/accounts"
+import { generateMnemonic, mnemonicToAccount, english, privateKeyToAccount } from "viem/accounts"
+import type { HDAccount, PrivateKeyAccount } from "viem/accounts"
 import SecureStorageService from "../app/SecureStorageService"
 import SecurityService, { AuthActions } from "../app/SecurityService"
 
 const ETH_DERIVATION_PATH = "m/44'/60'/0'/0/"
 const RSK_DERIVATION_PATH = "m/44'/137'/0'/0/"
 
-let currentAccount: HDAccount | null = null
+let currentAccount: HDAccount | PrivateKeyAccount | null = null
 let currentMnemonic: string | null = null
+let currentPrivateKey: string | null = null
 let currentIndex = 0
 let currentIsRskPath = false
 
@@ -44,12 +45,27 @@ export default function KeyManagerService() {
     const account = mnemonicToAccount(mnemonic, { path })
     currentAccount = account
     currentMnemonic = mnemonic
+    currentPrivateKey = null
     currentIndex = index
     currentIsRskPath = isRskPath
 
     return {
       address: account.address,
       index,
+    }
+  }
+
+  function importFromPrivateKey(privateKey: string) {
+    const formatted = (privateKey.startsWith("0x") ? privateKey : `0x${privateKey}`) as `0x${string}`
+    const account = privateKeyToAccount(formatted)
+    currentAccount = account
+    currentMnemonic = null
+    currentPrivateKey = formatted
+    currentIndex = 0
+    currentIsRskPath = false
+
+    return {
+      address: account.address,
     }
   }
 
@@ -61,6 +77,12 @@ export default function KeyManagerService() {
     return currentMnemonic
   }
 
+  function getImportType(): "mnemonic" | "privateKey" | null {
+    if (currentMnemonic) return "mnemonic"
+    if (currentPrivateKey) return "privateKey"
+    return null
+  }
+
   function isInitialized(): boolean {
     return currentAccount !== null
   }
@@ -69,22 +91,29 @@ export default function KeyManagerService() {
     currentMnemonic = null
   }
 
-  async function storeMnemonicSecurely(): Promise<void> {
-    if (!currentMnemonic) throw new Error("No mnemonic to store")
-    await secureStorage.storeMnemonic(currentMnemonic, currentIndex, currentIsRskPath)
+  async function storeWalletSecurely(): Promise<void> {
+    const importType = getImportType()
+    if (!importType) throw new Error("No wallet to store")
+    
+    const data = importType === "mnemonic" ? currentMnemonic! : currentPrivateKey!
+    await secureStorage.storeWallet(data, importType, currentIndex, currentIsRskPath)
   }
 
-  async function loadMnemonicSecurely(): Promise<void> {
-    const result = await secureStorage.getMnemonic()
+  async function loadWalletSecurely(): Promise<void> {
+    const result = await secureStorage.getWallet()
     if (result) {
-      importFromMnemonic(result.mnemonic, result.index, result.isRskPath)
+      if (result.importType === "mnemonic") {
+        importFromMnemonic(result.data, result.index, result.isRskPath)
+      } else {
+        importFromPrivateKey(result.data)
+      }
     } else {
-      throw new Error("Failed to load mnemonic from secure storage")
+      throw new Error("Failed to load wallet from secure storage")
     }
   }
 
-  async function isMnemonicStored(): Promise<boolean> {
-    return await secureStorage.hasStoredMnemonic()
+  async function isWalletStored(): Promise<boolean> {
+    return await secureStorage.hasStoredWallet()
   }
 
   async function signTransaction(
@@ -102,9 +131,8 @@ export default function KeyManagerService() {
       throw new Error("User not authorized to sign transaction")
     }
 
-    // If we need the mnemonic to recreate the account because it's not in memory
     if (!currentAccount) {
-      await loadMnemonicSecurely()
+      await loadWalletSecurely()
     }
 
     return signTransaction(tx)
@@ -113,15 +141,18 @@ export default function KeyManagerService() {
   return {
     generateWallet,
     importFromMnemonic,
+    importFromPrivateKey,
     getAddress,
     getMnemonic,
+    getImportType,
     clearMnemonic,
     signTransaction,
     signTransactionWithAuth,
     isInitialized,
-    storeMnemonicSecurely,
-    loadMnemonicSecurely,
-    isMnemonicStored,
+    storeWalletSecurely,
+    loadWalletSecurely,
+    isWalletStored,
   }
 }
+
 

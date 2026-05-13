@@ -92,16 +92,16 @@ export default function AppProvider({ children }: AppProviderProps) {
       
       // If not initialized in memory, try to load from secure storage
       if (!KeyManager.isInitialized()) {
-        const isStored = await KeyManager.isMnemonicStored();
+        const isStored = await KeyManager.isWalletStored();
         if (isStored) {
           try {
-            await KeyManager.loadMnemonicSecurely();
+            await KeyManager.loadWalletSecurely();
           } catch (e) {
-            console.error("Failed to load mnemonic from secure storage", e);
-            // We don't fail boot here, user might need to re-import or it's a fresh app
+            console.error("Failed to load wallet from secure storage", e);
           }
         }
       }
+
 
       if (KeyManager.isInitialized()) {
         dispatch(setWalletAddress(KeyManager.getAddress()));
