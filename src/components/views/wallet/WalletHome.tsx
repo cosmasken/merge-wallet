@@ -18,7 +18,7 @@ import AddTokenModal from "@/components/composite/AddTokenModal";
 import { selectIsConnected } from "@/redux/device";
 import BalanceService from "@/kernel/evm/BalanceService";
 import TokenManagerService, { getTokenList } from "@/kernel/evm/TokenManagerService";
-import type { TokenBalance } from "@/kernel/evm/TokenManagerService";
+import type { TokenBalance, TokenInfo } from "@/kernel/evm/TokenManagerService";
 import { useTranslation } from "@/translations";
 
 export default function WalletHome() {
@@ -63,7 +63,12 @@ export default function WalletHome() {
 
   useEffect(function fetchTokens() {
     if (!address) return;
-    const allTokens = [...getTokenList(network), ...trackedTokens.filter(t => t.network === network)];
+    const allTokens: TokenInfo[] = [...getTokenList(network), ...trackedTokens.filter(t => t.network === network).map(t => ({
+      address: t.address as `0x${string}`,
+      symbol: t.symbol,
+      decimals: t.decimals,
+      network: t.network
+    }))];
     TokenManagerService(network)
       .getAllTokenBalances(address as `0x${string}`, allTokens)
       .then(setTokens);
@@ -73,7 +78,12 @@ export default function WalletHome() {
     if (!address) return;
     setIsLoading(true);
     const Balance = BalanceService(network);
-    const allTokens = [...getTokenList(network), ...trackedTokens.filter(t => t.network === network)];
+    const allTokens: TokenInfo[] = [...getTokenList(network), ...trackedTokens.filter(t => t.network === network).map(t => ({
+      address: t.address as `0x${string}`,
+      symbol: t.symbol,
+      decimals: t.decimals,
+      network: t.network
+    }))];
 
     const [b, t] = await Promise.all([
       Balance.getBalance(address as `0x${string}`),

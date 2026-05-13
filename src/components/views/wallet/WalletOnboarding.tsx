@@ -23,7 +23,7 @@ export default function WalletOnboarding() {
     setCreating(true);
     const KeyManager = KeyManagerService();
     const { address } = KeyManager.generateWallet();
-    await KeyManager.storeMnemonicSecurely();
+    await KeyManager.storeWalletSecurely();
     dispatch(setWalletAddress(address));
     dispatch(setSeedBackedUp(false));
     navigate("/wallet/backup", { replace: true });

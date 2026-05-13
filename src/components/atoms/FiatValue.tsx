@@ -6,6 +6,7 @@ import { selectLocalCurrency, selectRbtcPrice } from "@/redux/preferences";
 interface FiatValueProps {
   wei?: bigint | string;
   value?: bigint | string;
+  decimals?: number;
   className?: string;
   fallbackClassName?: string;
 }
@@ -13,6 +14,7 @@ interface FiatValueProps {
 export default function FiatValue({
   wei,
   value,
+  decimals = 18,
   className,
   fallbackClassName,
 }: FiatValueProps) {

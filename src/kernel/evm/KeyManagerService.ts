@@ -16,16 +16,16 @@ export default function KeyManagerService() {
   const secureStorage = SecureStorageService()
   const security = SecurityService()
 
-  function getAccount(): HDAccount {
+  function getAccount(): HDAccount | PrivateKeyAccount {
     if (!currentAccount) {
       throw new Error("Wallet not initialized. Please load or generate a wallet first.")
     }
-    return currentAccount!
+    return currentAccount
   }
 
   function generateWallet(index = 0, isRskPath = false) {
     const mnemonic = generateMnemonic(english, 128)
-    const path = (isRskPath ? RSK_DERIVATION_PATH : ETH_DERIVATION_PATH) + index
+    const path = `${isRskPath ? RSK_DERIVATION_PATH : ETH_DERIVATION_PATH}${index}` as `m/44'/60'/${string}`
     const account = mnemonicToAccount(mnemonic, { path })
     
     currentAccount = account
@@ -41,7 +41,7 @@ export default function KeyManagerService() {
   }
 
   function importFromMnemonic(mnemonic: string, index = 0, isRskPath = false) {
-    const path = (isRskPath ? RSK_DERIVATION_PATH : ETH_DERIVATION_PATH) + index
+    const path = `${isRskPath ? RSK_DERIVATION_PATH : ETH_DERIVATION_PATH}${index}` as `m/44'/60'/${string}`
     const account = mnemonicToAccount(mnemonic, { path })
     currentAccount = account
     currentMnemonic = mnemonic
