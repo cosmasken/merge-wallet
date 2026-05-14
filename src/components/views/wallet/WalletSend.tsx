@@ -141,6 +141,11 @@ export default function WalletSend() {
   };
 
   const handleSend = async () => {
+    // Prevent multiple simultaneous transactions
+    if (isSending) {
+      return;
+    }
+    
     const authorized = await SecurityService().authorize(AuthActions.SendTransaction);
     if (!authorized) {
       NotificationService().error(t("wallet.send.authorization_required"));
@@ -151,6 +156,7 @@ export default function WalletSend() {
     setIsSending(true);
     setIsConfirming(false);
     setError("");
+    
     try {
       const txManager = TransactionManagerService(network);
 

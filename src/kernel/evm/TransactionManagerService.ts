@@ -1,6 +1,7 @@
 import { type Hash, type TransactionReceipt, parseEther } from "viem"
 import { getPublicClient } from "@/kernel/evm/ClientService"
 import KeyManagerService from "@/kernel/evm/KeyManagerService"
+import NonceManager from "@/kernel/evm/NonceManager"
 import type { ValidNetwork } from "@/redux/preferences"
 import { classifyError } from "@/kernel/evm/errors"
 
@@ -27,12 +28,16 @@ export default function TransactionManagerService(network?: ValidNetwork) {
     try {
       const publicClient = getPublicClient(network)
       const from = KeyManagerService().getAddress()
-      const [chainId, nonce, gasPrice] = await Promise.all([
+      const [chainId, gasPrice] = await Promise.all([
         publicClient.getChainId(),
-        publicClient.getTransactionCount({ address: from }),
-        gas ? Promise.resolve(undefined) : publicClient.getGasPrice(),
+        publicClient.getGasPrice(), // Always get gasPrice
       ])
-
+      
+      // Use nonce manager to prevent stale nonce issues
+      const nonce = await NonceManager.getNonce(from, network)
+      
+      console.log(`[Transaction] Sending with nonce ${nonce} to ${to}`)
+      
       const signedTx = await KeyManagerService().signTransaction({
         to,
         value,
@@ -50,6 +55,10 @@ export default function TransactionManagerService(network?: ValidNetwork) {
 
       return { hash, receipt: null }
     } catch (e) {
+      console.error('[Transaction] Failed:', e)
+      // Reset nonce on failure to resync with network
+      const from = KeyManagerService().getAddress()
+      await NonceManager.resetNonce(from, network)
       throw classifyError(e)
     }
   }
