@@ -18,4 +18,6 @@ android/app/release-key.keystore
 android/app/release/
 
 PROPOSAL.md
+merge-wallet-introduction.md
+intro.md
 .kiro

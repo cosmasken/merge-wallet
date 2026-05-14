@@ -1,6 +1,37 @@
 # Merge Wallet: Your key to Rootstock
 
+![Merge Wallet Banner](screenshots/playstore/banner.png)
+
 Self-custodial Rootstock (RSK) RBTC mobile wallet built with React 19, Vite 6, and Capacitor 8.
+
+## Features
+
+### Wallet Management
+![Wallet](screenshots/playstore/wallet.png)
+
+- Self-custodial RBTC storage with BIP39/BIP44 key derivation
+- Real-time balance display and transaction history
+- Send/receive RBTC with QR code support
+
+### Import & Security
+![Import](screenshots/playstore/import.png)
+
+- Import existing wallets via seed phrase
+- AES-256-GCM encryption with PIN/biometric authentication
+- Secure key storage with no plain text private keys
+
+### Settings & Customization
+![Settings](screenshots/playstore/settings_merge.png)
+
+- Network switching (Mainnet/Testnet)
+- Contact management for easy transactions
+- Customizable security preferences
+
+### Multi-Language Support
+![Language](screenshots/playstore/language.png)
+
+- Multiple language options
+- Localized interface for global users
 
 ## Tech Stack
 
