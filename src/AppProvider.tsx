@@ -6,11 +6,13 @@ import { SplashScreen } from "@capacitor/splash-screen";
 import AppLockScreen from "@/views/security/AppLockScreen";
 import ErrorBoundary from "@/layout/ErrorBoundary";
 import KeyManagerService from "@/kernel/evm/KeyManagerService";
-import SecurityService from "@/kernel/app/SecurityService";
+import SecurityService, { AuthActions } from "@/kernel/app/SecurityService";
+import { ModalProvider } from "@/kernel/app/ModalService";
 import { setWalletAddress, setSeedBackedUp, hydrateWallet } from "@/redux/wallet";
-import { hydratePreferences, selectLanguageCode } from "@/redux/preferences";
+import { hydratePreferences, selectLanguageCode, selectSecuritySettings } from "@/redux/preferences";
 import { setConnected } from "@/redux/device";
 import { loadState } from "@/redux/persistence";
+import { store } from "@/redux/store";
 import TransactionTracker from "./components/composite/TransactionTracker";
 
 type Phase = "PREFLIGHT" | "LOCKED" | "RUNNING" | "PAUSED" | "STARTUP_ERROR";
@@ -58,8 +60,9 @@ export default function AppProvider({ children }: AppProviderProps) {
 
       const Security = SecurityService();
       const result = await Security.initEncryption();
+      const { authMode } = selectSecuritySettings(store.getState());
 
-      if (result.hasPinConfigured) {
+      if (result.hasPinConfigured && authMode !== "none") {
         go("LOCKED");
       } else {
         boot();
@@ -69,7 +72,10 @@ export default function AppProvider({ children }: AppProviderProps) {
     coldStart();
 
     async function handlePause() {
-      if (phaseRef.current === "RUNNING") {
+      if (phaseRef.current !== "RUNNING") return;
+      const { authMode, authActions } = selectSecuritySettings(store.getState());
+      const shouldLock = authMode !== "none" && authActions.includes(AuthActions.AppResume);
+      if (shouldLock) {
         await SecurityService().clearKeyFromMemory();
         go("PAUSED");
       }
@@ -81,8 +87,13 @@ export default function AppProvider({ children }: AppProviderProps) {
       }
     }
 
-    App.addListener("pause", handlePause);
-    App.addListener("resume", handleResume);
+    App.addListener("appStateChange", ({ isActive }) => {
+      if (!isActive) {
+        handlePause();
+      } else {
+        handleResume();
+      }
+    });
 
     window.addEventListener("online", () => dispatch(setConnected(true)));
     window.addEventListener("offline", () => dispatch(setConnected(false)));
@@ -148,6 +159,7 @@ export default function AppProvider({ children }: AppProviderProps) {
     <div id="container">
       {content}
       {phase === "RUNNING" && <TransactionTracker />}
+      <ModalProvider />
     </div>
   );
 }

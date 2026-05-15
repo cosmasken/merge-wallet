@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { MemoryRouter, Route, Routes, useNavigate } from "react-router";
 
 import MergeLogo from "@/atoms/MergeLogo";
@@ -10,6 +10,17 @@ function LockScreen({ boot }: { boot: () => void }) {
   const [pin, setPin] = useState("");
   const [error, setError] = useState("");
   const [isVerifying, setIsVerifying] = useState(false);
+  const [isReady, setIsReady] = useState(false);
+
+  useEffect(function checkPinConfig() {
+    if (!SecurityService().isPinConfigured()) {
+      boot();
+    } else {
+      setIsReady(true);
+    }
+  }, [boot]);
+
+  if (!isReady) return null;
 
   const handleDigit = async (digit: string) => {
     if (isVerifying) return;
