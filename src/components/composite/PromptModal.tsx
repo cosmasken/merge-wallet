@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { Keyboard } from "@capacitor/keyboard";
 
 interface PromptModalProps {
   title?: string;
@@ -24,6 +25,18 @@ export default function PromptModal({
   onCancel,
 }: PromptModalProps) {
   const [value, setValue] = useState("");
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(function openKeyboard() {
+    const el = inputRef.current;
+    if (!el) return;
+    el.focus();
+    try {
+      Keyboard.show();
+    } catch {
+      // web fallback — focus already requested above
+    }
+  }, []);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -46,10 +59,10 @@ export default function PromptModal({
         )}
         <form onSubmit={handleSubmit}>
           <input
+            ref={inputRef}
             type={inputType}
             inputMode={inputMode}
             value={value}
-            autoFocus
             onChange={(e) => setValue(e.target.value)}
             placeholder={placeholder}
             className="mb-4 w-full rounded-lg border border-neutral-300 bg-neutral-50 p-3 text-center text-xl tracking-widest text-neutral-900 dark:border-neutral-600 dark:bg-neutral-700 dark:text-neutral-100"

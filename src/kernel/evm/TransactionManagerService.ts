@@ -3,7 +3,7 @@ import { getPublicClient } from "@/kernel/evm/ClientService"
 import KeyManagerService from "@/kernel/evm/KeyManagerService"
 import NonceManager from "@/kernel/evm/NonceManager"
 import type { ValidNetwork } from "@/redux/preferences"
-import { classifyError } from "@/kernel/evm/errors"
+import { classifyError, NonceTooLowError } from "@/kernel/evm/errors"
 
 export interface SendResult {
   hash: Hash
@@ -30,21 +30,24 @@ export default function TransactionManagerService(network?: ValidNetwork) {
       const from = KeyManagerService().getAddress()
       const [chainId, gasPrice] = await Promise.all([
         publicClient.getChainId(),
-        publicClient.getGasPrice(), // Always get gasPrice
+        publicClient.getGasPrice(),
       ])
-      
+
+      // Estimate gas if not explicitly provided (contracts need more than 21k)
+      const gasEstimate = gas ?? await publicClient.estimateGas({ to, value, data, account: from })
+
       // Use nonce manager to prevent stale nonce issues
       const nonce = await NonceManager.getNonce(from, network)
-      
+
       console.log(`[Transaction] Sending with nonce ${nonce} to ${to}`)
-      
+
       const signedTx = await KeyManagerService().signTransaction({
         to,
         value,
         data,
         chainId,
         nonce,
-        gas,
+        gas: gasEstimate,
         gasPrice,
         from,
       })
@@ -56,10 +59,15 @@ export default function TransactionManagerService(network?: ValidNetwork) {
       return { hash, receipt: null }
     } catch (e) {
       console.error('[Transaction] Failed:', e)
-      // Reset nonce on failure to resync with network
-      const from = KeyManagerService().getAddress()
-      await NonceManager.resetNonce(from, network)
-      throw classifyError(e)
+      const err = classifyError(e)
+      // Only reset nonce on nonce-related failures (nonce too low, already known).
+      // Network timeouts, insufficient funds, etc. should NOT reset nonce,
+      // since the original tx may have been accepted.
+      if (err instanceof NonceTooLowError) {
+        const from = KeyManagerService().getAddress()
+        await NonceManager.resetNonce(from, network)
+      }
+      throw err
     }
   }
 
