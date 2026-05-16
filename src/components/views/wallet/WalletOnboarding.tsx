@@ -3,9 +3,15 @@ import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 
 import KeyManagerService from "@/kernel/evm/KeyManagerService";
+import SecureStorageService from "@/kernel/app/SecureStorageService";
 import NotificationService from "@/kernel/app/NotificationService";
-import { setWalletAddress, setSeedBackedUp, selectWalletAddress } from "@/redux/wallet";
+import { setWalletAddress, setSeedBackedUp, selectWalletAddress, addWallet, setActiveWallet } from "@/redux/wallet";
 import { clearState } from "@/redux/persistence";
+import type { WalletIndexEntry } from "@/kernel/app/SecureStorageService";
+
+function generateId(): string {
+  return crypto.randomUUID();
+}
 
 export default function WalletOnboarding() {
   const navigate = useNavigate();
@@ -15,7 +21,6 @@ export default function WalletOnboarding() {
 
   useEffect(() => {
     if (existingAddress && !KeyManagerService().isInitialized()) {
-      // Stale persisted state without seed — clear it
       clearState();
     }
   }, [existingAddress]);
@@ -24,8 +29,20 @@ export default function WalletOnboarding() {
     setCreating(true);
     try {
       const KeyManager = KeyManagerService();
+      const id = generateId();
+      KeyManager.setActiveWalletId(id);
       const { address } = KeyManager.generateWallet();
       await KeyManager.storeWalletSecurely();
+      const walletMeta: WalletIndexEntry = {
+        id,
+        name: `Wallet ${(await SecureStorageService().listWallets()).length + 1}`,
+        address,
+        createdAt: Date.now(),
+        importType: "mnemonic",
+      };
+      await SecureStorageService().saveWalletIndex([...(await SecureStorageService().listWallets()), walletMeta]);
+      dispatch(addWallet({ id, name: walletMeta.name, address, createdAt: walletMeta.createdAt }));
+      dispatch(setActiveWallet(id));
       dispatch(setWalletAddress(address));
       dispatch(setSeedBackedUp(false));
       NotificationService().success("Wallet created successfully!");

@@ -5,6 +5,7 @@ import WalletHistory from "@/views/wallet/WalletHistory";
 import WalletImport from "@/views/wallet/WalletImport";
 import SeedBackup from "@/views/wallet/SeedBackup";
 import TokenDetailView from "@/views/wallet/TokenDetailView";
+import WalletManager from "@/views/settings/WalletManager";
 
 export const routeWallet = [
   {
@@ -33,6 +34,10 @@ export const routeWallet = [
       {
         path: "token/:symbol",
         element: <TokenDetailView />,
+      },
+      {
+        path: "manage",
+        element: <WalletManager />,
       },
     ],
   },

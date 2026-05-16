@@ -2,7 +2,16 @@ import { createAction, createReducer, createSelector } from "@reduxjs/toolkit";
 
 import type { RootState } from "./store";
 
+export interface WalletMeta {
+  id: string;
+  name: string;
+  address: string;
+  createdAt: number;
+}
+
 interface WalletState {
+  wallets: WalletMeta[];
+  activeWalletId: string | null;
   address: string;
   balance: string;
   name: string;
@@ -30,6 +39,8 @@ interface WalletState {
 }
 
 const initialState: WalletState = {
+  wallets: [],
+  activeWalletId: null,
   address: "",
   balance: "0",
   name: "My Wallet",
@@ -53,6 +64,12 @@ export const removeContact = createAction<string>("wallet/removeContact");
 export const addPendingTransaction = createAction<{ hash: string; type: "send" | "receive" | "contract"; amount: string; symbol: string; chainId: number }>("wallet/addPendingTransaction");
 export const updatePendingTransaction = createAction<{ hash: string; status: "success" | "failed" }>("wallet/updatePendingTransaction");
 export const hydrateWallet = createAction<Partial<WalletState>>("wallet/hydrate");
+
+// Multi-wallet actions
+export const addWallet = createAction<WalletMeta>("wallet/addWallet");
+export const removeWalletById = createAction<string>("wallet/removeWallet");
+export const renameWallet = createAction<{ id: string; name: string }>("wallet/renameWallet");
+export const setActiveWallet = createAction<string | null>("wallet/setActiveWallet");
 
 export const walletReducer = createReducer(initialState, (builder) => {
   builder
@@ -117,7 +134,26 @@ export const walletReducer = createReducer(initialState, (builder) => {
     .addCase(hydrateWallet, (_state, action) => ({
       ...initialState,
       ...action.payload,
-    }));
+    }))
+    // Multi-wallet
+    .addCase(addWallet, (state, action) => {
+      if (!state.wallets.some(w => w.id === action.payload.id)) {
+        state.wallets.push(action.payload);
+      }
+    })
+    .addCase(removeWalletById, (state, action) => {
+      state.wallets = state.wallets.filter(w => w.id !== action.payload);
+      if (state.activeWalletId === action.payload) {
+        state.activeWalletId = state.wallets[0]?.id ?? null;
+      }
+    })
+    .addCase(renameWallet, (state, action) => {
+      const w = state.wallets.find(w => w.id === action.payload.id);
+      if (w) w.name = action.payload.name;
+    })
+    .addCase(setActiveWallet, (state, action) => {
+      state.activeWalletId = action.payload;
+    });
 });
 
 export const selectWallet = (state: RootState) => state.wallet;
@@ -160,4 +196,19 @@ export const selectContacts = createSelector(
 export const selectPendingTransactions = createSelector(
   selectWallet,
   (wallet) => wallet.pendingTransactions,
+);
+
+export const selectWallets = createSelector(
+  selectWallet,
+  (wallet) => wallet.wallets,
+);
+
+export const selectActiveWalletId = createSelector(
+  selectWallet,
+  (wallet) => wallet.activeWalletId,
+);
+
+export const selectActiveWallet = createSelector(
+  [selectWallets, selectActiveWalletId],
+  (wallets, id) => wallets.find(w => w.id === id) ?? null,
 );

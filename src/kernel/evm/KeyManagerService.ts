@@ -11,6 +11,7 @@ let currentMnemonic: string | null = null
 let currentPrivateKey: string | null = null
 let currentIndex = 0
 let currentIsRskPath = false
+let activeWalletId: string | null = null
 
 export default function KeyManagerService() {
   const secureStorage = SecureStorageService()
@@ -94,22 +95,37 @@ export default function KeyManagerService() {
   async function storeWalletSecurely(): Promise<void> {
     const importType = getImportType()
     if (!importType) throw new Error("No wallet to store")
+    if (!activeWalletId) throw new Error("No active wallet ID set")
     
     const data = importType === "mnemonic" ? currentMnemonic! : currentPrivateKey!
-    await secureStorage.storeWallet(data, importType, currentIndex, currentIsRskPath)
+    await secureStorage.storeWallet(activeWalletId, data, importType, currentIndex, currentIsRskPath)
   }
 
   async function loadWalletSecurely(): Promise<void> {
-    const result = await secureStorage.getWallet()
-    if (result) {
-      if (result.importType === "mnemonic") {
-        importFromMnemonic(result.data, result.index, result.isRskPath)
-      } else {
-        importFromPrivateKey(result.data)
+    if (activeWalletId) {
+      const result = await secureStorage.getWallet(activeWalletId)
+      if (result) {
+        if (result.importType === "mnemonic") {
+          importFromMnemonic(result.data, result.index, result.isRskPath)
+        } else {
+          importFromPrivateKey(result.data)
+        }
+        return
       }
-    } else {
-      throw new Error("Failed to load wallet from secure storage")
     }
+    throw new Error("Failed to load wallet from secure storage")
+  }
+
+  async function loadWalletById(id: string): Promise<boolean> {
+    const result = await secureStorage.getWallet(id)
+    if (!result) return false
+    if (result.importType === "mnemonic") {
+      importFromMnemonic(result.data, result.index, result.isRskPath)
+    } else {
+      importFromPrivateKey(result.data)
+    }
+    activeWalletId = id
+    return true
   }
 
   async function isWalletStored(): Promise<boolean> {
@@ -131,8 +147,8 @@ export default function KeyManagerService() {
       throw new Error("User not authorized to sign transaction")
     }
 
-    if (!currentAccount) {
-      await loadWalletSecurely()
+    if (!currentAccount && activeWalletId) {
+      await loadWalletById(activeWalletId)
     }
 
     return signTransaction(tx)
@@ -151,7 +167,10 @@ export default function KeyManagerService() {
     isInitialized,
     storeWalletSecurely,
     loadWalletSecurely,
+    loadWalletById,
     isWalletStored,
+    getActiveWalletId: () => activeWalletId,
+    setActiveWalletId: (id: string | null) => { activeWalletId = id },
   }
 }
 
