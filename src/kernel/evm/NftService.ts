@@ -1,6 +1,5 @@
 import { erc721Abi } from "viem";
 import { getPublicClient } from "@/kernel/evm/ClientService";
-import type { ValidNetwork } from "@/redux/preferences";
 
 export interface NftInfo {
   address: `0x${string}`;
@@ -19,8 +18,8 @@ const KNOWN_NFTS: Record<string, { tokenIds: bigint[] }> = {
   "0x7b21bb17211c1b55ddcab1fbfb44a0b2b1a23077": { tokenIds: [12n] },
 };
 
-export default function NftService(network?: ValidNetwork) {
-  const publicClient = getPublicClient(network);
+export default function NftService(chainId?: number) {
+  const publicClient = getPublicClient(chainId);
 
   async function getNftBalance(
     contractAddress: `0x${string}`,
@@ -87,7 +86,6 @@ export default function NftService(network?: ValidNetwork) {
               args: [tokenId],
             }) as string;
           } catch {
-            // tokenURI may not exist
           }
 
           return { contractAddress, tokenId, tokenURI };

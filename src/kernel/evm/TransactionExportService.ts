@@ -1,18 +1,17 @@
 import { formatEther } from "viem";
 
 import TransactionHistoryService from "@/kernel/evm/TransactionHistoryService";
-import type { ValidNetwork } from "@/redux/preferences";
 
-export default function TransactionExportService(network?: ValidNetwork) {
+export default function TransactionExportService(chainId?: number) {
   async function exportCsv(address: `0x${string}`): Promise<void> {
-    const history = TransactionHistoryService(network);
+    const history = TransactionHistoryService(chainId);
     const txs = await history.getHistory(address);
 
     if (txs.length === 0) {
       throw new Error("No transactions to export");
     }
 
-    const headers = ["Date", "Transaction ID", "From", "To", "Value (RBTC)", "Status"];
+    const headers = ["Date", "Transaction ID", "From", "To", "Value", "Status"];
     const rows = txs.map((tx) => {
       const isOutgoing = tx.from.toLowerCase() === address.toLowerCase();
       const value = formatEther(tx.value);

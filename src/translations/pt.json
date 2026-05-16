@@ -38,6 +38,8 @@
     "section_network_desc": "Mainnet, testnet, RPC",
     "section_currency": "Moeda",
     "section_currency_desc": "Moeda de exibição, unidades",
+    "section_governance": "Governança",
+    "section_governance_desc": "Participar no Rootstock Collective",
     "section_import": "Importar Carteira",
     "section_import_desc": "Restaurar a partir da frase de recuperação",
     "section_about": "Sobre",

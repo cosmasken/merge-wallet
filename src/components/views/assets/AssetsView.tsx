@@ -10,9 +10,10 @@ import Button from "@/atoms/Button";
 import { TokenSkeleton } from "@/atoms/LoadingSkeleton";
 import ErrorState from "@/atoms/ErrorState";
 import { selectWalletAddress, selectWalletBalance, addTrackedNft, removeTrackedNft, selectTrackedNfts } from "@/redux/wallet";
-import { selectNetwork } from "@/redux/preferences";
+import { selectChainId } from "@/redux/preferences";
 import TokenManagerService, { getTokenList } from "@/kernel/evm/TokenManagerService";
 import type { TokenBalance } from "@/kernel/evm/TokenManagerService";
+import { getNativeCurrency } from "@/chains";
 import NftService from "@/kernel/evm/NftService";
 import type { NftInfo } from "@/kernel/evm/NftService";
 
@@ -22,7 +23,7 @@ export default function AssetsView() {
   const dispatch = useDispatch();
   const address = useSelector(selectWalletAddress);
   const balance = useSelector(selectWalletBalance);
-  const network = useSelector(selectNetwork);
+  const chainId = useSelector(selectChainId);
   const trackedNfts = useSelector(selectTrackedNfts);
   const [activeTab, setActiveTab] = useState<Tab>("tokens");
   const [tokens, setTokens] = useState<TokenBalance[]>([]);
@@ -33,18 +34,19 @@ export default function AssetsView() {
   const [importAddress, setImportAddress] = useState("");
   const [importError, setImportError] = useState("");
   const [importing, setImporting] = useState(false);
+  const nativeCurrency = getNativeCurrency(chainId);
 
   useEffect(function fetchTokens() {
     if (!address) return;
 
     setIsLoading(true);
     setError(null);
-    TokenManagerService(network)
-      .getAllTokenBalances(address as `0x${string}`, getTokenList(network))
+    TokenManagerService(chainId)
+      .getAllTokenBalances(address as `0x${string}`, getTokenList(chainId))
       .then(setTokens)
       .catch(() => setError("Failed to load token balances"))
       .finally(() => setIsLoading(false));
-  }, [address, network]);
+  }, [address, chainId]);
 
   useEffect(function fetchNfts() {
     if (!address || trackedNfts.length === 0) {
@@ -66,7 +68,7 @@ export default function AssetsView() {
     setError(null);
     try {
       const [t, n] = await Promise.all([
-        TokenManagerService(network).getAllTokenBalances(address as `0x${string}`, getTokenList(network)),
+        TokenManagerService(chainId).getAllTokenBalances(address as `0x${string}`, getTokenList(chainId)),
         trackedNfts.length > 0
           ? NftService().getNftBalances(address as `0x${string}`, trackedNfts as `0x${string}`[])
           : Promise.resolve([] as NftInfo[]),
@@ -77,7 +79,7 @@ export default function AssetsView() {
       setError("Failed to refresh data");
     }
     setIsLoading(false);
-  }, [address, network, trackedNfts]);
+  }, [address, chainId, trackedNfts]);
 
   const handleImport = useCallback(async () => {
     const trimmed = importAddress.trim();
@@ -139,15 +141,15 @@ export default function AssetsView() {
           <div className="flex flex-col px-4 pt-4 gap-2">
             <div className="flex items-center justify-between p-3 rounded-lg bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700">
               <div className="flex items-center gap-3">
-                <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center text-white text-xs font-bold">RBTC</div>
+                <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center text-white text-xs font-bold">{nativeCurrency.symbol}</div>
                 <div>
-                  <div className="font-medium text-sm">Rootstock RBTC</div>
+                  <div className="font-medium text-sm">{nativeCurrency.name}</div>
                   <div className="text-xs text-neutral-500">Native</div>
                   <FiatValue value={BigInt(balance)} className="text-xs text-neutral-400" />
                 </div>
               </div>
               <div className="font-mono text-sm">
-                <WeiDisplay value={BigInt(balance)} />
+                <WeiDisplay value={BigInt(balance)} symbol={nativeCurrency.symbol} />
               </div>
             </div>
 
@@ -183,7 +185,7 @@ export default function AssetsView() {
                     </div>
                   </div>
                   <div className="font-mono text-sm">
-                    <WeiDisplay value={token.balance} />
+                    <WeiDisplay value={token.balance} symbol={token.symbol} />
                   </div>
                 </div>
               ))

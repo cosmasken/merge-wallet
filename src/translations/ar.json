@@ -38,6 +38,8 @@
     "section_network_desc": "Mainnet ، testnet ، RPC",
     "section_currency": "العملة",
     "section_currency_desc": "عرض العملة ، الوحدات",
+    "section_governance": "الحوكمة",
+    "section_governance_desc": "المشاركة في Rootstock Collective",
     "section_import": "استيراد المحفظة",
     "section_import_desc": "استعادة من عبارة الاسترداد",
     "section_about": "حول",

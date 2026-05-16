@@ -4,7 +4,7 @@ import { isAddress, parseEther, formatEther, encodeFunctionData, erc20Abi, parse
 
 import ViewHeader from "@/layout/ViewHeader";
 import { selectWalletAddress, selectWalletBalance } from "@/redux/wallet";
-import { selectNetwork } from "@/redux/preferences";
+import { selectChainId } from "@/redux/preferences";
 import { selectIsConnected } from "@/redux/device";
 import { buildTxUrl } from "@/util/networks";
 import { getPublicClient } from "@/kernel/evm/ClientService";
@@ -19,6 +19,7 @@ import TransactionConfirmation from "@/components/composite/TransactionConfirmat
 import LoadingSpinner from "@/atoms/LoadingSpinner";
 import { selectContacts, addContact, addPendingTransaction } from "@/redux/wallet";
 import { useDispatch } from "react-redux";
+import { getNativeCurrency } from "@/chains";
 import { useTranslation } from "@/translations";
 
 interface TokenOption {
@@ -33,7 +34,7 @@ export default function WalletSend() {
   const dispatch = useDispatch();
   const address = useSelector(selectWalletAddress);
   const balance = useSelector(selectWalletBalance);
-  const network = useSelector(selectNetwork);
+  const chainId = useSelector(selectChainId);
   const isConnected = useSelector(selectIsConnected);
   const contacts = useSelector(selectContacts);
   const [to, setTo] = useState("");
@@ -48,22 +49,23 @@ export default function WalletSend() {
   const [isConfirming, setIsConfirming] = useState(false);
   const [error, setError] = useState("");
   const [txHash, setTxHash] = useState("");
+  const nativeCurrency = getNativeCurrency(chainId);
   const { t } = useTranslation();
   const [selectedToken, setSelectedToken] = useState<TokenOption>({
     type: "native",
-    symbol: "RBTC",
-    decimals: 18,
+    symbol: nativeCurrency.symbol,
+    decimals: nativeCurrency.decimals,
     balance: BigInt(balance),
   });
   const [tokenBalances, setTokenBalances] = useState<TokenOption[]>([]);
 
   useEffect(() => {
     if (!address) return;
-    TokenManagerService(network)
-      .getAllTokenBalances(address as `0x${string}`, getTokenList(network))
+    TokenManagerService(chainId)
+      .getAllTokenBalances(address as `0x${string}`, getTokenList(chainId))
       .then((results) => {
         const tokens: TokenOption[] = [
-          { type: "native", symbol: "RBTC", decimals: 18, balance: BigInt(balance) },
+          { type: "native", symbol: nativeCurrency.symbol, decimals: nativeCurrency.decimals, balance: BigInt(balance) },
           ...results.map((t) => ({
             type: "erc20" as const,
             symbol: t.symbol,
@@ -74,7 +76,7 @@ export default function WalletSend() {
         ];
         setTokenBalances(tokens);
       });
-  }, [address, network, balance]);
+  }, [address, chainId, balance]);
 
   const isValidAddress = isAddress(to);
   const isValidAmount = amount && !isNaN(Number(amount)) && Number(amount) > 0;
@@ -95,8 +97,8 @@ export default function WalletSend() {
     setIsEstimating(true);
     setError("");
     try {
-      const builder = TransactionBuilderService(network);
-      const publicClient = getPublicClient(network);
+      const builder = TransactionBuilderService(chainId);
+      const publicClient = getPublicClient(chainId);
       const gPrice = await publicClient.getGasPrice();
       setGasPrice(gPrice);
 
@@ -158,7 +160,7 @@ export default function WalletSend() {
     setError("");
     
     try {
-      const txManager = TransactionManagerService(network);
+      const       txManager = TransactionManagerService(chainId);
 
       if (shouldSaveContact && contactName) {
         dispatch(addContact({ name: contactName, address: to }));
@@ -177,7 +179,7 @@ export default function WalletSend() {
           type: "send",
           amount,
           symbol: selectedToken.symbol,
-          network,
+          chainId,
         }));
         NotificationService().success("Transaction sent successfully!");
       } else {
@@ -198,7 +200,7 @@ export default function WalletSend() {
           type: "contract",
           amount,
           symbol: selectedToken.symbol,
-          network,
+          chainId,
         }));
         NotificationService().success("Token transfer sent successfully!");
       }
@@ -223,7 +225,7 @@ export default function WalletSend() {
           <h2 className="text-lg font-bold">{t("wallet.send.success_title")}</h2>
           <p className="text-sm text-neutral-500 font-mono break-all">{txHash}</p>
           <a
-            href={buildTxUrl(network, txHash)}
+            href={buildTxUrl(chainId, txHash)}
             target="_blank"
             rel="noopener noreferrer"
             className="text-primary text-sm"
@@ -388,7 +390,7 @@ export default function WalletSend() {
           <div className="text-sm text-neutral-500">
             {t("wallet.send.estimated_gas_label")}: {gasEstimate.toString()} units
             {gasPrice !== null && (
-              <span> · {t("wallet.send.max_fee_label")}: {formatEther(gasEstimate * gasPrice)} RBTC</span>
+              <span> · {t("wallet.send.max_fee_label")}: {formatEther(gasEstimate * gasPrice)} {selectedToken.symbol}</span>
             )}
           </div>
         )}

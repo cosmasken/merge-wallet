@@ -5,6 +5,13 @@ export class NetworkError extends Error {
   }
 }
 
+export class NonceTooLowError extends Error {
+  constructor(message = "Nonce too low. The transaction may have already been processed.") {
+    super(message);
+    this.name = "NonceTooLowError";
+  }
+}
+
 export class InsufficientFundsError extends Error {
   required: bigint;
   available: bigint;
@@ -50,7 +57,7 @@ export function classifyError(e: unknown): Error {
       msg.includes("already known") ||
       msg.includes("replacement")
     ) {
-      return new TransactionFailedError("Transaction failed. The nonce may be stale. Try again.");
+      return new NonceTooLowError();
     }
     if (
       msg.includes("gas") ||

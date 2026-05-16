@@ -12,7 +12,7 @@ interface WalletState {
     address: string;
     symbol: string;
     decimals: number;
-    network: string;
+    chainId: number;
   }[];
   contacts: {
     name: string;
@@ -25,7 +25,7 @@ interface WalletState {
     symbol: string;
     status: "pending" | "success" | "failed";
     timestamp: number;
-    network: string;
+    chainId: number;
   }[];
 }
 
@@ -46,11 +46,11 @@ export const setWalletName = createAction<string>("wallet/setName");
 export const setSeedBackedUp = createAction<boolean>("wallet/setSeedBackedUp");
 export const addTrackedNft = createAction<string>("wallet/addTrackedNft");
 export const removeTrackedNft = createAction<string>("wallet/removeTrackedNft");
-export const addTrackedToken = createAction<{ address: string; symbol: string; decimals: number; network: string }>("wallet/addTrackedToken");
-export const removeTrackedToken = createAction<{ address: string; network: string }>("wallet/removeTrackedToken");
+export const addTrackedToken = createAction<{ address: string; symbol: string; decimals: number; chainId: number }>("wallet/addTrackedToken");
+export const removeTrackedToken = createAction<{ address: string; chainId: number }>("wallet/removeTrackedToken");
 export const addContact = createAction<{ name: string; address: string }>("wallet/addContact");
 export const removeContact = createAction<string>("wallet/removeContact");
-export const addPendingTransaction = createAction<{ hash: string; type: "send" | "receive" | "contract"; amount: string; symbol: string; network: string }>("wallet/addPendingTransaction");
+export const addPendingTransaction = createAction<{ hash: string; type: "send" | "receive" | "contract"; amount: string; symbol: string; chainId: number }>("wallet/addPendingTransaction");
 export const updatePendingTransaction = createAction<{ hash: string; status: "success" | "failed" }>("wallet/updatePendingTransaction");
 export const hydrateWallet = createAction<Partial<WalletState>>("wallet/hydrate");
 
@@ -81,13 +81,13 @@ export const walletReducer = createReducer(initialState, (builder) => {
     })
     .addCase(addTrackedToken, (state, action) => {
       const addr = action.payload.address.toLowerCase();
-      if (!state.trackedTokens.some((t) => t.address.toLowerCase() === addr && t.network === action.payload.network)) {
+      if (!state.trackedTokens.some((t) => t.address.toLowerCase() === addr && t.chainId === action.payload.chainId)) {
         state.trackedTokens.push(action.payload);
       }
     })
     .addCase(removeTrackedToken, (state, action) => {
       state.trackedTokens = state.trackedTokens.filter(
-        (t) => !(t.address.toLowerCase() === action.payload.address.toLowerCase() && t.network === action.payload.network)
+        (t) => !(t.address.toLowerCase() === action.payload.address.toLowerCase() && t.chainId === action.payload.chainId)
       );
     })
     .addCase(addContact, (state, action) => {

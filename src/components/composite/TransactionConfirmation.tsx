@@ -68,7 +68,7 @@ const TransactionConfirmation: React.FC<TransactionConfirmationProps> = ({
               <WeiDisplay 
                 wei={networkFee} 
                 decimals={18} 
-                symbol="RBTC" 
+                symbol={token.symbol} 
                 className="text-white" 
               />
               <FiatValue wei={networkFee} className="text-sm text-gray-500" />

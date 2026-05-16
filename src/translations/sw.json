@@ -38,6 +38,8 @@
     "section_network_desc": "Mainnet, testnet, RPC",
     "section_currency": "Sarafu",
     "section_currency_desc": "Sarafu ya kuonyesha, vitengo",
+    "section_governance": "Utawala",
+    "section_governance_desc": "Shiriki katika Rootstock Collective",
     "section_import": "Ingiza Pochi",
     "section_import_desc": "Rejesha kutoka kwa maneno ya kurejesha",
     "section_about": "Kuhusu",

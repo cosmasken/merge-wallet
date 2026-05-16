@@ -4,7 +4,7 @@ const PERSIST_KEY = "merge-wallet-state";
 
 interface PersistedState {
   preferences: {
-    network: string;
+    chainId: number;
     localCurrency: string;
     languageCode: string;
     hideBalance: boolean;
@@ -17,6 +17,12 @@ interface PersistedState {
       useBiometrics: boolean;
     };
   };
+  rpc: {
+    overrides: Record<number, {
+      customUrls: string[];
+      disabledUrls: string[];
+    }>;
+  };
   wallet: {
     address: string;
     name: string;
@@ -27,7 +33,7 @@ interface PersistedState {
       address: string;
       symbol: string;
       decimals: number;
-      network: string;
+      chainId: number;
     }[];
     contacts?: {
       name: string;
@@ -40,7 +46,7 @@ interface PersistedState {
       symbol: string;
       status: string;
       timestamp: number;
-      network: string;
+      chainId: number;
     }[];
   };
 }
@@ -48,11 +54,12 @@ interface PersistedState {
 export async function saveState(state: {
   preferences: Record<string, unknown>;
   wallet: Record<string, unknown>;
+  rpc: Record<string, unknown>;
 }): Promise<void> {
   const security = (state.preferences.security as Record<string, boolean>) ?? {};
   const data: PersistedState = {
     preferences: {
-      network: String(state.preferences.network ?? "testnet"),
+      chainId: Number(state.preferences.chainId ?? 31),
       localCurrency: String(state.preferences.localCurrency ?? "USD"),
       languageCode: String(state.preferences.languageCode ?? "en"),
       hideBalance: Boolean(state.preferences.hideBalance),
@@ -64,6 +71,9 @@ export async function saveState(state: {
         requireAuthForSend: security.requireAuthForSend ?? true,
         useBiometrics: security.useBiometrics ?? true,
       },
+    },
+    rpc: {
+      overrides: (state.rpc.overrides as Record<number, { customUrls: string[]; disabledUrls: string[] }>) ?? {},
     },
     wallet: {
       address: String(state.wallet.address ?? ""),
@@ -95,6 +105,7 @@ export async function saveState(state: {
 export async function loadState(): Promise<Partial<{
   preferences: Record<string, unknown>;
   wallet: Record<string, unknown>;
+  rpc: Record<string, unknown>;
 }> | null> {
   try {
     const { value } = await Preferences.get({ key: PERSIST_KEY });

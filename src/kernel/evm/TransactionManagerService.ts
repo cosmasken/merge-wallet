@@ -1,16 +1,15 @@
-import { type Hash, type TransactionReceipt, parseEther } from "viem"
-import { getPublicClient } from "@/kernel/evm/ClientService"
+import { type Hash, type TransactionReceipt } from "viem"
+import { getPublicClient, getPublicClientByChainId } from "@/kernel/evm/ClientService"
 import KeyManagerService from "@/kernel/evm/KeyManagerService"
 import NonceManager from "@/kernel/evm/NonceManager"
-import type { ValidNetwork } from "@/redux/preferences"
-import { classifyError } from "@/kernel/evm/errors"
+import { classifyError, NonceTooLowError } from "@/kernel/evm/errors"
 
 export interface SendResult {
   hash: Hash
   receipt: TransactionReceipt | null
 }
 
-export default function TransactionManagerService(network?: ValidNetwork) {
+export default function TransactionManagerService(chainId?: number) {
   async function sendTransaction(
     to: `0x${string}`,
     value: bigint,
@@ -26,28 +25,31 @@ export default function TransactionManagerService(network?: ValidNetwork) {
     gas?: bigint,
   ): Promise<SendResult> {
     try {
-      const publicClient = getPublicClient(network)
+      const publicClient = getPublicClient(chainId)
       const from = KeyManagerService().getAddress()
-      const [chainId, gasPrice] = await Promise.all([
-        publicClient.getChainId(),
-        publicClient.getGasPrice(), // Always get gasPrice
-      ])
-      
-      // Use nonce manager to prevent stale nonce issues
-      const nonce = await NonceManager.getNonce(from, network)
-      
-      console.log(`[Transaction] Sending with nonce ${nonce} to ${to}`)
-      
-      const signedTx = await KeyManagerService().signTransaction({
+      const chainIdResolved = await publicClient.getChainId()
+
+      const gasEstimate = gas ?? await publicClient.estimateGas({ to, value, data, account: from })
+
+      const nonce = await NonceManager.getNonce(from, chainId)
+
+      const publicByChainId = getPublicClientByChainId(chainIdResolved)
+      const prepared = await publicByChainId.prepareTransactionRequest({
+        account: from,
         to,
         value,
         data,
-        chainId,
         nonce,
-        gas,
-        gasPrice,
-        from,
+        gas: gasEstimate,
+        chain: publicByChainId.chain,
       })
+
+      console.log(`[Transaction] Sending with nonce ${nonce} to ${to} on chain ${chainIdResolved}`)
+
+      const signedTx = await KeyManagerService().signTransaction({
+        ...prepared,
+        chainId: chainIdResolved,
+      } as any)
 
       const hash = await publicClient.sendRawTransaction({
         serializedTransaction: signedTx,
@@ -56,10 +58,12 @@ export default function TransactionManagerService(network?: ValidNetwork) {
       return { hash, receipt: null }
     } catch (e) {
       console.error('[Transaction] Failed:', e)
-      // Reset nonce on failure to resync with network
-      const from = KeyManagerService().getAddress()
-      await NonceManager.resetNonce(from, network)
-      throw classifyError(e)
+      const err = classifyError(e)
+      if (err instanceof NonceTooLowError) {
+        const from = KeyManagerService().getAddress()
+        await NonceManager.resetNonce(from, chainId)
+      }
+      throw err
     }
   }
 
@@ -67,7 +71,7 @@ export default function TransactionManagerService(network?: ValidNetwork) {
     hash: Hash,
     confirmations = 1,
   ): Promise<TransactionReceipt> {
-    const publicClient = getPublicClient(network)
+    const publicClient = getPublicClient(chainId)
     return publicClient.waitForTransactionReceipt({ hash, confirmations })
   }
 

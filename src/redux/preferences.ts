@@ -8,8 +8,6 @@ export enum ThemeMode {
   Dark = "dark",
 }
 
-export type ValidNetwork = "mainnet" | "testnet";
-
 interface RbtcPrice {
   price: number;
   currency: string;
@@ -18,7 +16,7 @@ interface RbtcPrice {
 
 interface PreferencesState {
   themeMode: ThemeMode;
-  network: ValidNetwork;
+  chainId: number;
   languageCode: string;
   localCurrency: string;
   hideBalance: boolean;
@@ -35,7 +33,7 @@ interface PreferencesState {
 
 const initialState: PreferencesState = {
   themeMode: ThemeMode.System,
-  network: "testnet",
+  chainId: 31, // RSK testnet
   languageCode: "en",
   localCurrency: "USD",
   hideBalance: false,
@@ -51,7 +49,7 @@ const initialState: PreferencesState = {
 };
 
 export const setTheme = createAction<ThemeMode>("preferences/setTheme");
-export const setNetwork = createAction<ValidNetwork>("preferences/setNetwork");
+export const setChainId = createAction<number>("preferences/setChainId");
 export const setCurrency = createAction<string>("preferences/setCurrency");
 export const setLanguage = createAction<string>("preferences/setLanguage");
 export const toggleHideBalance = createAction("preferences/toggleHideBalance");
@@ -66,8 +64,8 @@ export const preferencesReducer = createReducer(initialState, (builder) => {
     .addCase(setTheme, (state, action) => {
       state.themeMode = action.payload;
     })
-    .addCase(setNetwork, (state, action) => {
-      state.network = action.payload;
+    .addCase(setChainId, (state, action) => {
+      state.chainId = action.payload;
     })
     .addCase(setCurrency, (state, action) => {
       state.localCurrency = action.payload;
@@ -107,9 +105,9 @@ export const selectThemeMode = createSelector(
   (prefs) => prefs.themeMode,
 );
 
-export const selectNetwork = createSelector(
+export const selectChainId = createSelector(
   selectPreferences,
-  (prefs): ValidNetwork => prefs.network,
+  (prefs): number => prefs.chainId,
 );
 
 export const selectLocalCurrency = createSelector(

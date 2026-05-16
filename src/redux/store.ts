@@ -3,12 +3,14 @@ import { combineReducers, configureStore, isPlain } from "@reduxjs/toolkit";
 import { preferencesReducer } from "./preferences";
 import { deviceReducer } from "./device";
 import { walletReducer } from "./wallet";
+import { rpcReducer } from "./rpc";
 import { saveState } from "./persistence";
 
 const rootReducer = combineReducers({
   device: deviceReducer,
   preferences: preferencesReducer,
   wallet: walletReducer,
+  rpc: rpcReducer,
 });
 
 export type RootState = ReturnType<typeof rootReducer>;
@@ -33,6 +35,7 @@ store.subscribe(() => {
     saveState({
       preferences: state.preferences as unknown as Record<string, unknown>,
       wallet: state.wallet as unknown as Record<string, unknown>,
+      rpc: state.rpc as unknown as Record<string, unknown>,
     });
   }, 500);
 });

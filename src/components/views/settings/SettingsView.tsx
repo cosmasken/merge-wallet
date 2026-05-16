@@ -2,14 +2,16 @@ import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 
 import ViewHeader from "@/layout/ViewHeader";
-import { selectThemeMode, selectShouldHideBalance, setTheme, toggleHideBalance, ThemeMode } from "@/redux/preferences";
+import { selectThemeMode, selectShouldHideBalance, setTheme, toggleHideBalance, ThemeMode, selectChainId } from "@/redux/preferences";
 import { useTranslation } from "@/translations";
+import { isGovernanceAvailable } from "@/util/networks";
 
 export default function SettingsView() {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const currentTheme = useSelector(selectThemeMode);
   const hideBalance = useSelector(selectShouldHideBalance);
+  const chainId = useSelector(selectChainId);
   const { t } = useTranslation();
 
   const sections = [
@@ -18,6 +20,10 @@ export default function SettingsView() {
     { title: t("settings.section_contacts"), path: "/settings/contacts", desc: t("settings.section_contacts_desc") },
     { title: t("settings.section_network"), path: "/settings/network", desc: t("settings.section_network_desc") },
     { title: t("settings.section_currency"), path: "/settings/currency", desc: t("settings.section_currency_desc") },
+    // Only show governance on mainnet
+    ...(isGovernanceAvailable(chainId) ? [
+      { title: t("settings.section_governance"), path: "/settings/governance", desc: t("settings.section_governance_desc") }
+    ] : []),
     { title: t("settings.section_import"), path: "/wallet/import", desc: t("settings.section_import_desc") },
     { title: t("settings.section_about"), path: "/settings/about", desc: t("settings.section_about_desc") },
   ];

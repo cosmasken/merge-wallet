@@ -2,24 +2,24 @@ import { useEffect, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
 
 import { selectPendingTransactions, updatePendingTransaction } from "@/redux/wallet";
-import { selectNetwork } from "@/redux/preferences";
+import { selectChainId } from "@/redux/preferences";
 import TransactionManagerService from "@/kernel/evm/TransactionManagerService";
 
 export default function TransactionTracker() {
   const dispatch = useDispatch();
-  const network = useSelector(selectNetwork);
+  const chainId = useSelector(selectChainId);
   const pendingTxs = useSelector(selectPendingTransactions);
   const activePolls = useRef<Set<string>>(new Set());
 
   useEffect(() => {
-    const activePending = pendingTxs.filter(tx => tx.status === "pending" && tx.network === network);
+    const activePending = pendingTxs.filter(tx => tx.status === "pending" && tx.chainId === chainId);
     
     activePending.forEach(tx => {
       if (activePolls.current.has(tx.hash)) return;
 
       activePolls.current.add(tx.hash);
       
-      const txManager = TransactionManagerService(network);
+      const txManager = TransactionManagerService(chainId);
       
       txManager.waitForReceipt(tx.hash as `0x${string}`)
         .then((receipt) => {
@@ -35,7 +35,7 @@ export default function TransactionTracker() {
           activePolls.current.delete(tx.hash);
         });
     });
-  }, [pendingTxs, network, dispatch]);
+  }, [pendingTxs, chainId, dispatch]);
 
   return null; // Background component
 }

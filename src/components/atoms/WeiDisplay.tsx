@@ -13,14 +13,14 @@ export default function WeiDisplay({
   wei,
   value,
   decimals = 18,
-  symbol = "RBTC",
+  symbol = "",
   hideBalance = false,
   className,
 }: WeiDisplayProps) {
   const amount = wei ?? value ?? 0n;
   
   if (hideBalance) {
-    return <span className={className}>XXXXX {symbol}</span>;
+    return <span className={className}>XXXXX{symbol && ` ${symbol}`}</span>;
   }
 
   const bigAmount = typeof amount === "string" ? BigInt(amount) : amount;
@@ -32,8 +32,8 @@ export default function WeiDisplay({
   return (
     <span className={className}>
       {whole}
-      {displayFraction !== "0" && <span className="text-neutral-400">.{displayFraction}</span>}{" "}
-      {symbol}
+      {displayFraction !== "0" && <span className="text-neutral-400">.{displayFraction}</span>}
+      {symbol && <span className="ml-1">{symbol}</span>}
     </span>
   );
 }
