@@ -17,6 +17,12 @@ interface PersistedState {
       useBiometrics: boolean;
     };
   };
+  rpc: {
+    overrides: Record<number, {
+      customUrls: string[];
+      disabledUrls: string[];
+    }>;
+  };
   wallet: {
     address: string;
     name: string;
@@ -48,6 +54,7 @@ interface PersistedState {
 export async function saveState(state: {
   preferences: Record<string, unknown>;
   wallet: Record<string, unknown>;
+  rpc: Record<string, unknown>;
 }): Promise<void> {
   const security = (state.preferences.security as Record<string, boolean>) ?? {};
   const data: PersistedState = {
@@ -64,6 +71,9 @@ export async function saveState(state: {
         requireAuthForSend: security.requireAuthForSend ?? true,
         useBiometrics: security.useBiometrics ?? true,
       },
+    },
+    rpc: {
+      overrides: (state.rpc.overrides as Record<number, { customUrls: string[]; disabledUrls: string[] }>) ?? {},
     },
     wallet: {
       address: String(state.wallet.address ?? ""),
@@ -95,6 +105,7 @@ export async function saveState(state: {
 export async function loadState(): Promise<Partial<{
   preferences: Record<string, unknown>;
   wallet: Record<string, unknown>;
+  rpc: Record<string, unknown>;
 }> | null> {
   try {
     const { value } = await Preferences.get({ key: PERSIST_KEY });

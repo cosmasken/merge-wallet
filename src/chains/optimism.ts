@@ -14,7 +14,7 @@ export const optimismSepolia: ChainConfig = {
   id: 11155420,
   name: "OP Sepolia Testnet",
   rpcUrls: ["https://sepolia.optimism.io"],
-  nativeCurrency: { name: "Sepolia Ether", symbol: "ETH", decimals: 18 },
+  nativeCurrency: { name: "Ether", symbol: "ETH", decimals: 18 },
   gasType: "eip1559",
   slip44: 60,
   blockExplorer: { name: "Etherscan", url: "https://sepolia-optimism.etherscan.io" },

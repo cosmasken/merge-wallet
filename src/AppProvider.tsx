@@ -10,6 +10,7 @@ import SecurityService, { AuthActions } from "@/kernel/app/SecurityService";
 import { ModalProvider } from "@/kernel/app/ModalService";
 import { setWalletAddress, setSeedBackedUp, hydrateWallet } from "@/redux/wallet";
 import { hydratePreferences, selectLanguageCode, selectSecuritySettings } from "@/redux/preferences";
+import { hydrateRpc } from "@/redux/rpc";
 import { setConnected } from "@/redux/device";
 import { loadState } from "@/redux/persistence";
 import { store } from "@/redux/store";
@@ -56,6 +57,7 @@ export default function AppProvider({ children }: AppProviderProps) {
       if (persisted) {
         if (persisted.preferences) dispatch(hydratePreferences(persisted.preferences));
         if (persisted.wallet) dispatch(hydrateWallet(persisted.wallet));
+        if (persisted.rpc) dispatch(hydrateRpc(persisted.rpc));
       }
 
       const Security = SecurityService();

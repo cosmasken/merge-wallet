@@ -14,7 +14,7 @@ export const arbitrumSepolia: ChainConfig = {
   id: 421614,
   name: "Arbitrum Sepolia Testnet",
   rpcUrls: ["https://sepolia-rollup.arbitrum.io/rpc"],
-  nativeCurrency: { name: "Sepolia Ether", symbol: "ETH", decimals: 18 },
+  nativeCurrency: { name: "Ether", symbol: "ETH", decimals: 18 },
   gasType: "eip1559",
   slip44: 60,
   blockExplorer: { name: "Arbiscan", url: "https://sepolia.arbiscan.io" },

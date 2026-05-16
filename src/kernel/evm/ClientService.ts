@@ -1,12 +1,13 @@
 import {
   createPublicClient,
   createWalletClient,
-  http,
   type PublicClient,
   type WalletClient,
 } from "viem";
 
 import { getChainConfig, toViemChain } from "@/chains";
+import { buildFallbackTransport } from "@/util/rpc";
+import { store } from "@/redux/store";
 
 const clients = new Map<number, { public: PublicClient; wallet: WalletClient }>();
 
@@ -18,7 +19,9 @@ function buildClients(chainId: number) {
   if (!config) throw new Error(`Unknown chain ID: ${chainId}`);
 
   const chain = toViemChain(config);
-  const transport = http(config.rpcUrls[0]);
+  const state = store.getState();
+  const overrides = state.rpc.overrides as Record<number, { customUrls: string[]; disabledUrls: string[] }>;
+  const transport = buildFallbackTransport(chainId, overrides);
 
   const pub = createPublicClient({ chain, transport });
   const wlt = createWalletClient({ chain, transport });
