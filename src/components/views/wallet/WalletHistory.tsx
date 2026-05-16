@@ -8,19 +8,21 @@ import Address from "@/atoms/Address";
 import { TransactionSkeleton } from "@/atoms/LoadingSkeleton";
 import ErrorState from "@/atoms/ErrorState";
 import { selectWalletAddress } from "@/redux/wallet";
-import { selectNetwork } from "@/redux/preferences";
+import { selectChainId } from "@/redux/preferences";
 import { buildTxUrl } from "@/util/networks";
 import TransactionHistoryService, { type TxHistoryEntry } from "@/kernel/evm/TransactionHistoryService";
 import TransactionExportService from "@/kernel/evm/TransactionExportService";
+import { getNativeCurrency } from "@/chains";
 import { useTranslation } from "@/translations";
 
 export default function WalletHistory() {
   const address = useSelector(selectWalletAddress);
-  const network = useSelector(selectNetwork);
+  const chainId = useSelector(selectChainId);
   const [txs, setTxs] = useState<TxHistoryEntry[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [exporting, setExporting] = useState(false);
+  const nativeCurrency = getNativeCurrency(chainId);
   const { t } = useTranslation();
 
   useEffect(function fetchHistory() {
@@ -28,29 +30,29 @@ export default function WalletHistory() {
 
     setIsLoading(true);
     setError(null);
-    TransactionHistoryService(network)
+    TransactionHistoryService(chainId)
       .getHistory(address as `0x${string}`)
       .then(setTxs)
       .catch(() => setError(t("wallet.history.failed_load")))
       .finally(() => setIsLoading(false));
-  }, [address, network, t]);
+  }, [address, chainId, t]);
 
   const refreshHistory = useCallback(async () => {
     if (!address) return;
     setError(null);
     try {
-      const txs = await TransactionHistoryService(network).getHistory(address as `0x${string}`);
+      const txs = await TransactionHistoryService(chainId).getHistory(address as `0x${string}`);
       setTxs(txs);
     } catch {
       setError(t("wallet.history.failed_refresh"));
     }
-  }, [address, network, t]);
+  }, [address, chainId, t]);
 
   const handleExport = async () => {
     if (!address) return;
     setExporting(true);
     try {
-      await TransactionExportService(network).exportCsv(address as `0x${string}`);
+      await TransactionExportService(chainId).exportCsv(address as `0x${string}`);
     } catch {
       // silently fail
     }
@@ -102,7 +104,7 @@ export default function WalletHistory() {
               return (
                 <a
                   key={tx.hash}
-                  href={buildTxUrl(network, tx.hash)}
+                  href={buildTxUrl(chainId, tx.hash)}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="flex items-center justify-between p-3 rounded-lg bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700"
@@ -120,7 +122,7 @@ export default function WalletHistory() {
                   </div>
                   <div className="text-right">
                     <div className={`font-mono text-sm ${isOutgoing ? "text-error" : "text-success"}`}>
-                      {isOutgoing ? "-" : "+"}<WeiDisplay value={tx.value} />
+                      {isOutgoing ? "-" : "+"}<WeiDisplay value={tx.value} symbol={nativeCurrency.symbol} />
                     </div>
                     <div className="text-xs text-neutral-400">
                       {new Date(tx.timestamp * 1000).toLocaleDateString()}

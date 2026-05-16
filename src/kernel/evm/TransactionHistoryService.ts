@@ -1,6 +1,5 @@
 import { getPublicClient } from "@/kernel/evm/ClientService"
 import { getExplorerUrl } from "@/util/networks"
-import type { ValidNetwork } from "@/redux/preferences"
 
 export interface TxHistoryEntry {
   hash: `0x${string}`
@@ -23,10 +22,14 @@ interface ExplorerTx {
   txreceipt_status: string
 }
 
-export default function TransactionHistoryService(network?: ValidNetwork) {
+export default function TransactionHistoryService(chainId?: number) {
+  const resolvedChainId = chainId ?? 31
+
   async function getHistory(address: `0x${string}`): Promise<TxHistoryEntry[]> {
     try {
-      const explorerUrl = getExplorerUrl(network ?? "testnet")
+      const explorerUrl = getExplorerUrl(resolvedChainId)
+      if (!explorerUrl) return []
+
       const apiUrl = `${explorerUrl}/api?module=account&action=txlist&address=${address}&sort=desc&limit=100`
 
       const response = await fetch(apiUrl)
@@ -51,7 +54,7 @@ export default function TransactionHistoryService(network?: ValidNetwork) {
   }
 
   async function getTransactionReceipt(hash: `0x${string}`) {
-    const publicClient = getPublicClient(network)
+    const publicClient = getPublicClient(resolvedChainId)
     return publicClient.getTransactionReceipt({ hash })
   }
 

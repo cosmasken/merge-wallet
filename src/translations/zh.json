@@ -38,6 +38,8 @@
     "section_network_desc": "主网，测试网，RPC",
     "section_currency": "货币",
     "section_currency_desc": "显示货币，单位",
+    "section_governance": "治理",
+    "section_governance_desc": "参与 Rootstock Collective",
     "section_import": "导入钱包",
     "section_import_desc": "从助记词恢复",
     "section_about": "关于",

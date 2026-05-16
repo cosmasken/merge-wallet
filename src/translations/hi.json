@@ -38,6 +38,8 @@
     "section_network_desc": "Mainnet, testnet, RPC",
     "section_currency": "मुद्रा",
     "section_currency_desc": "डिस्प्ले मुद्रा, इकाइयाँ",
+    "section_governance": "शासन",
+    "section_governance_desc": "Rootstock Collective में भाग लें",
     "section_import": "वॉलेट आयात करें",
     "section_import_desc": "रिकवरी फ्रेज़ से पुनर्स्थापित करें",
     "section_about": "के बारे में",

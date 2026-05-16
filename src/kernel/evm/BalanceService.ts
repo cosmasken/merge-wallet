@@ -1,11 +1,10 @@
 import { getPublicClient } from "@/kernel/evm/ClientService"
-import type { ValidNetwork } from "@/redux/preferences"
 
 let refreshInterval: ReturnType<typeof setInterval> | null = null
 
-export default function BalanceService(network?: ValidNetwork) {
+export default function BalanceService(chainId?: number) {
   async function getBalance(address: `0x${string}`): Promise<bigint> {
-    const publicClient = getPublicClient(network)
+    const publicClient = getPublicClient(chainId)
     const balance = await publicClient.getBalance({ address })
     return balance
   }

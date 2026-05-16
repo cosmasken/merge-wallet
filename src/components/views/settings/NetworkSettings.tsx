@@ -4,35 +4,26 @@ import { useDispatch, useSelector } from "react-redux";
 import ViewHeader from "@/layout/ViewHeader";
 import PullToRefresh from "@/atoms/PullToRefresh";
 import Button from "@/atoms/Button";
-import { selectNetwork, setNetwork, type ValidNetwork } from "@/redux/preferences";
-import { getChain } from "@/util/networks";
-import ClientService from "@/kernel/evm/ClientService";
-import MainnetWarningModal from "@/components/composite/MainnetWarningModal";
-
-const NETWORKS: { key: ValidNetwork; label: string }[] = [
-  { key: "mainnet", label: "Mainnet" },
-  { key: "testnet", label: "Testnet" },
-];
+import { getPublicClient } from "@/kernel/evm/ClientService";
+import { selectChainId, setChainId } from "@/redux/preferences";
+import { getAllChainConfigs } from "@/chains";
 
 export default function NetworkSettings() {
   const dispatch = useDispatch();
-  const currentNetwork = useSelector(selectNetwork);
+  const currentChainId = useSelector(selectChainId);
   const [testing, setTesting] = useState(false);
-  const [testResults, setTestResults] = useState<Record<string, boolean | null>>({});
-  const [showMainnetWarning, setShowMainnetWarning] = useState(false);
-  const [pendingNetwork, setPendingNetwork] = useState<ValidNetwork | null>(null);
+  const [testResults, setTestResults] = useState<Record<number, boolean | null>>({});
 
-  // Check if user has seen mainnet warning before
-  const hasSeenMainnetWarning = localStorage.getItem('hasSeenMainnetWarning') === 'true';
+  const chains = getAllChainConfigs();
 
-  const testConnection = useCallback(async (network: ValidNetwork) => {
+  const testConnection = useCallback(async (chainId: number) => {
     setTesting(true);
     try {
-      const client = ClientService(network);
-      await client.getPublicClient().getBlockNumber();
-      setTestResults(prev => ({ ...prev, [network]: true }));
+      const client = getPublicClient(chainId);
+      await client.getBlockNumber();
+      setTestResults(prev => ({ ...prev, [chainId]: true }));
     } catch {
-      setTestResults(prev => ({ ...prev, [network]: false }));
+      setTestResults(prev => ({ ...prev, [chainId]: false }));
     }
     setTesting(false);
   }, []);
@@ -41,45 +32,20 @@ export default function NetworkSettings() {
     setTesting(true);
     setTestResults({});
 
-    for (const { key } of NETWORKS) {
+    for (const chain of chains) {
       try {
-        const client = ClientService(key);
-        await client.getPublicClient().getBlockNumber();
-        setTestResults(prev => ({ ...prev, [key]: true }));
+        const client = getPublicClient(chain.id);
+        await client.getBlockNumber();
+        setTestResults(prev => ({ ...prev, [chain.id]: true }));
       } catch {
-        setTestResults(prev => ({ ...prev, [key]: false }));
+        setTestResults(prev => ({ ...prev, [chain.id]: false }));
       }
     }
     setTesting(false);
-  }, []);
+  }, [chains]);
 
-  const handleSwitch = (network: ValidNetwork) => {
-    // Show warning when switching to mainnet for the first time
-    if (network === "mainnet" && currentNetwork !== "mainnet" && !hasSeenMainnetWarning) {
-      setPendingNetwork(network);
-      setShowMainnetWarning(true);
-      return;
-    }
-    
-    dispatch(setNetwork(network));
-  };
-
-  const handleMainnetWarningConfirm = (dontShowAgain: boolean) => {
-    if (dontShowAgain) {
-      localStorage.setItem('hasSeenMainnetWarning', 'true');
-    }
-    
-    if (pendingNetwork) {
-      dispatch(setNetwork(pendingNetwork));
-    }
-    
-    setShowMainnetWarning(false);
-    setPendingNetwork(null);
-  };
-
-  const handleMainnetWarningCancel = () => {
-    setShowMainnetWarning(false);
-    setPendingNetwork(null);
+  const handleSwitch = (chainId: number) => {
+    dispatch(setChainId(chainId));
   };
 
   useEffect(function autoTestOnMount() {
@@ -90,7 +56,7 @@ export default function NetworkSettings() {
     <>
       <PullToRefresh onRefresh={testAllConnections}>
       <div>
-        <ViewHeader title="Network" subtitle="Rootstock network configuration" showBack />
+        <ViewHeader title="Network" subtitle="Multichain network configuration" showBack />
         <div className="flex flex-col gap-4 px-4">
           <Button
             label={testing ? "Testing Connections..." : "Test All Connections"}
@@ -100,19 +66,18 @@ export default function NetworkSettings() {
             onClick={testAllConnections}
           />
 
-          {NETWORKS.map(({ key, label }) => {
-            const chain = getChain(key);
-            const isActive = currentNetwork === key;
-            const testResult = testResults[key];
+          {chains.map((chain) => {
+            const isActive = currentChainId === chain.id;
+            const testResult = testResults[chain.id];
             return (
               <div
-                key={key}
-                onClick={() => handleSwitch(key)}
+                key={chain.id}
+                onClick={() => handleSwitch(chain.id)}
                 role="button"
                 tabIndex={0}
                 onKeyDown={(e) => {
                   if (e.key === 'Enter' || e.key === ' ') {
-                    handleSwitch(key);
+                    handleSwitch(chain.id);
                   }
                 }}
                 className={`w-full text-left p-4 rounded-lg border transition-colors cursor-pointer ${isActive
@@ -124,14 +89,14 @@ export default function NetworkSettings() {
                   <div>
                     <div className="flex items-center gap-2">
                       <div className="font-medium text-neutral-800 dark:text-neutral-100">
-                        {label}
+                        {chain.name}
                       </div>
                       {testResult !== null && (
                         <div className={`w-2 h-2 rounded-full ${testResult ? "bg-success" : "bg-error"}`} />
                       )}
                     </div>
                     <div className="text-xs text-neutral-500">
-                      Chain ID: {chain.id}
+                      Chain ID: {chain.id} · {chain.nativeCurrency.symbol}
                     </div>
                   </div>
                   <div className="flex items-center gap-2">
@@ -150,12 +115,12 @@ export default function NetworkSettings() {
                   </div>
                 </div>
                 <div className="mt-1 text-xs text-neutral-400 font-mono truncate">
-                  {chain.rpcUrls.default.http[0]}
+                  {chain.rpcUrls[0]}
                 </div>
                 <button
                   onClick={(e) => {
                     e.stopPropagation();
-                    testConnection(key);
+                    testConnection(chain.id);
                   }}
                   disabled={testing}
                   className="mt-2 text-xs text-primary font-medium disabled:opacity-50 hover:underline"
@@ -163,18 +128,11 @@ export default function NetworkSettings() {
                   {testing ? "Testing..." : "Test Connection"}
                 </button>
               </div>
-
             );
           })}
         </div>
       </div>
     </PullToRefresh>
-
-    <MainnetWarningModal
-      isOpen={showMainnetWarning}
-      onConfirm={handleMainnetWarningConfirm}
-      onCancel={handleMainnetWarningCancel}
-    />
-  </>
+    </>
   );
 }

@@ -4,7 +4,7 @@ const PERSIST_KEY = "merge-wallet-state";
 
 interface PersistedState {
   preferences: {
-    network: string;
+    chainId: number;
     localCurrency: string;
     languageCode: string;
     hideBalance: boolean;
@@ -27,7 +27,7 @@ interface PersistedState {
       address: string;
       symbol: string;
       decimals: number;
-      network: string;
+      chainId: number;
     }[];
     contacts?: {
       name: string;
@@ -40,7 +40,7 @@ interface PersistedState {
       symbol: string;
       status: string;
       timestamp: number;
-      network: string;
+      chainId: number;
     }[];
   };
 }
@@ -52,7 +52,7 @@ export async function saveState(state: {
   const security = (state.preferences.security as Record<string, boolean>) ?? {};
   const data: PersistedState = {
     preferences: {
-      network: String(state.preferences.network ?? "testnet"),
+      chainId: Number(state.preferences.chainId ?? 31),
       localCurrency: String(state.preferences.localCurrency ?? "USD"),
       languageCode: String(state.preferences.languageCode ?? "en"),
       hideBalance: Boolean(state.preferences.hideBalance),

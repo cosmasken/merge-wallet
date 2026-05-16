@@ -4,7 +4,7 @@ import { isAddress } from "viem";
 
 import Button from "@/atoms/Button";
 import TokenManagerService from "@/kernel/evm/TokenManagerService";
-import { selectNetwork } from "@/redux/preferences";
+import { selectChainId } from "@/redux/preferences";
 import { addTrackedToken } from "@/redux/wallet";
 
 interface AddTokenModalProps {
@@ -14,7 +14,7 @@ interface AddTokenModalProps {
 
 export default function AddTokenModal({ isOpen, onClose }: AddTokenModalProps) {
   const dispatch = useDispatch();
-  const network = useSelector(selectNetwork);
+  const chainId = useSelector(selectChainId);
   const [address, setAddress] = useState("");
   const [symbol, setSymbol] = useState("");
   const [decimals, setDecimals] = useState<number | "">("");
@@ -41,7 +41,7 @@ export default function AddTokenModal({ isOpen, onClose }: AddTokenModalProps) {
     setIsLoading(true);
     setError("");
     try {
-      const metadata = await TokenManagerService(network).getTokenMetadata(address);
+      const metadata = await TokenManagerService(chainId).getTokenMetadata(address);
       if (metadata) {
         setSymbol(metadata.symbol);
         setDecimals(metadata.decimals);
@@ -61,7 +61,7 @@ export default function AddTokenModal({ isOpen, onClose }: AddTokenModalProps) {
       address,
       symbol,
       decimals: Number(decimals),
-      network,
+      chainId,
     }));
     onClose();
   };

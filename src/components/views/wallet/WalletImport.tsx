@@ -6,14 +6,14 @@ import ViewHeader from "@/layout/ViewHeader";
 import KeyManagerService from "@/kernel/evm/KeyManagerService";
 import BalanceService from "@/kernel/evm/BalanceService";
 import { setWalletAddress } from "@/redux/wallet";
-import { selectNetwork } from "@/redux/preferences";
+import { selectChainId } from "@/redux/preferences";
 
 type ImportMode = "mnemonic" | "privateKey";
 
 export default function WalletImport() {
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const currentNetwork = useSelector(selectNetwork);
+  const chainId = useSelector(selectChainId);
   const [mode, setMode] = useState<ImportMode>("mnemonic");
   const [inputValue, setInputValue] = useState("");
   const [error, setError] = useState("");
@@ -40,7 +40,7 @@ export default function WalletImport() {
 
         setStatus("Discovering accounts...");
         let bestIndex = 0;
-        const Balance = BalanceService(currentNetwork);
+        const Balance = BalanceService(chainId);
         
         for (let i = 0; i < 5; i++) {
           const { address } = KeyManager.importFromMnemonic(trimmed.toLowerCase(), i);

@@ -1,41 +1,53 @@
-import { createPublicClient, createWalletClient, http, type PublicClient, type WalletClient } from "viem";
+import {
+  createPublicClient,
+  createWalletClient,
+  http,
+  type PublicClient,
+  type WalletClient,
+} from "viem";
 
-import { getChain, rskMainnet, rskTestnet } from "@/util/networks";
-import type { ValidNetwork } from "@/redux/preferences";
+import { getChainConfig, toViemChain } from "@/chains";
 
-let currentNetwork: ValidNetwork = "testnet";
-let publicClient: PublicClient | null = null;
-let walletClient: WalletClient | null = null;
+const clients = new Map<number, { public: PublicClient; wallet: WalletClient }>();
 
-function buildClients(network: ValidNetwork) {
-  const chain = getChain(network);
-  const transport = http(chain.rpcUrls.default.http[0]);
+function buildClients(chainId: number) {
+  const cached = clients.get(chainId);
+  if (cached) return cached;
 
-  publicClient = createPublicClient({ chain, transport });
-  walletClient = createWalletClient({ chain, transport });
+  const config = getChainConfig(chainId);
+  if (!config) throw new Error(`Unknown chain ID: ${chainId}`);
+
+  const chain = toViemChain(config);
+  const transport = http(config.rpcUrls[0]);
+
+  const pub = createPublicClient({ chain, transport });
+  const wlt = createWalletClient({ chain, transport });
+  clients.set(chainId, { public: pub, wallet: wlt });
+  return { public: pub, wallet: wlt };
 }
 
-
-export default function ClientService(network?: ValidNetwork) {
-  const targetNetwork = network ?? currentNetwork;
-
-  if (!publicClient || !walletClient || targetNetwork !== currentNetwork) {
-    currentNetwork = targetNetwork;
-    buildClients(targetNetwork);
-  }
-
+export default function ClientService(chainId: number) {
+  const c = buildClients(chainId);
   return {
-    getPublicClient: () => publicClient!,
-    getWalletClient: () => walletClient!,
-    getCurrentNetwork: () => currentNetwork,
-    getChain: () => getChain(currentNetwork),
+    getPublicClient: () => c.public,
+    getWalletClient: () => c.wallet,
+    getChainId: () => chainId,
+    getChain: () => buildClients(chainId).public.chain,
   };
 }
 
-export function getPublicClient(network?: ValidNetwork): PublicClient {
-  return ClientService(network).getPublicClient();
+export function getPublicClient(chainId?: number): PublicClient {
+  return buildClients(chainId ?? 31).public;
 }
 
-export function getWalletClient(network?: ValidNetwork): WalletClient {
-  return ClientService(network).getWalletClient();
+export function getPublicClientByChainId(chainId: number): PublicClient {
+  return buildClients(chainId).public;
+}
+
+export function getWalletClient(chainId?: number): WalletClient {
+  return buildClients(chainId ?? 31).wallet;
+}
+
+export function getWalletClientByChainId(chainId: number): WalletClient {
+  return buildClients(chainId).wallet;
 }

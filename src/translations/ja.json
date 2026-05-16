@@ -38,6 +38,8 @@
     "section_network_desc": "メインネット、テストネット、RPC",
     "section_currency": "通貨",
     "section_currency_desc": "表示通貨、単位",
+    "section_governance": "ガバナンス",
+    "section_governance_desc": "Rootstock Collectiveに参加",
     "section_import": "ウォレットをインポート",
     "section_import_desc": "リカバリーフレーズから復元",
     "section_about": "このアプリについて",

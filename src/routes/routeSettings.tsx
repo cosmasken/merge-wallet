@@ -5,6 +5,7 @@ import CurrencySettings from "@/views/settings/CurrencySettings";
 import AboutView from "@/views/settings/AboutView";
 import LanguageSettings from "@/views/settings/LanguageSettings";
 import AddressBook from "@/views/wallet/AddressBook";
+import GovernanceView from "@/views/settings/GovernanceView";
 
 export const routeSettings = [
   {
@@ -22,6 +23,10 @@ export const routeSettings = [
   {
     path: "/settings/currency",
     element: <CurrencySettings />,
+  },
+  {
+    path: "/settings/governance",
+    element: <GovernanceView />,
   },
   {
     path: "/settings/about",

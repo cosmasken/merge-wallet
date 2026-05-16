@@ -1,14 +1,14 @@
 import { parseEther } from "viem"
 import { getPublicClient } from "@/kernel/evm/ClientService"
-import type { ValidNetwork } from "@/redux/preferences"
+import { getChainConfig } from "@/chains"
 
-export default function TransactionBuilderService(network?: ValidNetwork) {
+export default function TransactionBuilderService(chainId?: number) {
   async function estimateGas(
     to: `0x${string}`,
     amount: string,
     from: `0x${string}`,
   ): Promise<bigint> {
-    const publicClient = getPublicClient(network)
+    const publicClient = getPublicClient(chainId)
     const gas = await publicClient.estimateGas({
       to,
       value: parseEther(amount),
@@ -22,20 +22,16 @@ export default function TransactionBuilderService(network?: ValidNetwork) {
     to: `0x${string}`,
     amount: string,
   ) {
-    const publicClient = getPublicClient(network)
-    
-    // Get fresh nonce each time to avoid stale nonce issues
-    const [gas, gasPrice, chainId] = await Promise.all([
-      estimateGas(to, amount, from),
-      publicClient.getGasPrice(),
-      publicClient.getChainId(),
+    const publicClient = getPublicClient(chainId)
+    const chainIdResolved = await publicClient.getChainId()
+    const config = getChainConfig(chainIdResolved)
+
+    const gas = await estimateGas(to, amount, from)
+
+    const [gasPrice, nonce] = await Promise.all([
+      config?.gasType === "eip1559" ? Promise.resolve(undefined) : publicClient.getGasPrice(),
+      publicClient.getTransactionCount({ address: from, blockTag: "pending" }),
     ])
-    
-    // Get nonce separately to ensure it's fresh
-    const nonce = await publicClient.getTransactionCount({ 
-      address: from,
-      blockTag: 'pending' // Include pending transactions
-    })
 
     return {
       to,
@@ -43,7 +39,7 @@ export default function TransactionBuilderService(network?: ValidNetwork) {
       gas,
       gasPrice,
       nonce,
-      chainId,
+      chainId: chainIdResolved,
       from,
     }
   }

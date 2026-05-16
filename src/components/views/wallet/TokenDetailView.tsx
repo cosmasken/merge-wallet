@@ -12,8 +12,9 @@ import LoadingSkeleton from "@/atoms/LoadingSkeleton";
 import SendIcon from "@/icons/SendIcon";
 import ReceiveIcon from "@/icons/ReceiveIcon";
 import { selectWalletAddress, selectWalletBalance, selectTrackedTokens } from "@/redux/wallet";
-import { selectNetwork, selectShouldHideBalance } from "@/redux/preferences";
+import { selectChainId, selectShouldHideBalance } from "@/redux/preferences";
 import { buildAddressUrl } from "@/util/networks";
+import { getNativeCurrency } from "@/chains";
 import { useTranslation } from "@/translations";
 import { getTokenList } from "@/kernel/evm/TokenManagerService";
 import { useEffect, useState } from "react";
@@ -24,40 +25,42 @@ export default function TokenDetailView() {
   const navigate = useNavigate();
   const address = useSelector(selectWalletAddress);
   const nativeBalance = useSelector(selectWalletBalance);
-  const network = useSelector(selectNetwork);
+  const chainId = useSelector(selectChainId);
   const hideBalance = useSelector(selectShouldHideBalance);
   const trackedTokens = useSelector(selectTrackedTokens);
   const { t } = useTranslation();
   
+  const nativeCurrency = getNativeCurrency(chainId);
+  const isNative = symbol === nativeCurrency.symbol;
   const [token, setToken] = useState<TokenBalance | null>(null);
-  const [loading, setLoading] = useState(symbol !== "RBTC");
+  const [loading, setLoading] = useState(!isNative);
 
   useEffect(() => {
-    if (symbol === "RBTC") {
+    if (isNative) {
       setToken({
         address: "0x0000000000000000000000000000000000000000" as `0x${string}`,
-        symbol: "RBTC",
-        name: "Rootstock RBTC",
+        symbol: nativeCurrency.symbol,
+        name: nativeCurrency.name,
         balance: BigInt(nativeBalance),
-        decimals: 18,
+        decimals: nativeCurrency.decimals,
       });
       return;
     }
 
     if (!address || !symbol) return;
 
-    const allTokens = [...getTokenList(network), ...trackedTokens.filter(t => t.network === network)];
+    const allTokens = [...getTokenList(chainId), ...trackedTokens.filter(t => t.chainId === chainId)];
     const tokenInfo = allTokens.find(t => t.symbol === symbol);
     
     if (tokenInfo) {
-      TokenManagerService(network)
+      TokenManagerService(chainId)
         .getTokenBalance(address as `0x${string}`, tokenInfo.address!)
         .then(res => {
           setToken(res);
           setLoading(false);
         });
     }
-  }, [symbol, address, nativeBalance, network, trackedTokens]);
+  }, [symbol, address, nativeBalance, chainId, trackedTokens]);
 
   if (!token && !loading) {
     return (
@@ -135,7 +138,7 @@ export default function TokenDetailView() {
           
           <div className="border-t border-neutral-100 dark:border-neutral-700 pt-3">
             <a
-              href={token?.address ? buildAddressUrl(network, token.address) : buildAddressUrl(network, address)}
+              href={token?.address ? buildAddressUrl(chainId, token.address) : buildAddressUrl(chainId, address)}
               target="_blank"
               rel="noopener noreferrer"
               className="flex items-center justify-between group"
