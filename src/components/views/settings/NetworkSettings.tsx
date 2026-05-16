@@ -1,4 +1,4 @@
-import { useCallback, useState } from "react";
+import { useCallback, useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 
 import ViewHeader from "@/layout/ViewHeader";
@@ -7,6 +7,7 @@ import Button from "@/atoms/Button";
 import { selectNetwork, setNetwork, type ValidNetwork } from "@/redux/preferences";
 import { getChain } from "@/util/networks";
 import ClientService from "@/kernel/evm/ClientService";
+import MainnetWarningModal from "@/components/composite/MainnetWarningModal";
 
 const NETWORKS: { key: ValidNetwork; label: string }[] = [
   { key: "mainnet", label: "Mainnet" },
@@ -18,6 +19,11 @@ export default function NetworkSettings() {
   const currentNetwork = useSelector(selectNetwork);
   const [testing, setTesting] = useState(false);
   const [testResults, setTestResults] = useState<Record<string, boolean | null>>({});
+  const [showMainnetWarning, setShowMainnetWarning] = useState(false);
+  const [pendingNetwork, setPendingNetwork] = useState<ValidNetwork | null>(null);
+
+  // Check if user has seen mainnet warning before
+  const hasSeenMainnetWarning = localStorage.getItem('hasSeenMainnetWarning') === 'true';
 
   const testConnection = useCallback(async (network: ValidNetwork) => {
     setTesting(true);
@@ -48,11 +54,41 @@ export default function NetworkSettings() {
   }, []);
 
   const handleSwitch = (network: ValidNetwork) => {
+    // Show warning when switching to mainnet for the first time
+    if (network === "mainnet" && currentNetwork !== "mainnet" && !hasSeenMainnetWarning) {
+      setPendingNetwork(network);
+      setShowMainnetWarning(true);
+      return;
+    }
+    
     dispatch(setNetwork(network));
   };
 
+  const handleMainnetWarningConfirm = (dontShowAgain: boolean) => {
+    if (dontShowAgain) {
+      localStorage.setItem('hasSeenMainnetWarning', 'true');
+    }
+    
+    if (pendingNetwork) {
+      dispatch(setNetwork(pendingNetwork));
+    }
+    
+    setShowMainnetWarning(false);
+    setPendingNetwork(null);
+  };
+
+  const handleMainnetWarningCancel = () => {
+    setShowMainnetWarning(false);
+    setPendingNetwork(null);
+  };
+
+  useEffect(function autoTestOnMount() {
+    testAllConnections();
+  }, [testAllConnections]);
+
   return (
-    <PullToRefresh onRefresh={testAllConnections}>
+    <>
+      <PullToRefresh onRefresh={testAllConnections}>
       <div>
         <ViewHeader title="Network" subtitle="Rootstock network configuration" showBack />
         <div className="flex flex-col gap-4 px-4">
@@ -133,5 +169,12 @@ export default function NetworkSettings() {
         </div>
       </div>
     </PullToRefresh>
+
+    <MainnetWarningModal
+      isOpen={showMainnetWarning}
+      onConfirm={handleMainnetWarningConfirm}
+      onCancel={handleMainnetWarningCancel}
+    />
+  </>
   );
 }
