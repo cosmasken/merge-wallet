@@ -1,4 +1,3 @@
-import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import { Provider } from "react-redux";
 import { createBrowserRouter, RouterProvider } from "react-router";
@@ -20,14 +19,8 @@ const router = createBrowserRouter([
     element: <MainLayout />,
     errorElement: <ErrorBoundary />,
     children: [
-      {
-        path: "/",
-        element: <IndexRoute />,
-      },
-      {
-        path: "/onboarding",
-        element: <WalletOnboarding />,
-      },
+      { path: "/", element: <IndexRoute /> },
+      { path: "/onboarding", element: <WalletOnboarding /> },
       ...routeWallet,
       ...routeAssets,
       ...routeSettings,
@@ -37,11 +30,9 @@ const router = createBrowserRouter([
 ]);
 
 createRoot(document.getElementById("root")!).render(
-  <StrictMode>
-    <Provider store={store}>
-      <AppProvider>
-        <RouterProvider router={router} />
-      </AppProvider>
-    </Provider>
-  </StrictMode>,
+  <Provider store={store}>
+    <AppProvider>
+      <RouterProvider router={router} />
+    </AppProvider>
+  </Provider>,
 );
