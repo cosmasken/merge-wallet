@@ -57,7 +57,7 @@ const TransactionConfirmation: React.FC<TransactionConfirmationProps> = ({
                   symbol={token.symbol} 
                   className="text-xl font-bold text-white" 
                 />
-                <FiatValue wei={value} className="text-sm text-gray-500" />
+                <FiatValue wei={value} symbol={token.symbol} decimals={token.decimals} className="text-sm text-gray-500" />
               </div>
             </div>
           </div>
@@ -71,7 +71,7 @@ const TransactionConfirmation: React.FC<TransactionConfirmationProps> = ({
                 symbol={token.symbol} 
                 className="text-white" 
               />
-              <FiatValue wei={networkFee} className="text-sm text-gray-500" />
+              <FiatValue wei={networkFee} symbol="RBTC" decimals={18} className="text-sm text-gray-500" />
             </div>
           </div>
 
@@ -84,7 +84,7 @@ const TransactionConfirmation: React.FC<TransactionConfirmationProps> = ({
                 symbol={token.symbol} 
                 className="text-2xl font-black text-primary-400" 
               />
-              <FiatValue wei={total} className="text-sm text-gray-500" />
+              <FiatValue wei={total} symbol={token.symbol} decimals={token.decimals} className="text-sm text-gray-500" />
             </div>
           </div>
         </div>

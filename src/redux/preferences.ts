@@ -14,6 +14,12 @@ interface RbtcPrice {
   lastUpdated: number;
 }
 
+interface TokenPrice {
+  price: number;
+  currency: string;
+  lastUpdated: number;
+}
+
 interface PreferencesState {
   themeMode: ThemeMode;
   chainId: number;
@@ -29,6 +35,7 @@ interface PreferencesState {
   authActions: string;
   pinInputMode: string;
   rbtcPrice: RbtcPrice | null;
+  tokenPrices?: Record<string, TokenPrice>;
 }
 
 const initialState: PreferencesState = {
@@ -46,6 +53,7 @@ const initialState: PreferencesState = {
   authActions: "Any;SendTransaction;RevealBalance",
   pinInputMode: "true",
   rbtcPrice: null,
+  tokenPrices: {},
 };
 
 export const setTheme = createAction<ThemeMode>("preferences/setTheme");
@@ -57,6 +65,7 @@ export const updateSecuritySettings = createAction<Partial<PreferencesState["sec
 export const setAuthMode = createAction<string>("preferences/setAuthMode");
 export const setAuthActions = createAction<string>("preferences/setAuthActions");
 export const setRbtcPrice = createAction<{ price: number; currency: string }>("preferences/setRbtcPrice");
+export const setTokenPrices = createAction<Record<string, { price: number; currency: string }>>("preferences/setTokenPrices");
 export const hydratePreferences = createAction<Partial<PreferencesState>>("preferences/hydrate");
 
 export const preferencesReducer = createReducer(initialState, (builder) => {
@@ -91,6 +100,17 @@ export const preferencesReducer = createReducer(initialState, (builder) => {
         currency: action.payload.currency,
         lastUpdated: Date.now(),
       };
+    })
+    .addCase(setTokenPrices, (state, action) => {
+      if (!state.tokenPrices) state.tokenPrices = {};
+      const now = Date.now();
+      for (const [symbol, info] of Object.entries(action.payload)) {
+        state.tokenPrices[symbol.toUpperCase()] = {
+          price: info.price,
+          currency: info.currency,
+          lastUpdated: now,
+        };
+      }
     })
     .addCase(hydratePreferences, (_state, action) => ({
       ...initialState,
@@ -155,4 +175,9 @@ export const selectAuthMode = createSelector(
 export const selectRbtcPrice = createSelector(
   selectPreferences,
   (prefs) => prefs.rbtcPrice,
+);
+
+export const selectTokenPrices = createSelector(
+  selectPreferences,
+  (prefs) => prefs.tokenPrices || {},
 );

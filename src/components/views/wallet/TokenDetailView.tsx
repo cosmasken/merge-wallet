@@ -98,7 +98,7 @@ export default function TokenDetailView() {
           )}
         </div>
         {!hideBalance && token && (
-          <FiatValue wei={token.balance} decimals={token.decimals} className="text-neutral-500" />
+          <FiatValue wei={token.balance} symbol={token.symbol} decimals={token.decimals} className="text-neutral-500" />
         )}
       </div>
 

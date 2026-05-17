@@ -26,7 +26,8 @@ import {
   removeTrackedNft,
   selectTrackedNfts,
 } from "@/redux/wallet";
-import { selectShouldHideBalance, toggleHideBalance, selectChainId } from "@/redux/preferences";
+import { selectShouldHideBalance, toggleHideBalance, selectChainId, selectLocalCurrency } from "@/redux/preferences";
+import { syncTokenPrices } from "@/kernel/evm/PriceService";
 import AddTokenModal from "@/components/composite/AddTokenModal";
 import DashboardHeader from "@/components/composite/DashboardHeader";
 import { selectIsConnected } from "@/redux/device";
@@ -49,6 +50,7 @@ export default function WalletHome() {
   const isConnected = useSelector(selectIsConnected);
   const hideBalance = useSelector(selectShouldHideBalance);
   const trackedTokens = useSelector(selectTrackedTokens);
+  const localCurrency = useSelector(selectLocalCurrency);
   
   const useSmartWallet = useSelector(selectUseSmartWallet);
   const smartWalletAddress = useSelector(selectSmartWalletAddress);
@@ -101,8 +103,11 @@ export default function WalletHome() {
       },
     );
 
+    // Sync dynamic token prices on load
+    syncTokenPrices(dispatch, localCurrency);
+
     return () => Balance.stopAutoRefresh();
-  }, [activeAddress, chainId, useSmartWallet, dispatch]);
+  }, [activeAddress, chainId, useSmartWallet, dispatch, localCurrency]);
 
   useEffect(function fetchTokens() {
     if (!activeAddress) return;
@@ -148,6 +153,7 @@ export default function WalletHome() {
       trackedNfts.length > 0
         ? NftService().getNftBalances(activeAddress as `0x${string}`, trackedNfts as `0x${string}`[])
         : Promise.resolve([] as NftInfo[]),
+      syncTokenPrices(dispatch, localCurrency),
     ]);
     
     setActiveBalance(b.toString());
@@ -157,7 +163,7 @@ export default function WalletHome() {
     setTokens(t);
     setNfts(n);
     setIsLoading(false);
-  }, [activeAddress, chainId, dispatch, useSmartWallet, trackedTokens, trackedNfts]);
+  }, [activeAddress, chainId, dispatch, useSmartWallet, trackedTokens, trackedNfts, localCurrency]);
 
   const handleImport = useCallback(async () => {
     const trimmed = importAddress.trim();
@@ -341,7 +347,7 @@ export default function WalletHome() {
                     <span className="font-semibold text-sm">{token.symbol}</span>
                     {!hideBalance && (
                       <div className="text-xs text-neutral-400 mt-0.5">
-                        <FiatValue wei={token.balance} fallbackClassName="inline" />
+                        <FiatValue wei={token.balance} symbol={token.symbol} decimals={token.decimals} fallbackClassName="inline" />
                       </div>
                     )}
                   </div>
