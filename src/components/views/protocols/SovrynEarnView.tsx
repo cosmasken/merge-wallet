@@ -26,9 +26,17 @@ export default function SovrynEarnView() {
 
   const [pool, setPool] = useState<PoolType>("xusd")
   const [xusdBalance, setXusdBalance] = useState<bigint>(0n)
-  const [iTokenBal, setITokenBal] = useState<bigint>(0n)
-  const [assetBal, setAssetBal] = useState<bigint>(0n)
-  const [tokenPrice, setTokenPrice] = useState<bigint>(0n)
+  
+  // XUSD Pool Metrics
+  const [xusdiTokenBal, setXusdiTokenBal] = useState<bigint>(0n)
+  const [xusdAssetBal, setXusdAssetBal] = useState<bigint>(0n)
+  const [xusdTokenPrice, setXusdTokenPrice] = useState<bigint>(0n)
+
+  // RBTC Pool Metrics
+  const [rbtciTokenBal, setRbtciTokenBal] = useState<bigint>(0n)
+  const [rbtcAssetBal, setRbtcAssetBal] = useState<bigint>(0n)
+  const [rbtcTokenPrice, setRbtcTokenPrice] = useState<bigint>(0n)
+
   const [supplyAmt, setSupplyAmt] = useState("")
   const [withdrawAmt, setWithdrawAmt] = useState("")
   const [isBusy, setIsBusy] = useState(false)
@@ -40,7 +48,6 @@ export default function SovrynEarnView() {
   const ixusd = IXUSD[chainId] as `0x${string}` | undefined
   const irbtc = IRBTC[chainId] as `0x${string}` | undefined
 
-  // Hoist above refresh so it's in scope for the dep array
   const isRbtcPool = pool === "rbtc"
 
   const refresh = useCallback(async () => {
@@ -54,28 +61,29 @@ export default function SovrynEarnView() {
           sovryn.getTokenPrice(ixusd),
         ])
         setXusdBalance(xBal)
-        if (!isRbtcPool) {
-          setITokenBal(iBal)
-          setAssetBal(aBal)
-          setTokenPrice(p)
-        }
+        setXusdiTokenBal(iBal)
+        setXusdAssetBal(aBal)
+        setXusdTokenPrice(p)
       }
-      if (irbtc && isRbtcPool) {
+      if (irbtc) {
         const [iBal, aBal, p] = await Promise.all([
           sovryn.getITokenBalance(irbtc, address as `0x${string}`),
           sovryn.getAssetBalance(irbtc, address as `0x${string}`),
           sovryn.getTokenPrice(irbtc),
         ])
-        setITokenBal(iBal)
-        setAssetBal(aBal)
-        setTokenPrice(p)
+        setRbtciTokenBal(iBal)
+        setRbtcAssetBal(aBal)
+        setRbtcTokenPrice(p)
       }
     } catch {}
-  }, [address, chainId, isRbtcPool])
+  }, [address, chainId])
 
   useEffect(() => { refresh() }, [refresh])
 
   const sourceBal = isRbtcPool ? BigInt(rbtcBalance) : xusdBalance
+  const iTokenBal = isRbtcPool ? rbtciTokenBal : xusdiTokenBal
+  const assetBal = isRbtcPool ? rbtcAssetBal : xusdAssetBal
+  const tokenPrice = isRbtcPool ? rbtcTokenPrice : xusdTokenPrice
   const earningBal = assetBal
   const underlyingLabel = isRbtcPool ? "RBTC" : "XUSD"
 
@@ -160,16 +168,103 @@ export default function SovrynEarnView() {
       </a>
       <div className="flex flex-col gap-4 px-4">
 
-        {/* Pool selector */}
-        <div className="flex gap-2">
-          {(["xusd", "rbtc"] as PoolType[]).map(p => (
-            <button key={p} onClick={() => { setPool(p); setError(""); }}
-              className={`flex-1 p-2.5 rounded-lg border-2 text-sm font-semibold transition-colors ${
-                pool === p ? "border-primary bg-primary/10 text-primary" : "border-neutral-300 dark:border-neutral-600 text-neutral-500"
-              }`}>
-              {p === "xusd" ? "XUSD Pool" : "RBTC Pool"}
-            </button>
-          ))}
+        {/* Pool Selector Cards */}
+        <div className="grid grid-cols-2 gap-3.5 mb-2 animate-in fade-in duration-300">
+          {/* XUSD Pool Card */}
+          <div
+            onClick={() => {
+              setSupplyAmt("");
+              setWithdrawAmt("");
+              setPool("xusd");
+              setError("");
+            }}
+            className={`cursor-pointer rounded-2xl p-4 border transition-all duration-300 relative overflow-hidden flex flex-col justify-between h-36 ${
+              pool === "xusd"
+                ? "bg-primary/5 border-primary shadow-[0_0_20px_rgba(235,16,112,0.06)] ring-1 ring-primary/30"
+                : "bg-white dark:bg-neutral-900 border-neutral-200 dark:border-neutral-800 hover:border-neutral-300 dark:hover:border-neutral-700 shadow-sm"
+            }`}
+          >
+            {/* Top Row: Symbol & APY */}
+            <div className="flex items-start justify-between">
+              <div>
+                <span className="text-xl font-bold font-display text-neutral-800 dark:text-neutral-100 flex items-center gap-1.5">
+                  XUSD
+                  <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse"></span>
+                </span>
+                <span className="text-[9px] text-neutral-400 dark:text-neutral-500 uppercase tracking-wider font-semibold block mt-0.5">
+                  Stablecoin Pool
+                </span>
+              </div>
+              <div className="text-right">
+                <span className="text-[10px] font-bold text-green-500 bg-green-500/10 px-2 py-0.5 rounded-full">
+                  ~4.5% APY
+                </span>
+              </div>
+            </div>
+
+            {/* Bottom Row: Earning Position */}
+            <div className="pt-2 border-t border-neutral-100/50 dark:border-neutral-800/50">
+              <span className="text-[9px] text-neutral-400 dark:text-neutral-500 block">
+                Supplied Position
+              </span>
+              <span className="text-xs font-mono font-bold text-neutral-700 dark:text-neutral-200 mt-0.5 block truncate">
+                <WeiDisplay wei={xusdAssetBal} symbol="XUSD" />
+              </span>
+            </div>
+
+            {/* Active Glow Accent */}
+            {pool === "xusd" && (
+              <div className="absolute right-0 bottom-0 w-24 h-24 bg-primary/10 rounded-full blur-2xl -mr-8 -mb-8 pointer-events-none" />
+            )}
+          </div>
+
+          {/* RBTC Pool Card */}
+          <div
+            onClick={() => {
+              setSupplyAmt("");
+              setWithdrawAmt("");
+              setPool("rbtc");
+              setError("");
+            }}
+            className={`cursor-pointer rounded-2xl p-4 border transition-all duration-300 relative overflow-hidden flex flex-col justify-between h-36 ${
+              pool === "rbtc"
+                ? "bg-primary/5 border-primary shadow-[0_0_20px_rgba(235,16,112,0.06)] ring-1 ring-primary/30"
+                : "bg-white dark:bg-neutral-900 border-neutral-200 dark:border-neutral-800 hover:border-neutral-300 dark:hover:border-neutral-700 shadow-sm"
+            }`}
+          >
+            {/* Top Row: Symbol & APY */}
+            <div className="flex items-start justify-between">
+              <div>
+                <span className="text-xl font-bold font-display text-neutral-800 dark:text-neutral-100 flex items-center gap-1.5">
+                  RBTC
+                  <span className="w-1.5 h-1.5 rounded-full bg-orange-500 animate-pulse"></span>
+                </span>
+                <span className="text-[9px] text-neutral-400 dark:text-neutral-500 uppercase tracking-wider font-semibold block mt-0.5">
+                  Rootstock BTC Pool
+                </span>
+              </div>
+              <div className="text-right">
+                <span className="text-[10px] font-bold text-orange-500 bg-orange-500/10 px-2 py-0.5 rounded-full">
+                  ~2.8% APY
+                </span>
+              </div>
+            </div>
+
+            {/* Bottom Row: Earning Position */}
+            <div className="pt-2 border-t border-neutral-100/50 dark:border-neutral-800/50">
+              <span className="text-[9px] text-neutral-400 dark:text-neutral-500 block">
+                Supplied Position
+              </span>
+              <span className="text-xs font-mono font-bold text-orange-600 dark:text-orange-400 mt-0.5 block truncate">
+                <WeiDisplay wei={rbtcAssetBal} symbol="RBTC" />
+              </span>
+            </div>
+
+            {/* Active Glow Accent */}
+            {pool === "rbtc" && (
+              <div className="absolute right-0 bottom-0 w-24 h-24 bg-orange-500/10 rounded-full blur-2xl -mr-8 -mb-8 pointer-events-none" />
+            )}
+          </div>
         </div>
 
         {/* Position */}
