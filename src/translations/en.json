@@ -167,6 +167,26 @@
       "verify_again": "Verify Again"
     }
   },
+  "protocols": {
+    "moc": {
+      "mintDoc_title": "Borrow DOC",
+      "mintDoc_subtitle": "Deposit RBTC → Borrow DOC stablecoin",
+      "mintDoc_btn": "Borrow DOC",
+      "mintDoc_desc": "Locks RBTC as collateral to borrow DOC, a USD-pegged stablecoin. You can repay DOC anytime to get your RBTC back.",
+      "redeemDoc_title": "Pay DOC",
+      "redeemDoc_subtitle": "Repay DOC → Receive RBTC back",
+      "redeemDoc_btn": "Pay DOC",
+      "redeemDoc_desc": "Repay your DOC to release the underlying RBTC collateral. The price of DOC is always pegged to $1 USD.",
+      "mintBPro_title": "Buy BPro",
+      "mintBPro_subtitle": "Deposit RBTC → Receive BPro",
+      "mintBPro_btn": "Buy BPro",
+      "mintBPro_desc": "BPro gives you leveraged exposure to Bitcoin price movements plus a share of protocol fees. It's a tokenized Bitcoin hashrate position.",
+      "redeemBPro_title": "Sell BPro",
+      "redeemBPro_subtitle": "Return BPro → Receive RBTC back",
+      "redeemBPro_btn": "Sell BPro",
+      "redeemBPro_desc": "Burn your BPro to release the underlying RBTC. The amount of RBTC you get depends on BPro's current redemption price."
+    }
+  },
   "security": {
     "settings": {
       "title": "Security",

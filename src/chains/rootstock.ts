@@ -14,7 +14,6 @@ export const rootstockTestnet: ChainConfig = {
   name: "Rootstock Testnet",
   rpcUrls: [
     "https://public-node.testnet.rsk.co",
-    "https://rpc.testnet.rootstock.io",
   ],
   nativeCurrency: { name: "RBTC", symbol: "RBTC", decimals: 18 },
   slip44: 137,

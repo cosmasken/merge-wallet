@@ -161,6 +161,26 @@
       "verify_again": "Thibitisha Tena"
     }
   },
+  "protocols": {
+    "moc": {
+      "mintDoc_title": "Kukopa DOC",
+      "mintDoc_subtitle": "Weka RBTC → Kopa DOC stablecoin",
+      "mintDoc_btn": "Kopa DOC",
+      "mintDoc_desc": "Inafunga RBTC kama dhamana kukopa DOC, stablecoin inayofuatisha dola. Unaweza kulipa DOC wakati wowote kupata RBTC yako.",
+      "redeemDoc_title": "Lipa DOC",
+      "redeemDoc_subtitle": "Lipa DOC → Pata RBTC",
+      "redeemDoc_btn": "Lipa DOC",
+      "redeemDoc_desc": "Lipa DOC yako kuachilia dhamana ya RBTC. Bei ya DOC daima ni sawa na $1 USD.",
+      "mintBPro_title": "Nunua BPro",
+      "mintBPro_subtitle": "Weka RBTC → Pokea BPro",
+      "mintBPro_btn": "Nunua BPro",
+      "mintBPro_desc": "BPro inakupa ufikiaji wa kiwango cha Bitcoin pamoja na sehemu ya ada za itifaki. Ni nafasi ya hashrate ya Bitcoin iliyotiwa alama.",
+      "redeemBPro_title": "Uza BPro",
+      "redeemBPro_subtitle": "Rudisha BPro → Pokea RBTC",
+      "redeemBPro_btn": "Uza BPro",
+      "redeemBPro_desc": "Choma BPro yako kuachilia RBTC. Kiasi cha RBTC unachopata kinategemea bei ya ukombozi wa sasa."
+    }
+  },
   "security": {
     "settings": {
       "title": "Usalama",

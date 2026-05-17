@@ -161,6 +161,26 @@
       "verify_again": "फिर से सत्यापित करें"
     }
   },
+  "protocols": {
+    "moc": {
+      "mintDoc_title": "DOC उधार लें",
+      "mintDoc_subtitle": "RBTC जमा करें → DOC stablecoin उधार लें",
+      "mintDoc_btn": "DOC उधार लें",
+      "mintDoc_desc": "DOC (डॉलर-आधारित स्टेबलकॉइन) उधार लेने के लिए RBTC को जमानत के रूप में लॉक करता है। आप कभी भी DOC चुकाकर अपना RBTC वापस पा सकते हैं।",
+      "redeemDoc_title": "DOC चुकाएं",
+      "redeemDoc_subtitle": "DOC चुकाएं → RBTC वापस लें",
+      "redeemDoc_btn": "DOC चुकाएं",
+      "redeemDoc_desc": "RBTC जमानत जारी करने के लिए अपना DOC चुकाएं। DOC की कीमत हमेशा $1 USD से जुड़ी होती है।",
+      "mintBPro_title": "BPro خریدیں",
+      "mintBPro_subtitle": "RBTC जमा करें → BPro प्राप्त करें",
+      "mintBPro_btn": "BPro خریدیں",
+      "mintBPro_desc": "BPro आपको Bitcoin की कीमत के उतार-चढ़ाव में लिवरेज्ड एक्सपोजर देता है और प्रोटोकॉल शुल्क का एक हिस्सा भी मिलता है।",
+      "redeemBPro_title": "BPro बेचें",
+      "redeemBPro_subtitle": "BPro वापस करें → RBTC वापस लें",
+      "redeemBPro_btn": "BPro बेचें",
+      "redeemBPro_desc": "RBTC जारी करने के लिए अपना BPro अथवा नष्ट करें। आपको मिलने वाली RBTC की मात्रा वर्तमान मोचन मूल्य पर निर्भर करती है।"
+    }
+  },
   "security": {
     "settings": {
       "title": "सुरक्षा",

@@ -167,6 +167,26 @@
       "verify_again": "Vérifier à nouveau"
     }
   },
+  "protocols": {
+    "moc": {
+      "mintDoc_title": "Emprunter du DOC",
+      "mintDoc_subtitle": "Déposer du RBTC → Emprunter du DOC stablecoin",
+      "mintDoc_btn": "Emprunter du DOC",
+      "mintDoc_desc": "Verrouille le RBTC comme garantie pour emprunter du DOC, un stablecoin indexé sur le dollar. Vous pouvez rembourser le DOC à tout moment pour récupérer votre RBTC.",
+      "redeemDoc_title": "Rembourser du DOC",
+      "redeemDoc_subtitle": "Rembourser du DOC → Récupérer du RBTC",
+      "redeemDoc_btn": "Rembourser du DOC",
+      "redeemDoc_desc": "Remboursez votre DOC pour libérer la garantie RBTC sous-jacente. Le prix du DOC est toujours garanti à 1 $ USD.",
+      "mintBPro_title": "Acheter du BPro",
+      "mintBPro_subtitle": "Déposer du RBTC → Recevoir du BPro",
+      "mintBPro_btn": "Acheter du BPro",
+      "mintBPro_desc": "BPro vous donne une exposition à effet de levier aux mouvements de prix du Bitcoin plus une part des frais de protocole. C'est une position de hashrate Bitcoin tokenisée.",
+      "redeemBPro_title": "Vendre du BPro",
+      "redeemBPro_subtitle": "Retourner du BPro → Récupérer du RBTC",
+      "redeemBPro_btn": "Vendre du BPro",
+      "redeemBPro_desc": "Brûlez votre BPro pour libérer le RBTC sous-jacent. Le montant de RBTC que vous obtenez dépend du prix de rachat actuel du BPro."
+    }
+  },
   "security": {
     "settings": {
       "title": "Sécurité",

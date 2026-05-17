@@ -161,6 +161,26 @@
       "verify_again": "再次验证"
     }
   },
+  "protocols": {
+    "moc": {
+      "mintDoc_title": "借出 DOC",
+      "mintDoc_subtitle": "存入 RBTC → 借出 DOC 稳定币",
+      "mintDoc_btn": "借出 DOC",
+      "mintDoc_desc": "以 RBTC 为抖押借出 DOC，一种与美元挂钉的稳定币。您可随时偿还 DOC 来拿回您的 RBTC。",
+      "redeemDoc_title": "偿还 DOC",
+      "redeemDoc_subtitle": "偿还 DOC → 得回 RBTC",
+      "redeemDoc_btn": "偿还 DOC",
+      "redeemDoc_desc": "偿还您的 DOC 以释放底层 RBTC 抖押。DOC 价格始终与 1 美元挂钉。",
+      "mintBPro_title": "购买 BPro",
+      "mintBPro_subtitle": "存入 RBTC → 获得 BPro",
+      "mintBPro_btn": "购买 BPro",
+      "mintBPro_desc": "BPro 让您以杠杆形式暴露于比特币价格波动，并享有协议费用的一部分。",
+      "redeemBPro_title": "出售 BPro",
+      "redeemBPro_subtitle": "返还 BPro → 得回 RBTC",
+      "redeemBPro_btn": "出售 BPro",
+      "redeemBPro_desc": "销毁您的 BPro 以释放底层 RBTC。您获得的 RBTC 数量取决于当前赎回价格。"
+    }
+  },
   "security": {
     "settings": {
       "title": "安全",

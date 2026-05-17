@@ -119,15 +119,47 @@ export default function TokenDetailView() {
         />
       </div>
 
-      <div className="px-4">
-        <button
-          disabled
-          className="w-full p-4 rounded-2xl bg-neutral-100 dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 flex items-center justify-between opacity-60"
-        >
-          <span className="font-bold text-neutral-800 dark:text-neutral-100 italic">Buy</span>
-          <span className="text-xs text-neutral-400">(coming soon)</span>
-        </button>
-      </div>
+      {symbol === "DOC" ? (
+        <div className="flex gap-4 px-4">
+          <Button
+            label={t("protocols.moc.mintDoc_btn")}
+            variant="secondary"
+            fullWidth
+            onClick={() => navigate("/protocols/moc/create-doc")}
+          />
+          <Button
+            label={t("protocols.moc.redeemDoc_btn")}
+            variant="secondary"
+            fullWidth
+            onClick={() => navigate("/protocols/moc/redeem-doc")}
+          />
+        </div>
+      ) : symbol === "BPro" ? (
+        <div className="flex gap-4 px-4">
+          <Button
+            label={t("protocols.moc.mintBPro_btn")}
+            variant="secondary"
+            fullWidth
+            onClick={() => navigate("/protocols/moc/buy-bpro")}
+          />
+          <Button
+            label={t("protocols.moc.redeemBPro_btn")}
+            variant="secondary"
+            fullWidth
+            onClick={() => navigate("/protocols/moc/sell-bpro")}
+          />
+        </div>
+      ) : (
+        <div className="px-4">
+          <button
+            disabled
+            className="w-full p-4 rounded-2xl bg-neutral-100 dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 flex items-center justify-between opacity-60"
+          >
+            <span className="font-bold text-neutral-800 dark:text-neutral-100 italic">Buy</span>
+            <span className="text-xs text-neutral-400">(coming soon)</span>
+          </button>
+        </div>
+      )}
 
       <div className="px-4 flex flex-col gap-4">
         <Card className="p-4 flex flex-col gap-3">

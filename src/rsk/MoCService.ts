@@ -1,12 +1,14 @@
 import { parseEther, getAddress, encodeFunctionData, erc20Abi } from "viem"
 import { getPublicClientByChainId } from "@/kernel/evm/ClientService"
 import TransactionManagerService from "@/kernel/evm/TransactionManagerService"
+import KeyManagerService from "@/kernel/evm/KeyManagerService"
 import { MOC_CORE, MOC_STATE, DOC, BPRO } from "./addresses"
 import { mocCoreAbi, mocStateAbi } from "./abis/moc"
 
 export default function MoCService(chainId: number) {
   const publicClient = getPublicClientByChainId(chainId)
   const txManager = TransactionManagerService(chainId)
+  const keyManager = KeyManagerService()
 
   const mocCore = MOC_CORE[chainId] as `0x${string}`
   const mocState = MOC_STATE[chainId] as `0x${string}`
@@ -15,6 +17,36 @@ export default function MoCService(chainId: number) {
 
   function requireAvailable() {
     if (!mocCore || !doc) throw new Error(`MoC not available on chain ${chainId}`)
+  }
+
+  function getUserAddress(): `0x${string}` {
+    return getAddress(keyManager.getAddress())
+  }
+
+  async function getAllowance(token: `0x${string}`, spender: `0x${string}`): Promise<bigint> {
+    requireAvailable()
+    return publicClient.readContract({
+      address: token,
+      abi: erc20Abi,
+      functionName: "allowance",
+      args: [getUserAddress(), spender],
+    }) as Promise<bigint>
+  }
+
+  async function approveToken(
+    token: `0x${string}`,
+    spender: `0x${string}`,
+    amountWei: bigint,
+  ): Promise<`0x${string}`> {
+    requireAvailable()
+    const data = encodeFunctionData({
+      abi: erc20Abi,
+      functionName: "approve",
+      args: [spender, amountWei],
+    })
+    const { hash } = await txManager.sendContractTransaction(token, 0n, data)
+    await txManager.waitForReceipt(hash)
+    return hash
   }
 
   async function getBtcPrice(): Promise<bigint> {
@@ -96,7 +128,8 @@ export default function MoCService(chainId: number) {
       functionName: "mintDoc",
       args: [wei],
     })
-    const { hash } = await txManager.sendContractTransaction(mocCore, wei, data)
+    const valueWithBuffer = wei * 1005n / 1000n
+    const { hash } = await txManager.sendContractTransaction(mocCore, valueWithBuffer, data)
     return hash
   }
 
@@ -120,7 +153,8 @@ export default function MoCService(chainId: number) {
       functionName: "mintBPro",
       args: [wei],
     })
-    const { hash } = await txManager.sendContractTransaction(mocCore, wei, data)
+    const valueWithBuffer = wei * 1005n / 1000n
+    const { hash } = await txManager.sendContractTransaction(mocCore, valueWithBuffer, data)
     return hash
   }
 
@@ -148,5 +182,10 @@ export default function MoCService(chainId: number) {
     redeemDoc,
     mintBPro,
     redeemBPro,
+    getAllowance,
+    approveToken,
+    mocCore,
+    doc,
+    bpro,
   }
 }

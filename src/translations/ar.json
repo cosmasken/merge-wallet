@@ -161,6 +161,26 @@
       "verify_again": "التحقق مرة أخرى"
     }
   },
+  "protocols": {
+    "moc": {
+      "mintDoc_title": "اقتراض DOC",
+      "mintDoc_subtitle": "إيداع RBTC ← اقتراض DOC stablecoin",
+      "mintDoc_btn": "اقتراض DOC",
+      "mintDoc_desc": "يقفل RBTC كضمان لاقتراض DOC، عملة مستقرة مرتبطة بالدولار. يمكنك سداد DOC في أي وقت لاسترداد RBTC الخاص بك.",
+      "redeemDoc_title": "سداد DOC",
+      "redeemDoc_subtitle": "سداد DOC ← استرداد RBTC",
+      "redeemDoc_btn": "سداد DOC",
+      "redeemDoc_desc": "سدد DOC الخاص بك لتحرير ضمان RBTC الأساسي. سعر DOC دائمًا مثبت عند 1 دولار أمريكي.",
+      "mintBPro_title": "شراء BPro",
+      "mintBPro_subtitle": "إيداع RBTC ← استقبال BPro",
+      "mintBPro_btn": "شراء BPro",
+      "mintBPro_desc": "يمنحك BPro تعرضًا بالرافعة المالية لتحركات سعر Bitcoin بالإضافة إلى حصة من رسوم البروتوكول.",
+      "redeemBPro_title": "بيع BPro",
+      "redeemBPro_subtitle": "إعادة BPro ← استرداد RBTC",
+      "redeemBPro_btn": "بيع BPro",
+      "redeemBPro_desc": "احرق BPro الخاص بك لتحرير RBTC الأساسي. تعتمد كمية RBTC التي تحصل عليها على سعر الاسترداد الحالي."
+    }
+  },
   "security": {
     "settings": {
       "title": "الأمان",

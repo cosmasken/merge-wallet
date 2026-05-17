@@ -161,6 +161,26 @@
       "verify_again": "もう一度確認"
     }
   },
+  "protocols": {
+    "moc": {
+      "mintDoc_title": "DOCを借りる",
+      "mintDoc_subtitle": "RBTCを入金 → DOCステーブルコインを借りる",
+      "mintDoc_btn": "DOCを借りる",
+      "mintDoc_desc": "RBTCを担保に入れてDOC（ドル連動のステーブルコイン）を借ります。いつでもDOCを返済してRBTCを取り戻せます。",
+      "redeemDoc_title": "DOCを返済",
+      "redeemDoc_subtitle": "DOCを返済 → RBTCを回収",
+      "redeemDoc_btn": "DOCを返済",
+      "redeemDoc_desc": "DOCを返済してRBTC担保を解放します。DOCの価格は常に1米ドルに連動しています。",
+      "mintBPro_title": "BProを購入",
+      "mintBPro_subtitle": "RBTCを入金 → BProを受け取る",
+      "mintBPro_btn": "BProを購入",
+      "mintBPro_desc": "BProはビットコイン価格の動きにレバレッジがかかった形でエクスポージャーを提供し、プロトコル手数料の一部も分配されます。",
+      "redeemBPro_title": "BProを売る",
+      "redeemBPro_subtitle": "BProを返却 → RBTCを回収",
+      "redeemBPro_btn": "BProを売る",
+      "redeemBPro_desc": "BProをバーンしてRBTCを解放します。受け取るRBTCの量は現在の賞還価格に依存します。"
+    }
+  },
   "security": {
     "settings": {
       "title": "セキュリティ",

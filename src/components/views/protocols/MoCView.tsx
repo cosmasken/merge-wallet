@@ -18,6 +18,7 @@ import { getPublicClientByChainId } from "@/kernel/evm/ClientService"
 import { classifyError } from "@/kernel/evm/errors"
 import SecurityService, { AuthActions } from "@/kernel/app/SecurityService"
 import NotificationService from "@/kernel/app/NotificationService"
+import { useTranslation } from "@/translations"
 
 
 type Action = "mintDoc" | "redeemDoc" | "mintBPro" | "redeemBPro"
@@ -29,43 +30,10 @@ const VALID_ACTIONS: Record<string, Action> = {
   "sell-bpro": "redeemBPro",
 }
 
-const ACTION_LABELS: Record<Action, { title: string; subtitle: string; btn: string; desc: string }> = {
-  mintDoc: {
-    title: "Create DOC",
-    subtitle: "Deposit RBTC → receive DOC stablecoin",
-    btn: "Create DOC",
-    desc: "Locks RBTC as collateral and mints DOC, a USD-pegged stablecoin. You can redeem DOC anytime to get your RBTC back.",
-  },
-  redeemDoc: {
-    title: "Redeem DOC",
-    subtitle: "Return DOC → receive RBTC back",
-    btn: "Redeem DOC",
-    desc: "Burn your DOC to release the underlying RBTC collateral. The price of DOC is always redeemable at $1.",
-  },
-  mintBPro: {
-    title: "Buy BPro",
-    subtitle: "Deposit RBTC → receive BPro",
-    btn: "Buy BPro",
-    desc: "BPro gives you leveraged exposure to Bitcoin price movements plus a share of protocol fees. It's a tokenized Bitcoin hashrate position.",
-  },
-  redeemBPro: {
-    title: "Sell BPro",
-    subtitle: "Return BPro → receive RBTC back",
-    btn: "Sell BPro",
-    desc: "Burn your BPro to release the underlying RBTC. The amount of RBTC you get depends on BPro's current redemption price.",
-  },
-}
-
-const PILL_ORDER: { slug: string; label: string; action: Action }[] = [
-  { slug: "create-doc", label: "Create DOC", action: "mintDoc" },
-  { slug: "redeem-doc", label: "Redeem DOC", action: "redeemDoc" },
-  { slug: "buy-bpro", label: "Buy BPro", action: "mintBPro" },
-  { slug: "sell-bpro", label: "Sell BPro", action: "redeemBPro" },
-]
-
 export default function MoCView() {
   const navigate = useNavigate()
   const dispatch = useDispatch()
+  const { t } = useTranslation()
   const { action: urlAction } = useParams<{ action: string }>()
   const isOverview = !urlAction || !VALID_ACTIONS[urlAction]
   const action = isOverview ? "mintDoc" : VALID_ACTIONS[urlAction]
@@ -90,10 +58,30 @@ export default function MoCView() {
   const moc = MoCService(chainId)
   const mocTokens = getProtocolTokens(chainId).filter(t => t.protocol === "moc")
 
-  const a = isOverview ? null : ACTION_LABELS[action]
+  const PILL_ORDER: { slug: string; label: string; action: Action }[] = [
+    { slug: "create-doc", label: t("protocols.moc.mintDoc_btn"), action: "mintDoc" },
+    { slug: "redeem-doc", label: t("protocols.moc.redeemDoc_btn"), action: "redeemDoc" },
+    { slug: "buy-bpro", label: t("protocols.moc.mintBPro_btn"), action: "mintBPro" },
+    { slug: "sell-bpro", label: t("protocols.moc.redeemBPro_btn"), action: "redeemBPro" },
+  ]
+
+  const a = isOverview ? null : {
+    title: t(`protocols.moc.${action}_title`),
+    subtitle: t(`protocols.moc.${action}_subtitle`),
+    btn: t(`protocols.moc.${action}_btn`),
+    desc: t(`protocols.moc.${action}_desc`),
+  }
+
   const isRbtcIn = action === "mintDoc" || action === "mintBPro"
   const isOk = amount && !isNaN(Number(amount)) && Number(amount) > 0
-  const isLow = isOk && parseEther(amount) > BigInt(balance)
+  
+  const getActiveBalance = () => {
+    if (isRbtcIn) return BigInt(balance)
+    const symbol = action === "redeemDoc" ? "DOC" : "BPro"
+    return mocBalances[symbol] ?? 0n
+  }
+  const activeBalance = getActiveBalance()
+  const isLow = isOk && parseEther(amount) > activeBalance
   const isEmptyOverview = isOverview && mocTokens.every(t => !mocBalances[t.symbol] || mocBalances[t.symbol] === 0n)
 
   useEffect(() => {
@@ -101,7 +89,7 @@ export default function MoCView() {
   }, [chainId])
 
   useEffect(() => {
-    if (!address || !isOverview) return
+    if (!address) return
     const client = getPublicClientByChainId(chainId)
     Promise.all(mocTokens.map(async t => {
       try {
@@ -113,7 +101,7 @@ export default function MoCView() {
       results.forEach(r => { map[r.symbol] = r.balance })
       setMocBalances(map)
     })
-  }, [address, chainId, isOverview])
+  }, [address, chainId])
 
   const handleSubmit = useCallback(async () => {
     if (!isOk || isLow) return
@@ -125,6 +113,29 @@ export default function MoCView() {
     setIsBusy(true)
     setError("")
     try {
+      const authorized = await SecurityService().authorize(AuthActions.SendTransaction)
+      if (!authorized) { NotificationService().error("Authorization required"); setIsBusy(false); return }
+
+      const amountWei = parseEther(amount)
+
+      // Handle token approvals for redemptions
+      if (action === "redeemDoc" && moc.doc) {
+        setError("Checking DOC allowance...")
+        const allowance = await moc.getAllowance(moc.doc, moc.mocCore)
+        if (allowance < amountWei) {
+          setError("Approving DOC spending...")
+          await moc.approveToken(moc.doc, moc.mocCore, amountWei)
+        }
+      } else if (action === "redeemBPro" && moc.bpro) {
+        setError("Checking BPro allowance...")
+        const allowance = await moc.getAllowance(moc.bpro, moc.mocCore)
+        if (allowance < amountWei) {
+          setError("Approving BPro spending...")
+          await moc.approveToken(moc.bpro, moc.mocCore, amountWei)
+        }
+      }
+      setError("")
+
       const hash = await ({
         mintDoc: () => moc.mintDoc(amount),
         redeemDoc: () => moc.redeemDoc(amount),
@@ -146,7 +157,7 @@ export default function MoCView() {
       NotificationService().error(err.message)
     }
     setIsBusy(false)
-  }, [action, amount, chainId])
+  }, [action, amount, chainId, moc])
 
   const abiActionName: Record<string, string> = {
     mintDoc: "mintDoc",
@@ -161,11 +172,12 @@ export default function MoCView() {
     const client = getPublicClientByChainId(chainId)
     const mocCore = MOC_CORE[chainId] as `0x${string}`
     const wei = isRbtcIn ? parseEther(amount) : 0n
+    const valueWithBuffer = isRbtcIn ? wei * 1005n / 1000n : 0n
     const fnName = abiActionName[action]
     const data = fnName ? encodeFunctionData({ abi: mocCoreAbi, functionName: fnName as any, args: [parseEther(amount)] }) : undefined
 
     Promise.all([
-      client.estimateGas({ to: mocCore, value: wei, data, account: address as `0x${string}` }).catch(() => undefined),
+      client.estimateGas({ to: mocCore, value: isRbtcIn ? valueWithBuffer : wei, data, account: address as `0x${string}` }).catch(() => undefined),
       client.getGasPrice().catch(() => undefined),
     ]).then(([gas, gasPrice]) => {
       if (gas && gasPrice) {
@@ -290,16 +302,24 @@ export default function MoCView() {
 
         {/* Pill nav */}
         <div className="flex gap-2 overflow-x-auto no-scrollbar">
-          {PILL_ORDER.map(p => (
-            <button key={p.slug} onClick={() => navigate(`/protocols/moc/${p.slug}`)}
-              className={`shrink-0 px-3.5 py-2 rounded-full border-2 text-xs font-semibold transition-colors ${
-                !isOverview && action === p.action
-                  ? "border-primary bg-primary text-white"
-                  : "border-neutral-200 dark:border-neutral-700 text-neutral-500 dark:text-neutral-400"
-              }`}>
-              {p.label}
-            </button>
-          ))}
+          {isOverview ? (
+            PILL_ORDER.map(p => (
+              <button key={p.slug} onClick={() => navigate(`/protocols/moc/${p.slug}`)}
+                className="shrink-0 px-3.5 py-2 rounded-full border border-neutral-200 dark:border-neutral-700 text-neutral-500 dark:text-neutral-400 text-xs font-semibold hover:border-primary transition-colors">
+                {p.label}
+              </button>
+            ))
+          ) : (
+            PILL_ORDER.filter(p => p.action === action).map(p => (
+              <button key={p.slug} onClick={() => navigate("/protocols/moc")}
+                className="px-3.5 py-2 rounded-full border border-primary/20 bg-primary/10 text-primary text-xs font-semibold flex items-center gap-1.5 hover:bg-primary/20 transition-colors">
+                <svg viewBox="0 0 24 24" className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="2.5">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
+                </svg>
+                {p.label}
+              </button>
+            ))
+          )}
         </div>
 
         {isOverview ? (
@@ -361,16 +381,20 @@ export default function MoCView() {
 
               <div className="flex items-center justify-between mb-1">
                 <label className="text-xs text-neutral-500">{isRbtcIn ? "RBTC amount" : `${action === "redeemDoc" ? "DOC" : "BPro"} amount`}</label>
-                <span className="text-xs text-neutral-400 font-mono">RBTC bal: {formatEther(BigInt(balance))}</span>
+                <span className="text-xs text-neutral-400 font-mono">
+                  {isRbtcIn ? "RBTC" : action === "redeemDoc" ? "DOC" : "BPro"} Bal: {formatEther(activeBalance)}
+                </span>
               </div>
               <input type="text" placeholder="0.00" value={amount} onChange={e => setAmount(e.target.value)}
                 className="w-full p-3 rounded-lg border border-neutral-300 bg-white dark:bg-neutral-800 dark:border-neutral-600 text-lg font-mono" />
-              {isRbtcIn && (
-                <button onClick={() => setAmount(formatEther(BigInt(balance)))} className="text-xs text-primary font-semibold mt-1">Max</button>
-              )}
+              <button onClick={() => setAmount(formatEther(activeBalance))} className="text-xs text-primary font-semibold mt-1">Max</button>
             </Card>
 
-            {isLow && <p className="text-error text-sm bg-error/10 p-3 rounded-lg">Insufficient RBTC balance</p>}
+            {isLow && (
+              <p className="text-error text-sm bg-error/10 p-3 rounded-lg">
+                Insufficient {isRbtcIn ? "RBTC" : action === "redeemDoc" ? "DOC" : "BPro"} balance
+              </p>
+            )}
             {error && <p className="text-error text-sm bg-error/10 p-3 rounded-lg">{error}</p>}
 
             <Button
