@@ -38,6 +38,7 @@ interface WalletState {
   }[];
   useSmartWallet: boolean;
   smartWalletAddress: string;
+  hasSeenSmartWalletNotice: boolean;
 }
 
 const initialState: WalletState = {
@@ -53,6 +54,7 @@ const initialState: WalletState = {
   pendingTransactions: [],
   useSmartWallet: false,
   smartWalletAddress: "",
+  hasSeenSmartWalletNotice: false,
 };
 
 export const setWalletAddress = createAction<string>("wallet/setAddress");
@@ -70,6 +72,7 @@ export const updatePendingTransaction = createAction<{ hash: string; status: "su
 export const hydrateWallet = createAction<Partial<WalletState>>("wallet/hydrate");
 export const setUseSmartWallet = createAction<boolean>("wallet/setUseSmartWallet");
 export const setSmartWalletAddress = createAction<string>("wallet/setSmartWalletAddress");
+export const setHasSeenSmartWalletNotice = createAction<boolean>("wallet/setHasSeenSmartWalletNotice");
 
 // Multi-wallet actions
 export const addWallet = createAction<WalletMeta>("wallet/addWallet");
@@ -91,6 +94,9 @@ export const walletReducer = createReducer(initialState, (builder) => {
     })
     .addCase(setSmartWalletAddress, (state, action) => {
       state.smartWalletAddress = action.payload;
+    })
+    .addCase(setHasSeenSmartWalletNotice, (state, action) => {
+      state.hasSeenSmartWalletNotice = action.payload;
     })
     .addCase(setWalletName, (state, action) => {
       state.name = action.payload;
@@ -239,4 +245,9 @@ export const selectSmartWalletAddress = createSelector(
 export const selectActiveAddress = createSelector(
   [selectWalletAddress, selectUseSmartWallet, selectSmartWalletAddress],
   (address, useSmart, smartAddress) => (useSmart && smartAddress ? smartAddress : address),
+);
+
+export const selectHasSeenSmartWalletNotice = createSelector(
+  selectWallet,
+  (wallet) => wallet.hasSeenSmartWalletNotice ?? false,
 );

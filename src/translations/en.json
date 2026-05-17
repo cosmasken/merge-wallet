@@ -64,7 +64,13 @@
       "history_button": "Transaction History",
       "wallet_type_standard": "Standard EOA",
       "wallet_type_smart": "RIF Smart Wallet",
-      "gasless_badge": "Gasless"
+      "gasless_badge": "Gasless",
+      "smart_notice_title": "Welcome to RIF Smart Wallet!",
+      "smart_notice_desc": "You are switching to your RIF Smart Wallet. Here is what makes it unique:",
+      "smart_notice_bullet1": "Gasless Transactions: Pay network transaction fees using stablecoins or other standard tokens instead of RBTC.",
+      "smart_notice_bullet2": "Self-Custody: The account is fully secured and controlled by your existing recovery phrase. No new backup is required.",
+      "smart_notice_bullet3": "Unique Address: Your RIF Smart Wallet has a different address from your Standard EOA account. Always check your address before receiving funds.",
+      "smart_notice_button": "Got it, Enable Smart Wallet"
     },
     "import": {
       "title": "Import Wallet",

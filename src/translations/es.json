@@ -64,7 +64,13 @@
       "history_button": "Historial de Transacciones",
       "wallet_type_standard": "EOA Estándar",
       "wallet_type_smart": "Billetera Inteligente RIF",
-      "gasless_badge": "Sin Gas"
+      "gasless_badge": "Sin Gas",
+      "smart_notice_title": "¡Bienvenido a RIF Smart Wallet!",
+      "smart_notice_desc": "Estás cambiando a tu cuenta RIF Smart Wallet. Esto es lo que la hace única:",
+      "smart_notice_bullet1": "Transacciones sin Gas: Paga las tarifas de red usando stablecoins u otros tokens en lugar de RBTC.",
+      "smart_notice_bullet2": "Autocustodia: La cuenta está totalmente protegida y controlada por tu frase de recuperación existente.",
+      "smart_notice_bullet3": "Dirección Única: Tu RIF Smart Wallet tiene una dirección diferente a tu cuenta EOA estándar. Siempre verifica la dirección antes de recibir fondos.",
+      "smart_notice_button": "Entendido, activar Smart Wallet"
     },
     "import": {
       "title": "Importar Billetera",
