@@ -14,7 +14,7 @@ export interface TxHistoryEntry {
 interface BlockscoutTx {
   hash: string
   from: { hash: string }
-  to: { hash: string }
+  to: { hash: string } | null
   value: string
   block_number: number
   timestamp: string
@@ -31,7 +31,11 @@ export default function TransactionHistoryService(chainId?: number) {
 
       const url = `${apiUrl}/api/v2/addresses/${address.toLowerCase()}/transactions?limit=50`
 
-      const response = await fetch(url)
+      const controller = new AbortController()
+      const timeoutId = setTimeout(() => controller.abort(), 5000)
+
+      const response = await fetch(url, { signal: controller.signal })
+      clearTimeout(timeoutId)
       const data = await response.json()
 
       if (!data.items) return []
@@ -39,7 +43,7 @@ export default function TransactionHistoryService(chainId?: number) {
       return data.items.map((tx: BlockscoutTx): TxHistoryEntry => ({
         hash: tx.hash as `0x${string}`,
         from: tx.from.hash as `0x${string}`,
-        to: tx.to.hash as `0x${string}`,
+        to: (tx.to?.hash ?? "") as `0x${string}`,
         value: BigInt(tx.value),
         blockNumber: tx.block_number,
         timestamp: new Date(tx.timestamp).getTime() / 1000,

@@ -36,7 +36,7 @@ export default function WalletHistory() {
       .then(setTxs)
       .catch(() => setError(t("wallet.history.failed_load")))
       .finally(() => setIsLoading(false));
-  }, [address, chainId, t]);
+  }, [address, chainId]);
 
   const refreshHistory = useCallback(async () => {
     if (!address) return;
