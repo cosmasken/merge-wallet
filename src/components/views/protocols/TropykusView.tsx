@@ -1,5 +1,5 @@
-import { useEffect, useState, useCallback } from "react"
-import { useSelector } from "react-redux"
+import { useEffect, useState, useCallback, useRef } from "react"
+import { useDispatch, useSelector } from "react-redux"
 import { useParams, useNavigate } from "react-router"
 import { formatEther, formatUnits } from "viem"
 
@@ -8,7 +8,7 @@ import Card from "@/atoms/Card"
 import Button from "@/atoms/Button"
 import LoadingSpinner from "@/atoms/LoadingSpinner"
 import WeiDisplay from "@/atoms/WeiDisplay"
-import { selectWalletAddress, selectWalletBalance } from "@/redux/wallet"
+import { selectWalletAddress, selectWalletBalance, selectPendingTransactions, addPendingTransaction } from "@/redux/wallet"
 import { selectChainId } from "@/redux/preferences"
 import TropykusService from "@/rsk/TropykusService"
 import { classifyError } from "@/kernel/evm/errors"
@@ -38,6 +38,7 @@ const PILL_ORDER: { slug: string; label: string; action: Tab }[] = [
 
 export default function TropykusView() {
   const navigate = useNavigate()
+  const dispatch = useDispatch()
   const { action: urlAction } = useParams<{ action: string }>()
   const isOverview = !urlAction || !VALID_ACTIONS[urlAction]
   const tab = isOverview ? "lend" : VALID_ACTIONS[urlAction]
@@ -46,6 +47,7 @@ export default function TropykusView() {
   const address = useSelector(selectWalletAddress)
   const chainId = useSelector(selectChainId)
   const balance = useSelector(selectWalletBalance)
+  const pendingTxs = useSelector(selectPendingTransactions)
 
   const [asset, setAsset] = useState<Asset>("kRBTC")
   const [amount, setAmount] = useState("")
@@ -54,6 +56,7 @@ export default function TropykusView() {
   const [txHash, setTxHash] = useState("")
   const [cBalances, setCBalances] = useState<Record<string, bigint>>({})
   const [rates, setRates] = useState<Record<string, bigint>>({})
+  const redirecting = useRef(false)
 
   const tropykus = TropykusService(chainId)
   const meta = ASSET_META[asset]
@@ -92,7 +95,13 @@ export default function TropykusView() {
         : await tropykus.borrow(asset, amount)
 
       setTxHash(hash)
-      NotificationService().success(`${isLend ? "Lend" : "Borrow"} submitted!`)
+      dispatch(addPendingTransaction({
+        hash,
+        type: "contract",
+        amount,
+        symbol: meta.label,
+        chainId,
+      }))
     } catch (e) {
       const err = classifyError(e)
       setError(err.message)
@@ -101,20 +110,58 @@ export default function TropykusView() {
     setIsBusy(false)
   }, [tab, asset, amount, isOk, chainId])
 
+  const liveTx = txHash ? pendingTxs.find(t => t.hash === txHash) : undefined
+  const txStatus = liveTx?.status
+
+  useEffect(() => {
+    if (txStatus === "success" && !redirecting.current) {
+      redirecting.current = true
+      const timer = setTimeout(() => {
+        navigate(`/protocols/tropykus`, { replace: true })
+      }, 2000)
+      return () => clearTimeout(timer)
+    }
+  }, [txStatus])
+
   if (txHash) {
     return (
       <div className="animate-in fade-in duration-500">
         <ViewHeader title="Tropykus" showBack />
         <div className="flex flex-col items-center gap-4 px-4 pt-16 text-center">
-          <div className="w-16 h-16 rounded-full bg-success flex items-center justify-center">
-            <svg viewBox="0 0 24 24" className="w-8 h-8 text-white" fill="none" stroke="currentColor" strokeWidth="3">
-              <polyline points="20 6 9 17 4 12" />
-            </svg>
-          </div>
-          <h2 className="text-lg font-bold">Transaction Submitted</h2>
-          <p className="text-sm text-neutral-500 font-mono break-all">{txHash}</p>
+          {txStatus === "success" ? (
+            <>
+              <div className="w-16 h-16 rounded-full bg-success flex items-center justify-center">
+                <svg viewBox="0 0 24 24" className="w-8 h-8 text-white" fill="none" stroke="currentColor" strokeWidth="3">
+                  <polyline points="20 6 9 17 4 12" />
+                </svg>
+              </div>
+              <h2 className="text-lg font-bold">Transaction Confirmed</h2>
+              <p className="text-sm text-neutral-500">Returning to overview...</p>
+            </>
+          ) : txStatus === "failed" ? (
+            <>
+              <div className="w-16 h-16 rounded-full bg-error flex items-center justify-center">
+                <svg viewBox="0 0 24 24" className="w-8 h-8 text-white" fill="none" stroke="currentColor" strokeWidth="3">
+                  <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
+                </svg>
+              </div>
+              <h2 className="text-lg font-bold">Transaction Failed</h2>
+              <p className="text-sm text-neutral-500">The transaction was not confirmed</p>
+              <Button label="Back" variant="secondary" onClick={() => { setTxHash(""); setError("") }} />
+            </>
+          ) : (
+            <>
+              <div className="w-16 h-16 rounded-full bg-warn flex items-center justify-center animate-pulse">
+                <svg viewBox="0 0 24 24" className="w-8 h-8 text-white" fill="none" stroke="currentColor" strokeWidth="2.5">
+                  <circle cx="12" cy="12" r="10" /><polyline points="12 6 12 12 16 14" />
+                </svg>
+              </div>
+              <h2 className="text-lg font-bold">Confirming Transaction</h2>
+              <p className="text-sm text-neutral-500">Waiting for block confirmation...</p>
+            </>
+          )}
+          <p className="text-xs text-neutral-400 font-mono break-all">{txHash}</p>
           <a href={buildTxUrl(chainId, txHash)} target="_blank" rel="noopener noreferrer" className="text-primary text-sm">View on Explorer</a>
-          <Button label="Back" variant="secondary" onClick={() => window.history.back()} />
         </div>
       </div>
     )
