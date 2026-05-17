@@ -1,6 +1,7 @@
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
+import { Clipboard } from "@capacitor/clipboard";
 
 import ViewHeader from "@/layout/ViewHeader";
 import KeyManagerService from "@/kernel/evm/KeyManagerService";
@@ -15,9 +16,21 @@ export default function SeedBackup() {
   const [revealed, setRevealed] = useState(alreadyBackedUp);
   const [confirmed, setConfirmed] = useState(alreadyBackedUp);
   const [isVerifying, setIsVerifying] = useState(false);
+  const [copied, setCopied] = useState(false);
   const { t } = useTranslation();
 
   const mnemonic = KeyManagerService().getMnemonic();
+
+  const handleCopySeed = useCallback(async () => {
+    if (!mnemonic) return
+    try {
+      await Clipboard.write({ string: mnemonic })
+    } catch {
+      await navigator.clipboard.writeText(mnemonic)
+    }
+    setCopied(true)
+    setTimeout(() => setCopied(false), 2000)
+  }, [mnemonic])
 
   const handleStartVerification = () => {
     setIsVerifying(true);
@@ -77,7 +90,18 @@ export default function SeedBackup() {
         )}
 
         {revealed && mnemonic && (
-          <div className="space-y-6 mt-4">
+          <div className="space-y-4 mt-4">
+            <button
+              onClick={handleCopySeed}
+              className="w-full p-3 rounded-xl border-2 border-dashed border-neutral-300 dark:border-neutral-600 text-sm text-neutral-500 font-semibold flex items-center justify-center gap-2 active:bg-neutral-50 dark:active:bg-neutral-800 transition-colors"
+            >
+              <svg viewBox="0 0 24 24" className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2.5">
+                <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
+                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+              </svg>
+              {copied ? "Copied!" : "Copy to clipboard"}
+            </button>
+
             <label className="flex items-start gap-3 text-sm text-neutral-500 cursor-pointer">
               <input
                 type="checkbox"
