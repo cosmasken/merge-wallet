@@ -1,45 +1,9 @@
 import { getPublicClientByChainId } from "./ClientService";
 import KeyManagerService from "./KeyManagerService";
 import { type Hex, hexToBytes, toHex } from "viem";
+import { type RifRelayConfig, RIF_RELAY_CONFIGS } from "@/rsk/addresses";
 
-export interface RifRelayConfig {
-  relayHub: `0x${string}`;
-  smartWalletFactory: `0x${string}`;
-  deployVerifier: `0x${string}`;
-  relayVerifier: `0x${string}`;
-  relayUrl: string;
-  allowedToken: `0x${string}`;
-}
-
-const CONFIGS: Record<number, RifRelayConfig> = {
-  // Testnet
-  31: {
-    relayHub: "0xAd525463961399793f8716b0D85133ff7503a7C2",
-    smartWalletFactory: "0xBaDb31cAf5B95edd785446B76219b60fB1f07233",
-    deployVerifier: "0xAe59e767768c6c25d64619Ee1c498Fd7D83e3c24",
-    relayVerifier: "0x5897E84216220663F306676458Afc7bf2A6A3C52",
-    relayUrl: "https://v2.relay.rif-wallet-services.testnet.rifcomputing.net",
-    allowedToken: "0x19cbdcca78956ae53d5a4209995147be15e1bc83", // standard testnet token
-  },
-  // Regtest
-  33: {
-    relayHub: "0xDA7Ce79725418F4F6E13Bf5F520C89Cec5f6A974",
-    smartWalletFactory: "0xE0825f57Dd05Ef62FF731c27222A86E104CC4Cad",
-    deployVerifier: "0x73ec81da0C72DD112e06c09A6ec03B5544d26F05",
-    relayVerifier: "0x03F23ae1917722d5A27a2Ea0Bcc98725a2a2a49a",
-    relayUrl: "http://localhost:8090",
-    allowedToken: "0x1Af2844A588759D0DE58abD568ADD96BB8B3B6D8", // UtilToken from deployment
-  },
-  // Mainnet
-  30: {
-    relayHub: "0xDA7Ce79725418F4F6E13Bf5F520C89Cec5f6A974",
-    smartWalletFactory: "0x9eebec6c5157bee13b451b1dfe1ee2cb40846323",
-    deployVerifier: "0x2fd633e358bc50ccf6bf926d621e8612b55264c9",
-    relayVerifier: "0x5C9c7d96E6C59E55dA4dCf7F791AE58dAF8DBc86",
-    relayUrl: "https://relay.rif-wallet-services.mainnet.rifcomputing.net",
-    allowedToken: "0x2acc95758f8b5f583470ba265eb685a8f45fc9d5", // RIF Token
-  },
-};
+const CONFIGS: Record<number, RifRelayConfig> = RIF_RELAY_CONFIGS;
 
 export function getRifRelayConfig(chainId: number): RifRelayConfig {
   return CONFIGS[chainId] || CONFIGS[31];

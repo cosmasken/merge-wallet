@@ -84,6 +84,66 @@ export const IBPRO: Record<number, string> = {
   [TESTNET]: '0x6226b4B3F29Ecb5f9EEC3eC3391488173418dD5d',
 }
 
+// ── Core Utility Tokens ─────────────────────────────────────
+export const RIF: Record<number, string> = {
+  [MAINNET]: '0x2acc95758f8b5f583470bA265E685CF8e3f4283b',
+  [TESTNET]: '0x19F64674D8A5B4E652319F5e239eFd3bc969a1fE',
+}
+export const USDRIF: Record<number, string> = {
+  [MAINNET]: '0x3A15461d8ae0f0fb5fa2629e9da7D66a794a6e37',
+  [TESTNET]: '0xd1b0d1bc03491f49b9aea967ddd07b37f7327e63',
+}
+
+// ── Governance Constants ────────────────────────────────────
+export const GOVERNANCE_CONTRACTS = {
+  GOVERNOR: '0x71Ac6Ff904A17f50f2c07b693376Ccc1c92627F0' as const,
+  MULTICALL: '0xcA11bde05977b3631167028862bE2a173976CA11' as const,
+  RIF: '0x2acc95758f8b5f583470bA265E685CF8E3f4283b' as const,
+  STRIF: '0x5db91E24bd32059584bBdB831a901f1199f3d459' as const,
+  USDRIF: '0x3A15461d8ae0f0fb5fa2629e9da7D66a794a6e37' as const,
+  GRANTS_BUCKET: '0x48229e5d82a186aa89a99212d2d59f5674aa5b6c' as const,
+  GRANTS_ACTIVE_BUCKET: '0xf016fa6b237bb56e3aee7022c6947a6a103e3c47' as const,
+  GROWTH_BUCKET: '0x267a6073637408b6a1d34d685ff5720a0cbcbd9d' as const,
+  GENERAL_BUCKET: '0xfe3d9b7d68ae13455475f28089968336414fd358' as const,
+} as const;
+
+// ── RIF Relay Configurations ────────────────────────────────
+export interface RifRelayConfig {
+  relayHub: `0x${string}`;
+  smartWalletFactory: `0x${string}`;
+  deployVerifier: `0x${string}`;
+  relayVerifier: `0x${string}`;
+  relayUrl: string;
+  allowedToken: `0x${string}`;
+}
+
+export const RIF_RELAY_CONFIGS: Record<number, RifRelayConfig> = {
+  [TESTNET]: {
+    relayHub: "0xAd525463961399793f8716b0D85133ff7503a7C2",
+    smartWalletFactory: "0xBaDb31cAf5B95edd785446B76219b60fB1f07233",
+    deployVerifier: "0xAe59e767768c6c25d64619Ee1c498Fd7D83e3c24",
+    relayVerifier: "0x5897E84216220663F306676458Afc7bf2A6A3C52",
+    relayUrl: "https://v2.relay.rif-wallet-services.testnet.rifcomputing.net",
+    allowedToken: "0x19cbdcca78956ae53d5a4209995147be15e1bc83",
+  },
+  33: {
+    relayHub: "0xDA7Ce79725418F4F6E13Bf5F520C89Cec5f6A974",
+    smartWalletFactory: "0xE0825f57Dd05Ef62FF731c27222A86E104CC4Cad",
+    deployVerifier: "0x73ec81da0C72DD112e06c09A6ec03B5544d26F05",
+    relayVerifier: "0x03F23ae1917722d5A27a2Ea0Bcc98725a2a2a49a",
+    relayUrl: "http://localhost:8090",
+    allowedToken: "0x1Af2844A588759D0DE58abD568ADD96BB8B3B6D8",
+  },
+  [MAINNET]: {
+    relayHub: "0xDA7Ce79725418F4F6E13Bf5F520C89Cec5f6A974",
+    smartWalletFactory: "0x9eebec6c5157bee13b451b1dfe1ee2cb40846323",
+    deployVerifier: "0x2fd633e358bc50ccf6bf926d621e8612b55264c9",
+    relayVerifier: "0x5C9c7d96E6C59E55dA4dCf7F791AE58dAF8DBc86",
+    relayUrl: "https://relay.rif-wallet-services.mainnet.rifcomputing.net",
+    allowedToken: "0x2acc95758f8b5f583470ba265eb685a8f45fc9d5",
+  },
+};
+
 // ── Registry ────────────────────────────────────────────────
 export interface ProtocolToken {
   symbol: string

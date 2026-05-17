@@ -1,6 +1,6 @@
 import { erc20Abi, getAddress } from "viem"
 import { getPublicClient } from "@/kernel/evm/ClientService"
-import { getProtocolTokens } from "@/rsk/addresses"
+import { getProtocolTokens, RIF, USDRIF } from "@/rsk/addresses"
 
 export interface TokenBalance {
   address: `0x${string}`
@@ -19,12 +19,12 @@ export interface TokenInfo {
 
 const RSK_TOKENS: Record<number, { symbol: string; address: string; decimals: number }[]> = {
   30: [
-    { symbol: "RIF", address: "0x2acc95758f8b5f583470bA265E685CF8e3f4283b", decimals: 18 },
-    { symbol: "USDRIF", address: "0x3A15461d8ae0f0fb5fa2629e9da7D66a794a6e37", decimals: 18 },
+    { symbol: "RIF", address: RIF[30], decimals: 18 },
+    { symbol: "USDRIF", address: USDRIF[30], decimals: 18 },
   ],
   31: [
-    { symbol: "RIF", address: "0x19F64674D8A5B4E652319F5e239eFd3bc969a1fE", decimals: 18 },
-    { symbol: "USDRIF", address: "0xd1b0d1bc03491f49b9aea967ddd07b37f7327e63", decimals: 18 },
+    { symbol: "RIF", address: RIF[31], decimals: 18 },
+    { symbol: "USDRIF", address: USDRIF[31], decimals: 18 },
   ],
 }
 
