@@ -1,6 +1,6 @@
 import { useEffect, useState, useCallback } from "react"
 import { useSelector } from "react-redux"
-import { useParams } from "react-router"
+import { useParams, useNavigate } from "react-router"
 import { formatEther, parseEther } from "viem"
 
 import ViewHeader from "@/layout/ViewHeader"
@@ -51,7 +51,15 @@ const ACTION_LABELS: Record<Action, { title: string; subtitle: string; btn: stri
   },
 }
 
+const PILL_ORDER: { slug: string; label: string; action: Action }[] = [
+  { slug: "create-doc", label: "Create DOC", action: "mintDoc" },
+  { slug: "redeem-doc", label: "Redeem DOC", action: "redeemDoc" },
+  { slug: "buy-bpro", label: "Buy BPro", action: "mintBPro" },
+  { slug: "sell-bpro", label: "Sell BPro", action: "redeemBPro" },
+]
+
 export default function MoCView() {
+  const navigate = useNavigate()
   const { action: urlAction } = useParams<{ action: string }>()
   const action = VALID_ACTIONS[urlAction ?? ""] ?? "mintDoc"
 
@@ -123,6 +131,20 @@ export default function MoCView() {
     <div className="animate-in fade-in slide-in-from-bottom-4 duration-300">
       <ViewHeader title="Money On Chain" subtitle={a.subtitle} showBack />
       <div className="flex flex-col gap-4 px-4">
+
+        {/* Pill nav */}
+        <div className="flex gap-2 overflow-x-auto no-scrollbar">
+          {PILL_ORDER.map(p => (
+            <button key={p.slug} onClick={() => navigate(`/protocols/moc/${p.slug}`)}
+              className={`shrink-0 px-3.5 py-2 rounded-full border-2 text-xs font-semibold transition-colors ${
+                action === p.action
+                  ? "border-primary bg-primary text-white"
+                  : "border-neutral-200 dark:border-neutral-700 text-neutral-500 dark:text-neutral-400"
+              }`}>
+              {p.label}
+            </button>
+          ))}
+        </div>
 
         <Card className="p-4">
           <h2 className="text-sm font-bold mb-1">{a.title}</h2>

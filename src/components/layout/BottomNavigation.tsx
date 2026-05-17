@@ -8,7 +8,7 @@ import SettingsIcon from "@/icons/SettingsIcon";
 const tabs = [
   { to: "/wallet", label: "Wallet", icon: WalletIcon },
   { to: "/assets", label: "Assets", icon: AssetsIcon },
-  { to: "/protocols", label: "Protocols", icon: ProtocolsIcon },
+  { to: "/protocols", label: "Explore", icon: ProtocolsIcon },
   { to: "/settings", label: "Settings", icon: SettingsIcon },
 ];
 

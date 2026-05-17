@@ -4,7 +4,6 @@ import { useNavigate } from "react-router-dom";
 
 import ViewHeader from "@/layout/ViewHeader";
 import Card from "@/atoms/Card";
-import Button from "@/atoms/Button";
 import WeiDisplay from "@/atoms/WeiDisplay";
 import PullToRefresh from "@/atoms/PullToRefresh";
 import { selectWalletAddress } from "@/redux/wallet";
@@ -58,7 +57,7 @@ export default function ProtocolDashboard() {
     <>
       <PullToRefresh onRefresh={async () => { window.location.reload(); }}>
       <div>
-        <ViewHeader title="Protocols" subtitle="RSK ecosystem integrations" />
+        <ViewHeader title="Explore" subtitle="DeFi protocols & earning opportunities" />
         {!hasProtocols && (
           <div className="mx-4 p-3 rounded-lg bg-warn-light/20 border border-warn/30 text-xs text-warn-dark">
             No protocol integrations available on this network.
@@ -72,88 +71,96 @@ export default function ProtocolDashboard() {
         <div className="flex flex-col gap-4 px-4 mt-4">
 
           {/* MoC Card */}
-          <Card className="p-4">
-            <div className="flex items-center justify-between mb-3">
-              <h2 className="text-sm font-bold">Money On Chain</h2>
-              {btcPrice && <span className="text-xs text-neutral-500">BTC: ${(BigInt(btcPrice) / 10n ** 18n).toString()}</span>}
-            </div>
-            <div className="flex flex-col gap-2 text-sm">
-              {byProtocol('moc').map(t => (
-                <div key={t.symbol} className="flex justify-between">
-                  <span className="text-neutral-500">{t.symbol}</span>
-                  <WeiDisplay wei={protocolBalances[t.symbol] ?? 0n} symbol={t.symbol} decimals={t.decimals} />
+          <button onClick={() => navigate("/protocols/moc/create-doc")} className="text-left w-full">
+            <Card className="p-4">
+              <div className="flex items-start gap-3">
+                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-cyan-400 flex items-center justify-center text-white font-bold text-sm shrink-0">
+                  MoC
                 </div>
-              ))}
-            </div>
-            <div className="flex gap-2 mt-3 pt-3 border-t border-neutral-100 dark:border-neutral-800">
-              <Button label="Create DOC" variant="secondary" size="sm" onClick={() => navigate("/protocols/moc/create-doc")} />
-              <Button label="Redeem DOC" variant="secondary" size="sm" onClick={() => navigate("/protocols/moc/redeem-doc")} />
-            </div>
-            <div className="flex gap-2 mt-2">
-              <Button label="Buy BPro" variant="secondary" size="sm" onClick={() => navigate("/protocols/moc/buy-bpro")} />
-              <Button label="Sell BPro" variant="secondary" size="sm" onClick={() => navigate("/protocols/moc/sell-bpro")} />
-            </div>
-          </Card>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center justify-between">
+                    <h2 className="text-sm font-bold">Money On Chain</h2>
+                    {btcPrice && <span className="text-xs text-neutral-500">BTC ${(BigInt(btcPrice) / 10n ** 18n).toString()}</span>}
+                  </div>
+                  <p className="text-xs text-neutral-400 mt-0.5">Mint/redeem RBTC-backed assets</p>
+                  <div className="flex flex-wrap gap-x-3 gap-y-0.5 mt-2 text-xs">
+                    {byProtocol('moc').map(t => (
+                      <span key={t.symbol} className="text-neutral-500">
+                        {t.symbol}: <WeiDisplay wei={protocolBalances[t.symbol] ?? 0n} symbol="" decimals={t.decimals} />
+                      </span>
+                    ))}
+                  </div>
+                </div>
+                <svg viewBox="0 0 24 24" className="w-5 h-5 text-neutral-300 shrink-0 mt-1" fill="none" stroke="currentColor" strokeWidth="2">
+                  <polyline points="9 18 15 12 9 6" />
+                </svg>
+              </div>
+            </Card>
+          </button>
 
           {/* Tropykus Card */}
-          <Card className="p-4">
-            <div className="flex items-center justify-between mb-3">
-              <h2 className="text-sm font-bold">Tropykus</h2>
-            </div>
-            <div className="flex flex-col gap-2 text-sm">
-              {byProtocol('tropykus').map(t => (
-                <div key={t.symbol} className="flex justify-between">
-                  <span className="text-neutral-500">{t.symbol}</span>
-                  <WeiDisplay wei={protocolBalances[t.symbol] ?? 0n} symbol={t.symbol} decimals={t.decimals} />
+          <button onClick={() => navigate("/protocols/tropykus/lend")} className="text-left w-full">
+            <Card className="p-4">
+              <div className="flex items-start gap-3">
+                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-green-500 to-emerald-300 flex items-center justify-center text-white font-bold text-sm shrink-0">
+                  Tr
                 </div>
-              ))}
-            </div>
-            <div className="flex gap-2 mt-3 pt-3 border-t border-neutral-100 dark:border-neutral-800">
-              <Button label="Lend" variant="secondary" size="sm" onClick={() => navigate("/protocols/tropykus/lend")} />
-              <Button label="Borrow" variant="secondary" size="sm" onClick={() => navigate("/protocols/tropykus/borrow")} />
-            </div>
-          </Card>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center justify-between">
+                    <h2 className="text-sm font-bold">Tropykus</h2>
+                  </div>
+                  <p className="text-xs text-neutral-400 mt-0.5">Lend assets or borrow against collateral</p>
+                  <div className="flex flex-wrap gap-x-3 gap-y-0.5 mt-2 text-xs">
+                    {byProtocol('tropykus').map(t => (
+                      <span key={t.symbol} className="text-neutral-500">
+                        {t.symbol}: <WeiDisplay wei={protocolBalances[t.symbol] ?? 0n} symbol="" decimals={t.decimals} />
+                      </span>
+                    ))}
+                  </div>
+                </div>
+                <svg viewBox="0 0 24 24" className="w-5 h-5 text-neutral-300 shrink-0 mt-1" fill="none" stroke="currentColor" strokeWidth="2">
+                  <polyline points="9 18 15 12 9 6" />
+                </svg>
+              </div>
+            </Card>
+          </button>
 
           {/* Sovryn Card */}
-          <Card className="p-4">
-            {chainId !== 30 && (
-              <div className="mb-2 p-1.5 rounded bg-warn-light/20 border border-warn/30 text-xs text-warn-dark text-center">
-                Mainnet only — switch to RSK Mainnet to use
-              </div>
-            )}
-            <div className="flex items-center justify-between mb-3">
-              <h2 className="text-sm font-bold">Sovryn</h2>
-              <a href="https://sovryn.app" target="_blank" rel="noopener noreferrer" className="text-xs text-primary font-semibold">Open dapp ↗</a>
-            </div>
-            <div className="flex flex-col gap-2 text-sm">
-              {byProtocol('sovryn').length > 0 ? byProtocol('sovryn').map(t => (
-                <div key={t.symbol} className="flex justify-between">
-                  <span className="text-neutral-500">{t.symbol}</span>
-                  <WeiDisplay wei={protocolBalances[t.symbol] ?? 0n} symbol={t.symbol} decimals={t.decimals} />
+          <button onClick={() => chainId === 30 ? navigate("/protocols/sovryn/swap") : undefined} className="text-left w-full" disabled={chainId !== 30}>
+            <Card className={`p-4 ${chainId !== 30 ? "opacity-60" : ""}`}>
+              {chainId !== 30 && (
+                <div className="mb-2 p-1.5 rounded bg-warn-light/20 border border-warn/30 text-xs text-warn-dark text-center">
+                  Mainnet only — switch to RSK Mainnet
                 </div>
-              )) : (
-                <div className="text-xs text-neutral-400 italic py-1">Tokens only available on mainnet</div>
               )}
-            </div>
-            <div className="flex gap-2 mt-3 pt-3 border-t border-neutral-100 dark:border-neutral-800">
-              <Button label="Swap" variant="secondary" size="sm" disabled={chainId !== 30} onClick={() => navigate("/protocols/sovryn/swap")} />
-              <Button label="Earn" variant="secondary" size="sm" disabled={chainId !== 30} onClick={() => navigate("/protocols/sovryn/earn")} />
-            </div>
-            <div className="flex gap-2 mt-2">
-              <a href="https://sovryn.app/trade" target="_blank" rel="noopener noreferrer"
-                className="flex-1 p-2 text-center text-xs rounded-lg border border-neutral-300 dark:border-neutral-600 text-neutral-500 hover:border-primary/50 transition-colors">
-                Margin Trade ↗
-              </a>
-              <a href="https://sovryn.app/lending" target="_blank" rel="noopener noreferrer"
-                className="flex-1 p-2 text-center text-xs rounded-lg border border-neutral-300 dark:border-neutral-600 text-neutral-500 hover:border-primary/50 transition-colors">
-                Loans ↗
-              </a>
-              <a href="https://sovryn.app/staking" target="_blank" rel="noopener noreferrer"
-                className="flex-1 p-2 text-center text-xs rounded-lg border border-neutral-300 dark:border-neutral-600 text-neutral-500 hover:border-primary/50 transition-colors">
-                Staking ↗
-              </a>
-            </div>
-          </Card>
+              <div className="flex items-start gap-3">
+                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-purple-500 to-pink-400 flex items-center justify-center text-white font-bold text-sm shrink-0">
+                  Sv
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center justify-between">
+                    <h2 className="text-sm font-bold">Sovryn</h2>
+                    <a href="https://sovryn.app" target="_blank" rel="noopener noreferrer" className="text-xs text-primary font-semibold" onClick={e => e.stopPropagation()}>
+                      dapp ↗
+                    </a>
+                  </div>
+                  <p className="text-xs text-neutral-400 mt-0.5">Swap, earn, and trade with leverage</p>
+                  <div className="flex flex-wrap gap-x-3 gap-y-0.5 mt-2 text-xs">
+                    {byProtocol('sovryn').length > 0 ? byProtocol('sovryn').map(t => (
+                      <span key={t.symbol} className="text-neutral-500">
+                        {t.symbol}: <WeiDisplay wei={protocolBalances[t.symbol] ?? 0n} symbol="" decimals={t.decimals} />
+                      </span>
+                    )) : (
+                      <span className="text-neutral-400 italic">Tokens only available on mainnet</span>
+                    )}
+                  </div>
+                </div>
+                <svg viewBox="0 0 24 24" className="w-5 h-5 text-neutral-300 shrink-0 mt-1" fill="none" stroke="currentColor" strokeWidth="2">
+                  <polyline points="9 18 15 12 9 6" />
+                </svg>
+              </div>
+            </Card>
+          </button>
 
         </div>
       </div>

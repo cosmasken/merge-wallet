@@ -1,6 +1,6 @@
 import { useEffect, useState, useCallback } from "react"
 import { useSelector } from "react-redux"
-import { useParams } from "react-router"
+import { useParams, useNavigate } from "react-router"
 import { formatEther, formatUnits } from "viem"
 
 import ViewHeader from "@/layout/ViewHeader"
@@ -30,7 +30,13 @@ const VALID_ACTIONS: Record<string, Tab> = {
   borrow: "borrow",
 }
 
+const PILL_ORDER: { slug: string; label: string; action: Tab }[] = [
+  { slug: "lend", label: "Lend", action: "lend" },
+  { slug: "borrow", label: "Borrow", action: "borrow" },
+]
+
 export default function TropykusView() {
+  const navigate = useNavigate()
   const { action } = useParams<{ action: string }>()
   const tab = VALID_ACTIONS[action ?? ""] ?? "lend"
   const isLend = tab === "lend"
@@ -116,6 +122,20 @@ export default function TropykusView() {
     <div className="animate-in fade-in slide-in-from-bottom-4 duration-300">
       <ViewHeader title="Tropykus" subtitle={isLend ? "Lend your assets and earn interest" : "Borrow against your supplied assets"} showBack />
       <div className="flex flex-col gap-4 px-4">
+
+        {/* Pill nav */}
+        <div className="flex gap-2 overflow-x-auto no-scrollbar">
+          {PILL_ORDER.map(p => (
+            <button key={p.slug} onClick={() => navigate(`/protocols/tropykus/${p.slug}`)}
+              className={`shrink-0 px-4 py-2 rounded-full border-2 text-sm font-semibold transition-colors ${
+                tab === p.action
+                  ? "border-primary bg-primary text-white"
+                  : "border-neutral-200 dark:border-neutral-700 text-neutral-500 dark:text-neutral-400"
+              }`}>
+              {p.label}
+            </button>
+          ))}
+        </div>
 
         {/* Market cards */}
         <div className="flex flex-wrap gap-2">
