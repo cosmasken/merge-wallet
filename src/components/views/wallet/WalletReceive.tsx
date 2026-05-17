@@ -53,7 +53,7 @@ export default function WalletReceive() {
         <Card className="p-8 flex flex-col items-center gap-4">
           <canvas ref={canvasRef} className="w-48 h-48 rounded-lg" />
           <div className="text-center font-mono text-sm break-all">
-            <Address address={activeAddress} />
+            <Address address={activeAddress} copyable />
           </div>
           <button
             onClick={handleCopy}

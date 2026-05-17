@@ -255,7 +255,7 @@ export default function WalletHome() {
           />
         )}
 
-        <Address address={activeAddress} short className="text-xs text-neutral-400" />
+        <Address address={activeAddress} short copyable className="text-xs text-neutral-400" />
       </div>
 
       <div className="flex gap-4 w-full">

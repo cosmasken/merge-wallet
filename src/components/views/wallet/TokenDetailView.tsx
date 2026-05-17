@@ -181,16 +181,7 @@ export default function TokenDetailView() {
           <div>
             <label className="text-xs text-neutral-400 block mb-1">Your Wallet Address</label>
             <div className="flex items-center justify-between">
-              <Address address={address} className="text-sm font-mono text-neutral-700 dark:text-neutral-300" />
-              <button 
-                onClick={() => {
-                  navigator.clipboard.writeText(address);
-                  // Optional: Add toast or feedback
-                }}
-                className="text-primary text-xs font-bold"
-              >
-                Copy
-              </button>
+              <Address address={address} copyable className="text-sm font-mono text-neutral-700 dark:text-neutral-300" />
             </div>
           </div>
           
