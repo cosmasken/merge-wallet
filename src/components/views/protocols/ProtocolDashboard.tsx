@@ -86,8 +86,12 @@ export default function ProtocolDashboard() {
               ))}
             </div>
             <div className="flex gap-2 mt-3 pt-3 border-t border-neutral-100 dark:border-neutral-800">
-              <Button label="Create DOC" variant="secondary" size="sm" onClick={() => navigate("/protocols/moc")} />
-              <Button label="Buy BPro" variant="secondary" size="sm" onClick={() => navigate("/protocols/moc")} />
+              <Button label="Create DOC" variant="secondary" size="sm" onClick={() => navigate("/protocols/moc/create-doc")} />
+              <Button label="Redeem DOC" variant="secondary" size="sm" onClick={() => navigate("/protocols/moc/redeem-doc")} />
+            </div>
+            <div className="flex gap-2 mt-2">
+              <Button label="Buy BPro" variant="secondary" size="sm" onClick={() => navigate("/protocols/moc/buy-bpro")} />
+              <Button label="Sell BPro" variant="secondary" size="sm" onClick={() => navigate("/protocols/moc/sell-bpro")} />
             </div>
           </Card>
 
@@ -105,8 +109,8 @@ export default function ProtocolDashboard() {
               ))}
             </div>
             <div className="flex gap-2 mt-3 pt-3 border-t border-neutral-100 dark:border-neutral-800">
-              <Button label="Lend" variant="secondary" size="sm" onClick={() => navigate("/protocols/tropykus")} />
-              <Button label="Borrow" variant="secondary" size="sm" onClick={() => navigate("/protocols/tropykus")} />
+              <Button label="Lend" variant="secondary" size="sm" onClick={() => navigate("/protocols/tropykus/lend")} />
+              <Button label="Borrow" variant="secondary" size="sm" onClick={() => navigate("/protocols/tropykus/borrow")} />
             </div>
           </Card>
 

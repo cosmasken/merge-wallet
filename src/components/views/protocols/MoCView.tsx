@@ -1,12 +1,12 @@
 import { useEffect, useState, useCallback } from "react"
 import { useSelector } from "react-redux"
+import { useParams } from "react-router"
 import { formatEther, parseEther } from "viem"
 
 import ViewHeader from "@/layout/ViewHeader"
 import Card from "@/atoms/Card"
 import Button from "@/atoms/Button"
 import LoadingSpinner from "@/atoms/LoadingSpinner"
-import WeiDisplay from "@/atoms/WeiDisplay"
 import { selectWalletAddress, selectWalletBalance } from "@/redux/wallet"
 import { selectChainId } from "@/redux/preferences"
 import MoCService from "@/rsk/MoCService"
@@ -16,6 +16,13 @@ import NotificationService from "@/kernel/app/NotificationService"
 import { buildTxUrl } from "@/util/networks"
 
 type Action = "mintDoc" | "redeemDoc" | "mintBPro" | "redeemBPro"
+
+const VALID_ACTIONS: Record<string, Action> = {
+  "create-doc": "mintDoc",
+  "redeem-doc": "redeemDoc",
+  "buy-bpro": "mintBPro",
+  "sell-bpro": "redeemBPro",
+}
 
 const ACTION_LABELS: Record<Action, { title: string; subtitle: string; btn: string; desc: string }> = {
   mintDoc: {
@@ -45,10 +52,12 @@ const ACTION_LABELS: Record<Action, { title: string; subtitle: string; btn: stri
 }
 
 export default function MoCView() {
+  const { action: urlAction } = useParams<{ action: string }>()
+  const action = VALID_ACTIONS[urlAction ?? ""] ?? "mintDoc"
+
   const address = useSelector(selectWalletAddress)
   const chainId = useSelector(selectChainId)
   const balance = useSelector(selectWalletBalance)
-  const [action, setAction] = useState<Action>("mintDoc")
   const [amount, setAmount] = useState("")
   const [btcPrice, setBtcPrice] = useState<string | null>(null)
   const [isBusy, setIsBusy] = useState(false)
@@ -111,21 +120,9 @@ export default function MoCView() {
   }
 
   return (
-    <div>
-      <ViewHeader title="Money On Chain" subtitle="Create or redeem RBTC-backed assets" showBack />
+    <div className="animate-in fade-in slide-in-from-bottom-4 duration-300">
+      <ViewHeader title="Money On Chain" subtitle={a.subtitle} showBack />
       <div className="flex flex-col gap-4 px-4">
-
-        {/* Action selector */}
-        <div className="grid grid-cols-2 gap-2">
-          {(["mintDoc", "redeemDoc", "mintBPro", "redeemBPro"] as Action[]).map(aKey => (
-            <button key={aKey} onClick={() => { setAction(aKey); setError("") }}
-              className={`p-2 rounded-lg border-2 text-xs font-semibold transition-colors ${
-                action === aKey ? "border-primary bg-primary/10 text-primary" : "border-neutral-300 dark:border-neutral-600 text-neutral-500"
-              }`}>
-              {ACTION_LABELS[aKey].title}
-            </button>
-          ))}
-        </div>
 
         <Card className="p-4">
           <h2 className="text-sm font-bold mb-1">{a.title}</h2>

@@ -1,3 +1,4 @@
+import { Navigate } from "react-router";
 import ProtocolDashboard from "@/views/protocols/ProtocolDashboard";
 import MoCView from "@/views/protocols/MoCView";
 import TropykusView from "@/views/protocols/TropykusView";
@@ -14,10 +15,18 @@ export const routeProtocols = [
       },
       {
         path: "moc",
+        element: <Navigate to="/protocols" replace />,
+      },
+      {
+        path: "moc/:action",
         element: <MoCView />,
       },
       {
         path: "tropykus",
+        element: <Navigate to="/protocols" replace />,
+      },
+      {
+        path: "tropykus/:action",
         element: <TropykusView />,
       },
       {

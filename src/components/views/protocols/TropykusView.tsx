@@ -1,12 +1,12 @@
 import { useEffect, useState, useCallback } from "react"
 import { useSelector } from "react-redux"
-import { formatEther, formatUnits, parseEther, parseUnits } from "viem"
+import { useParams } from "react-router"
+import { formatEther, formatUnits } from "viem"
 
 import ViewHeader from "@/layout/ViewHeader"
 import Card from "@/atoms/Card"
 import Button from "@/atoms/Button"
 import LoadingSpinner from "@/atoms/LoadingSpinner"
-import WeiDisplay from "@/atoms/WeiDisplay"
 import { selectWalletAddress, selectWalletBalance } from "@/redux/wallet"
 import { selectChainId } from "@/redux/preferences"
 import TropykusService from "@/rsk/TropykusService"
@@ -25,12 +25,20 @@ const ASSET_META: Record<Asset, { label: string; decimals: number; isRbtc: boole
   kUSDRIF: { label: "USDRIF", decimals: 8, isRbtc: false },
 }
 
+const VALID_ACTIONS: Record<string, Tab> = {
+  lend: "lend",
+  borrow: "borrow",
+}
+
 export default function TropykusView() {
+  const { action } = useParams<{ action: string }>()
+  const tab = VALID_ACTIONS[action ?? ""] ?? "lend"
+  const isLend = tab === "lend"
+
   const address = useSelector(selectWalletAddress)
   const chainId = useSelector(selectChainId)
   const balance = useSelector(selectWalletBalance)
 
-  const [tab, setTab] = useState<Tab>("lend")
   const [asset, setAsset] = useState<Asset>("kRBTC")
   const [amount, setAmount] = useState("")
   const [isBusy, setIsBusy] = useState(false)
@@ -41,7 +49,6 @@ export default function TropykusView() {
 
   const tropykus = TropykusService(chainId)
   const meta = ASSET_META[asset]
-  const isLend = tab === "lend"
   const isOk = amount && !isNaN(Number(amount)) && Number(amount) > 0
 
   const refresh = useCallback(async () => {
@@ -106,21 +113,9 @@ export default function TropykusView() {
   }
 
   return (
-    <div>
-      <ViewHeader title="Tropykus" subtitle="Lend or borrow against your assets" showBack />
+    <div className="animate-in fade-in slide-in-from-bottom-4 duration-300">
+      <ViewHeader title="Tropykus" subtitle={isLend ? "Lend your assets and earn interest" : "Borrow against your supplied assets"} showBack />
       <div className="flex flex-col gap-4 px-4">
-
-        {/* Lend / Borrow toggle */}
-        <div className="flex gap-2">
-          {(["lend", "borrow"] as Tab[]).map(t => (
-            <button key={t} onClick={() => { setTab(t); setError("") }}
-              className={`flex-1 p-2.5 rounded-lg border-2 text-sm font-semibold transition-colors ${
-                tab === t ? "border-primary bg-primary/10 text-primary" : "border-neutral-300 dark:border-neutral-600 text-neutral-500"
-              }`}>
-              {t === "lend" ? "📤 Lend" : "📥 Borrow"}
-            </button>
-          ))}
-        </div>
 
         {/* Market cards */}
         <div className="flex flex-wrap gap-2">
