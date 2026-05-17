@@ -138,17 +138,7 @@ export default function WalletHome() {
         </div>
       )}
 
-      {!seedBackedUp && (
-        <div className="w-full p-3 rounded-lg bg-warn-light/20 border border-warn/30 flex items-center justify-between">
-          <p className="text-xs text-warn-dark">{t("wallet.home.backup_reminder")}</p>
-          <button
-            onClick={() => navigate("/wallet/backup")}
-            className="text-xs font-semibold text-primary ml-2 shrink-0"
-          >
-            {t("wallet.home.backup_now")}
-          </button>
-        </div>
-      )}
+
 
       <div className="flex flex-col items-center gap-3">
         <div className="flex items-center justify-center gap-3">
