@@ -80,6 +80,9 @@ export default function WalletHome() {
     }
   }, [useSmartWallet, reduxBalance]);
 
+  const [balanceFilter, setBalanceFilter] = useState<string>("all");
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+
   const tokenPrices = useSelector(selectTokenPrices);
   const rbtcPrice = useSelector(selectRbtcPrice);
 
@@ -128,6 +131,86 @@ export default function WalletHome() {
 
     return sum;
   }, [activeBalance, tokens, tokenPrices, rbtcPrice, localCurrency]);
+
+  const filterOptions = useMemo(() => {
+    const list = [
+      { id: "all", label: "All Assets", symbol: "" },
+      { id: "RBTC", label: "RBTC", symbol: "RBTC" }
+    ];
+    for (const t of tokens) {
+      list.push({ id: t.symbol, label: t.symbol, symbol: t.symbol });
+    }
+    return list;
+  }, [tokens]);
+
+  const displayValues = useMemo(() => {
+    if (balanceFilter === "all") {
+      return {
+        cryptoAmount: "",
+        cryptoSymbol: "",
+        fiatAmount: totalFiatValue,
+        label: "All Assets"
+      };
+    }
+    
+    if (balanceFilter === "RBTC") {
+      const rbtcAmount = parseFloat(formatUnits(BigInt(activeBalance), 18));
+      const rbtcPriceVal = tokenPrices["RBTC"]?.price ?? (rbtcPrice?.price ?? 0);
+      return {
+        cryptoAmount: rbtcAmount.toLocaleString(undefined, { minimumFractionDigits: 4, maximumFractionDigits: 4 }),
+        cryptoSymbol: "RBTC",
+        fiatAmount: rbtcAmount * rbtcPriceVal,
+        label: "RBTC"
+      };
+    }
+
+    const matchedToken = tokens.find(t => t.symbol === balanceFilter);
+    if (matchedToken) {
+      const amount = parseFloat(formatUnits(matchedToken.balance, matchedToken.decimals));
+      const sym = matchedToken.symbol.toUpperCase();
+      let price = 0;
+      if (tokenPrices[sym]?.price != null) {
+        price = tokenPrices[sym].price;
+      } else {
+        // Fallback pricing
+        let usdPrice = 1.0;
+        if (sym === "BPRO" || sym === "IBPRO") {
+          usdPrice = 78011.0 * 1.15;
+        } else if (sym === "RIF" || sym === "STRIF") {
+          usdPrice = 0.08;
+        } else if (sym === "SOV") {
+          usdPrice = 0.22;
+        } else if (sym === "MOC") {
+          usdPrice = 0.09;
+        } else if (
+          sym === "DOC" ||
+          sym === "USDRIF" ||
+          sym === "XUSD" ||
+          sym === "ZUSD" ||
+          sym === "DLLR" ||
+          sym === "IXUSD" ||
+          sym === "IDOC"
+        ) {
+          usdPrice = 1.0;
+        }
+        const usdToLocalRate = localCurrency === "USD" ? 1.0 : (rbtcPrice?.price ?? 78011.0) / 78011.0;
+        price = usdPrice * usdToLocalRate;
+      }
+      return {
+        cryptoAmount: amount.toLocaleString(undefined, { minimumFractionDigits: 4, maximumFractionDigits: 4 }),
+        cryptoSymbol: matchedToken.symbol,
+        fiatAmount: amount * price,
+        label: matchedToken.symbol
+      };
+    }
+
+    return {
+      cryptoAmount: "0.0000",
+      cryptoSymbol: balanceFilter,
+      fiatAmount: 0,
+      label: balanceFilter
+    };
+  }, [balanceFilter, activeBalance, tokens, tokenPrices, rbtcPrice, totalFiatValue, localCurrency]);
 
   useEffect(function fetchBalance() {
     if (!activeAddress) return;
@@ -276,13 +359,66 @@ export default function WalletHome() {
       )}
 
 
-      <div className="flex flex-col items-center gap-3">
+      <div className="flex flex-col items-center justify-center bg-neutral-50/50 dark:bg-neutral-900/40 border border-neutral-100 dark:border-neutral-800/80 rounded-3xl p-6 relative animate-in fade-in slide-in-from-bottom duration-500">
+        
+        {/* Dropdown Selector */}
+        <div className="relative mb-2.5">
+          <button
+            onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+            className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-neutral-200/50 dark:bg-neutral-800/50 text-[10px] font-bold uppercase tracking-wider text-neutral-500 hover:bg-neutral-300/50 dark:hover:bg-neutral-700/50 active:scale-95 transition-all select-none"
+          >
+            <span>{displayValues.label}</span>
+            <svg viewBox="0 0 24 24" className={`w-3 h-3 text-neutral-400 transition-transform duration-200 ${isDropdownOpen ? "rotate-180" : ""}`} fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M6 9l6 6 6-6" />
+            </svg>
+          </button>
+
+          {isDropdownOpen && (
+            <>
+              <div 
+                className="fixed inset-0 z-40"
+                onClick={() => setIsDropdownOpen(false)}
+              />
+              <div className="absolute left-1/2 -translate-x-1/2 mt-1.5 w-44 bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-2xl shadow-xl py-2 z-50 animate-in fade-in slide-in-from-top-2 duration-200 max-h-56 overflow-y-auto">
+                {filterOptions.map((opt) => (
+                  <button
+                    key={opt.id}
+                    onClick={() => {
+                      setBalanceFilter(opt.id);
+                      setIsDropdownOpen(false);
+                    }}
+                    className={`flex items-center justify-between w-full px-4 py-2 text-xs font-semibold hover:bg-neutral-50 dark:hover:bg-neutral-700/50 transition-colors ${
+                      balanceFilter === opt.id ? "text-primary font-bold" : "text-neutral-600 dark:text-neutral-300"
+                    }`}
+                  >
+                    <span>{opt.label}</span>
+                    {balanceFilter === opt.id && (
+                      <svg viewBox="0 0 24 24" className="w-3.5 h-3.5 text-primary" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M20 6L9 17l-5-5" />
+                      </svg>
+                    )}
+                  </button>
+                ))}
+              </div>
+            </>
+          )}
+        </div>
+
         <div className="flex items-center justify-center gap-3">
           <div className="text-4xl font-bold font-display text-neutral-800 dark:text-neutral-100">
             {isLoading ? (
               <LoadingSkeleton variant="text" className="w-32 h-8 mx-auto" />
+            ) : hideBalance ? (
+              "••••••"
+            ) : balanceFilter === "all" ? (
+              totalFiatValue.toLocaleString(undefined, {
+                style: "currency",
+                currency: localCurrency,
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2,
+              })
             ) : (
-              <WeiDisplay wei={BigInt(activeBalance)} hideBalance={hideBalance} symbol={nativeCurrency.symbol} />
+              `${displayValues.cryptoAmount} ${displayValues.cryptoSymbol}`
             )}
           </div>
           <button
@@ -304,17 +440,21 @@ export default function WalletHome() {
         </div>
 
         {!hideBalance && (
-          <span className="text-lg font-semibold text-neutral-500">
-            {totalFiatValue.toLocaleString(undefined, {
-              style: "currency",
-              currency: localCurrency,
-              minimumFractionDigits: 2,
-              maximumFractionDigits: 2,
-            })}
+          <span className="text-xs font-semibold uppercase tracking-wider text-neutral-400 mt-1">
+            {balanceFilter === "all" ? (
+              t("wallet.home.total_balance")
+            ) : (
+              displayValues.fiatAmount.toLocaleString(undefined, {
+                style: "currency",
+                currency: localCurrency,
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2,
+              })
+            )}
           </span>
         )}
 
-        <Address address={activeAddress} short copyable className="text-xs text-neutral-400" />
+        <Address address={activeAddress} short copyable className="text-xs text-neutral-400 mt-1" />
       </div>
 
       <div className="flex gap-4 w-full">
