@@ -2,13 +2,13 @@ import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { formatUnits } from "viem";
 
-import { selectWalletAddress } from "@/redux/wallet";
+import { selectActiveAddress } from "@/redux/wallet";
 import { selectChainId } from "@/redux/preferences";
 import { GovernanceService } from "@/kernel/governance/GovernanceService";
 import type { Proposal, VotingPower } from "@/kernel/governance/types";
 
 export function useGovernance() {
-  const address = useSelector(selectWalletAddress);
+  const address = useSelector(selectActiveAddress);
   const chainId = useSelector(selectChainId);
   const [proposals, setProposals] = useState<Proposal[]>([]);
   const [votingPower, setVotingPower] = useState<VotingPower | null>(null);

@@ -11,7 +11,7 @@ import Button from "@/atoms/Button";
 import LoadingSkeleton from "@/atoms/LoadingSkeleton";
 import SendIcon from "@/icons/SendIcon";
 import ReceiveIcon from "@/icons/ReceiveIcon";
-import { selectWalletAddress, selectWalletBalance, selectTrackedTokens } from "@/redux/wallet";
+import { selectWalletAddress, selectWalletBalance, selectTrackedTokens, selectActiveAddress } from "@/redux/wallet";
 import { selectChainId, selectShouldHideBalance } from "@/redux/preferences";
 import { buildAddressUrl } from "@/util/networks";
 import { getNativeCurrency } from "@/chains";
@@ -23,7 +23,7 @@ import TokenManagerService, { TokenBalance } from "@/kernel/evm/TokenManagerServ
 export default function TokenDetailView() {
   const { symbol } = useParams<{ symbol: string }>();
   const navigate = useNavigate();
-  const address = useSelector(selectWalletAddress);
+  const address = useSelector(selectActiveAddress);
   const nativeBalance = useSelector(selectWalletBalance);
   const chainId = useSelector(selectChainId);
   const hideBalance = useSelector(selectShouldHideBalance);

@@ -8,7 +8,7 @@ import Card from "@/atoms/Card"
 import Button from "@/atoms/Button"
 import LoadingSpinner from "@/atoms/LoadingSpinner"
 import WeiDisplay from "@/atoms/WeiDisplay"
-import { selectWalletAddress, selectWalletBalance } from "@/redux/wallet"
+import { selectWalletAddress, selectWalletBalance, selectActiveAddress, selectUseSmartWallet, selectSmartWalletAddress } from "@/redux/wallet"
 import { selectChainId } from "@/redux/preferences"
 import SovrynService from "@/rsk/SovrynService"
 import { classifyError } from "@/kernel/evm/errors"
@@ -20,7 +20,9 @@ type PoolType = "xusd" | "rbtc"
 
 export default function SovrynEarnView() {
   const navigate = useNavigate()
-  const address = useSelector(selectWalletAddress)
+  const address = useSelector(selectActiveAddress)
+  const useSmartWallet = useSelector(selectUseSmartWallet)
+  const smartWalletAddress = useSelector(selectSmartWalletAddress)
   const chainId = useSelector(selectChainId)
   const rbtcBalance = useSelector(selectWalletBalance)
 
@@ -43,7 +45,7 @@ export default function SovrynEarnView() {
   const [error, setError] = useState("")
   const [txHash, setTxHash] = useState("")
 
-  const sovryn = SovrynService(chainId)
+  const sovryn = SovrynService(chainId, useSmartWallet, smartWalletAddress)
   const xusd = XUSD[chainId] as `0x${string}` | undefined
   const ixusd = IXUSD[chainId] as `0x${string}` | undefined
   const irbtc = IRBTC[chainId] as `0x${string}` | undefined

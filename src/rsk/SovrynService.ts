@@ -2,6 +2,7 @@ import { parseEther, getAddress, zeroAddress, encodeFunctionData, erc20Abi, pars
 import { getPublicClientByChainId } from "@/kernel/evm/ClientService"
 import TransactionManagerService from "@/kernel/evm/TransactionManagerService"
 import KeyManagerService from "@/kernel/evm/KeyManagerService"
+import RifRelayService from "@/kernel/evm/RifRelayService"
 import {
   SOVRYN_PROTOCOL,
   SWAPS_EXTERNAL,
@@ -20,10 +21,11 @@ import {
   btcWrapperProxyAbi,
 } from "./abis/sovryn"
 
-export default function SovrynService(chainId: number) {
+export default function SovrynService(chainId: number, useSmartWallet = false, smartWalletAddress = "") {
   const publicClient = getPublicClientByChainId(chainId)
   const txManager = TransactionManagerService(chainId)
   const keyManager = KeyManagerService()
+  const relay = RifRelayService(chainId)
 
   const protocol = SOVRYN_PROTOCOL[chainId] as `0x${string}` | undefined
   const swapsExternal = SWAPS_EXTERNAL[chainId] as `0x${string}` | undefined
@@ -37,6 +39,9 @@ export default function SovrynService(chainId: number) {
   }
 
   function getUserAddress(): `0x${string}` {
+    if (useSmartWallet && smartWalletAddress) {
+      return getAddress(smartWalletAddress)
+    }
     return getAddress(keyManager.getAddress())
   }
 
@@ -85,9 +90,17 @@ export default function SovrynService(chainId: number) {
       functionName: "approve",
       args: [spender, amountWei],
     })
-    const { hash } = await txManager.sendContractTransaction(token, 0n, data)
-    await txManager.waitForReceipt(hash)
-    return hash
+    if (useSmartWallet) {
+      const res = await relay.relayTransaction(token, data, 0n)
+      if (!res.success) throw new Error(res.error || "RIF Relay approve failed")
+      const hash = res.txHash as `0x${string}`
+      await txManager.waitForReceipt(hash)
+      return hash
+    } else {
+      const { hash } = await txManager.sendContractTransaction(token, 0n, data)
+      await txManager.waitForReceipt(hash)
+      return hash
+    }
   }
 
   // ── Swap path resolution ───────────────────────────────────
@@ -190,8 +203,14 @@ export default function SovrynService(chainId: number) {
         "0x" as `0x${string}`, // swapData (empty = protocol resolves path)
       ],
     })
-    const { hash } = await txManager.sendContractTransaction(protocol!, wei, data)
-    return hash
+    if (useSmartWallet) {
+      const res = await relay.relayTransaction(protocol!, data, wei)
+      if (!res.success) throw new Error(res.error || "Relay swapRbtcToXusd failed")
+      return res.txHash as `0x${string}`
+    } else {
+      const { hash } = await txManager.sendContractTransaction(protocol!, wei, data)
+      return hash
+    }
   }
 
   /**
@@ -224,8 +243,14 @@ export default function SovrynService(chainId: number) {
         "0x" as `0x${string}`,
       ],
     })
-    const { hash } = await txManager.sendContractTransaction(swapsExternal!, 0n, data)
-    return hash
+    if (useSmartWallet) {
+      const res = await relay.relayTransaction(swapsExternal!, data, 0n)
+      if (!res.success) throw new Error(res.error || "Relay swapSovToXusd failed")
+      return res.txHash as `0x${string}`
+    } else {
+      const { hash } = await txManager.sendContractTransaction(swapsExternal!, 0n, data)
+      return hash
+    }
   }
 
   // ── Low-level: direct convertByPath on SovrynSwapNetwork ──
@@ -258,8 +283,14 @@ export default function SovrynService(chainId: number) {
           minReturn,
         ],
       })
-      const { hash } = await txManager.sendContractTransaction(btcWrapperProxy, sendValue, data)
-      return hash
+      if (useSmartWallet) {
+        const res = await relay.relayTransaction(btcWrapperProxy, data, sendValue)
+        if (!res.success) throw new Error(res.error || "Relay convertByPath failed")
+        return res.txHash as `0x${string}`
+      } else {
+        const { hash } = await txManager.sendContractTransaction(btcWrapperProxy, sendValue, data)
+        return hash
+      }
     } else {
       const swapNetwork = await getSwapNetworkAddress()
       const data = encodeFunctionData({
@@ -274,8 +305,14 @@ export default function SovrynService(chainId: number) {
           0n,                // affiliateFee
         ],
       })
-      const { hash } = await txManager.sendContractTransaction(swapNetwork, sendValue, data)
-      return hash
+      if (useSmartWallet) {
+        const res = await relay.relayTransaction(swapNetwork, data, sendValue)
+        if (!res.success) throw new Error(res.error || "Relay convertByPath failed")
+        return res.txHash as `0x${string}`
+      } else {
+        const { hash } = await txManager.sendContractTransaction(swapNetwork, sendValue, data)
+        return hash
+      }
     }
   }
 
@@ -326,8 +363,14 @@ export default function SovrynService(chainId: number) {
       functionName: "mint",
       args: [user, underlyingAmountWei],
     })
-    const { hash } = await txManager.sendContractTransaction(loanTokenAddress, 0n, data)
-    return hash
+    if (useSmartWallet) {
+      const res = await relay.relayTransaction(loanTokenAddress, data, 0n)
+      if (!res.success) throw new Error(res.error || "Relay lend failed")
+      return res.txHash as `0x${string}`
+    } else {
+      const { hash } = await txManager.sendContractTransaction(loanTokenAddress, 0n, data)
+      return hash
+    }
   }
 
   /**
@@ -345,8 +388,14 @@ export default function SovrynService(chainId: number) {
       functionName: "burn",
       args: [user, iTokenAmountWei],
     })
-    const { hash } = await txManager.sendContractTransaction(loanTokenAddress, 0n, data)
-    return hash
+    if (useSmartWallet) {
+      const res = await relay.relayTransaction(loanTokenAddress, data, 0n)
+      if (!res.success) throw new Error(res.error || "Relay withdraw failed")
+      return res.txHash as `0x${string}`
+    } else {
+      const { hash } = await txManager.sendContractTransaction(loanTokenAddress, 0n, data)
+      return hash
+    }
   }
 
   // ── RBTC Lending (iRBTC payable mint/burn) ─────────────────
@@ -366,8 +415,14 @@ export default function SovrynService(chainId: number) {
       functionName: "mintWithBTC",
       args: [user, false],
     })
-    const { hash } = await txManager.sendContractTransaction(irbtc, rbtcAmountWei, data)
-    return hash
+    if (useSmartWallet) {
+      const res = await relay.relayTransaction(irbtc, data, rbtcAmountWei)
+      if (!res.success) throw new Error(res.error || "Relay lendRbtc failed")
+      return res.txHash as `0x${string}`
+    } else {
+      const { hash } = await txManager.sendContractTransaction(irbtc, rbtcAmountWei, data)
+      return hash
+    }
   }
 
   /**
@@ -384,8 +439,14 @@ export default function SovrynService(chainId: number) {
       functionName: "burnToBTC",
       args: [user, iRbtcAmountWei, false],
     })
-    const { hash } = await txManager.sendContractTransaction(irbtc, 0n, data)
-    return hash
+    if (useSmartWallet) {
+      const res = await relay.relayTransaction(irbtc, data, 0n)
+      if (!res.success) throw new Error(res.error || "Relay withdrawRbtc failed")
+      return res.txHash as `0x${string}`
+    } else {
+      const { hash } = await txManager.sendContractTransaction(irbtc, 0n, data)
+      return hash
+    }
   }
 
   /**

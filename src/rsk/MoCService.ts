@@ -2,13 +2,15 @@ import { parseEther, getAddress, encodeFunctionData, erc20Abi } from "viem"
 import { getPublicClientByChainId } from "@/kernel/evm/ClientService"
 import TransactionManagerService from "@/kernel/evm/TransactionManagerService"
 import KeyManagerService from "@/kernel/evm/KeyManagerService"
+import RifRelayService from "@/kernel/evm/RifRelayService"
 import { MOC_CORE, MOC_STATE, DOC, BPRO } from "./addresses"
 import { mocCoreAbi, mocStateAbi } from "./abis/moc"
 
-export default function MoCService(chainId: number) {
+export default function MoCService(chainId: number, useSmartWallet = false, smartWalletAddress = "") {
   const publicClient = getPublicClientByChainId(chainId)
   const txManager = TransactionManagerService(chainId)
   const keyManager = KeyManagerService()
+  const relay = RifRelayService(chainId)
 
   const mocCore = MOC_CORE[chainId] as `0x${string}`
   const mocState = MOC_STATE[chainId] as `0x${string}`
@@ -20,6 +22,9 @@ export default function MoCService(chainId: number) {
   }
 
   function getUserAddress(): `0x${string}` {
+    if (useSmartWallet && smartWalletAddress) {
+      return getAddress(smartWalletAddress)
+    }
     return getAddress(keyManager.getAddress())
   }
 
@@ -44,9 +49,17 @@ export default function MoCService(chainId: number) {
       functionName: "approve",
       args: [spender, amountWei],
     })
-    const { hash } = await txManager.sendContractTransaction(token, 0n, data)
-    await txManager.waitForReceipt(hash)
-    return hash
+    if (useSmartWallet) {
+      const res = await relay.relayTransaction(token, data, 0n)
+      if (!res.success) throw new Error(res.error || "RIF Relay approve failed")
+      const hash = res.txHash as `0x${string}`
+      await txManager.waitForReceipt(hash)
+      return hash
+    } else {
+      const { hash } = await txManager.sendContractTransaction(token, 0n, data)
+      await txManager.waitForReceipt(hash)
+      return hash
+    }
   }
 
   async function getBtcPrice(): Promise<bigint> {
@@ -129,8 +142,14 @@ export default function MoCService(chainId: number) {
       args: [wei],
     })
     const valueWithBuffer = wei * 1005n / 1000n
-    const { hash } = await txManager.sendContractTransaction(mocCore, valueWithBuffer, data)
-    return hash
+    if (useSmartWallet) {
+      const res = await relay.relayTransaction(mocCore, data, valueWithBuffer)
+      if (!res.success) throw new Error(res.error || "RIF Relay mintDoc failed")
+      return res.txHash as `0x${string}`
+    } else {
+      const { hash } = await txManager.sendContractTransaction(mocCore, valueWithBuffer, data)
+      return hash
+    }
   }
 
   async function redeemDoc(docAmount: string): Promise<`0x${string}`> {
@@ -141,8 +160,14 @@ export default function MoCService(chainId: number) {
       functionName: "redeemFreeDoc",
       args: [wei],
     })
-    const { hash } = await txManager.sendContractTransaction(mocCore, 0n, data)
-    return hash
+    if (useSmartWallet) {
+      const res = await relay.relayTransaction(mocCore, data, 0n)
+      if (!res.success) throw new Error(res.error || "RIF Relay redeemFreeDoc failed")
+      return res.txHash as `0x${string}`
+    } else {
+      const { hash } = await txManager.sendContractTransaction(mocCore, 0n, data)
+      return hash
+    }
   }
 
   async function mintBPro(rbtcAmount: string): Promise<`0x${string}`> {
@@ -154,8 +179,14 @@ export default function MoCService(chainId: number) {
       args: [wei],
     })
     const valueWithBuffer = wei * 1005n / 1000n
-    const { hash } = await txManager.sendContractTransaction(mocCore, valueWithBuffer, data)
-    return hash
+    if (useSmartWallet) {
+      const res = await relay.relayTransaction(mocCore, data, valueWithBuffer)
+      if (!res.success) throw new Error(res.error || "RIF Relay mintBPro failed")
+      return res.txHash as `0x${string}`
+    } else {
+      const { hash } = await txManager.sendContractTransaction(mocCore, valueWithBuffer, data)
+      return hash
+    }
   }
 
   async function redeemBPro(bproAmount: string): Promise<`0x${string}`> {
@@ -166,8 +197,14 @@ export default function MoCService(chainId: number) {
       functionName: "redeemBPro",
       args: [wei],
     })
-    const { hash } = await txManager.sendContractTransaction(mocCore, 0n, data)
-    return hash
+    if (useSmartWallet) {
+      const res = await relay.relayTransaction(mocCore, data, 0n)
+      if (!res.success) throw new Error(res.error || "RIF Relay redeemBPro failed")
+      return res.txHash as `0x${string}`
+    } else {
+      const { hash } = await txManager.sendContractTransaction(mocCore, 0n, data)
+      return hash
+    }
   }
 
   return {

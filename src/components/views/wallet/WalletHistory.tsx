@@ -8,7 +8,7 @@ import WeiDisplay from "@/atoms/WeiDisplay";
 import Address from "@/atoms/Address";
 import { TransactionSkeleton } from "@/atoms/LoadingSkeleton";
 import ErrorState from "@/atoms/ErrorState";
-import { selectWalletAddress, selectPendingTransactions } from "@/redux/wallet";
+import { selectActiveAddress, selectPendingTransactions } from "@/redux/wallet";
 import { selectChainId } from "@/redux/preferences";
 import TransactionHistoryService, { type TxHistoryEntry } from "@/kernel/evm/TransactionHistoryService";
 import TransactionExportService from "@/kernel/evm/TransactionExportService";
@@ -17,7 +17,7 @@ import { useTranslation } from "@/translations";
 
 export default function WalletHistory() {
   const navigate = useNavigate();
-  const address = useSelector(selectWalletAddress);
+  const address = useSelector(selectActiveAddress);
   const chainId = useSelector(selectChainId);
   const pendingTxs = useSelector(selectPendingTransactions);
   const [txs, setTxs] = useState<TxHistoryEntry[]>([]);

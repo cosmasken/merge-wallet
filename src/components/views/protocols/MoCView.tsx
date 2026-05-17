@@ -9,7 +9,7 @@ import Button from "@/atoms/Button"
 import LoadingSpinner from "@/atoms/LoadingSpinner"
 import WeiDisplay from "@/atoms/WeiDisplay"
 import ProtocolConfirmation from "@/composite/ProtocolConfirmation"
-import { selectWalletAddress, selectWalletBalance, selectPendingTransactions, addPendingTransaction } from "@/redux/wallet"
+import { selectWalletAddress, selectWalletBalance, selectPendingTransactions, addPendingTransaction, selectActiveAddress, selectUseSmartWallet, selectSmartWalletAddress } from "@/redux/wallet"
 import { selectChainId } from "@/redux/preferences"
 import MoCService from "@/rsk/MoCService"
 import { getProtocolTokens, MOC_CORE } from "@/rsk/addresses"
@@ -38,7 +38,9 @@ export default function MoCView() {
   const isOverview = !urlAction || !VALID_ACTIONS[urlAction]
   const action = isOverview ? "mintDoc" : VALID_ACTIONS[urlAction]
 
-  const address = useSelector(selectWalletAddress)
+  const address = useSelector(selectActiveAddress)
+  const useSmartWallet = useSelector(selectUseSmartWallet)
+  const smartWalletAddress = useSelector(selectSmartWalletAddress)
   const chainId = useSelector(selectChainId)
   const balance = useSelector(selectWalletBalance)
   const pendingTxs = useSelector(selectPendingTransactions)
@@ -55,7 +57,7 @@ export default function MoCView() {
   const [txHash, setTxHash] = useState("")
   const redirecting = useRef(false)
 
-  const moc = MoCService(chainId)
+  const moc = MoCService(chainId, useSmartWallet, smartWalletAddress)
   const mocTokens = getProtocolTokens(chainId).filter(t => t.protocol === "moc")
 
   const PILL_ORDER: { slug: string; label: string; action: Action }[] = [

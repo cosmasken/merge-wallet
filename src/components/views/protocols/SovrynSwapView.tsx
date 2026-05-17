@@ -7,7 +7,7 @@ import ViewHeader from "@/layout/ViewHeader"
 import Card from "@/atoms/Card"
 import Button from "@/atoms/Button"
 import LoadingSpinner from "@/atoms/LoadingSpinner"
-import { selectWalletAddress, selectWalletBalance } from "@/redux/wallet"
+import { selectWalletAddress, selectWalletBalance, selectActiveAddress, selectUseSmartWallet, selectSmartWalletAddress } from "@/redux/wallet"
 import { selectChainId } from "@/redux/preferences"
 import SovrynService from "@/rsk/SovrynService"
 import { classifyError } from "@/kernel/evm/errors"
@@ -29,7 +29,9 @@ interface TokenOption {
 export default function SovrynSwapView() {
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
-  const address = useSelector(selectWalletAddress)
+  const address = useSelector(selectActiveAddress)
+  const useSmartWallet = useSelector(selectUseSmartWallet)
+  const smartWalletAddress = useSelector(selectSmartWalletAddress)
   const chainId = useSelector(selectChainId)
   const nativeBal = useSelector(selectWalletBalance)
 
@@ -60,7 +62,7 @@ export default function SovrynSwapView() {
   const [bypassSlippage, setBypassSlippage] = useState(false)
   const [tokenBalances, setTokenBalances] = useState<Record<string, bigint>>({})
 
-  const sovryn = SovrynService(chainId)
+  const sovryn = SovrynService(chainId, useSmartWallet, smartWalletAddress)
   const wrbtc = WRBTC[chainId] as `0x${string}` | undefined
 
   const fromToken = tokenOptions.find(t => t.symbol === fromSymbol) ?? tokenOptions[0]
