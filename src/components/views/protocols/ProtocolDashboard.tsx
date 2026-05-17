@@ -98,33 +98,6 @@ export default function ProtocolDashboard() {
             </Card>
           </button>
 
-          {/* Tropykus Card */}
-          <button onClick={() => navigate("/protocols/tropykus")} className="text-left w-full">
-            <Card className="p-4">
-              <div className="flex items-start gap-3">
-                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-green-500 to-emerald-300 flex items-center justify-center text-white font-bold text-sm shrink-0">
-                  Tr
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center justify-between">
-                    <h2 className="text-sm font-bold">Tropykus</h2>
-                  </div>
-                  <p className="text-xs text-neutral-400 mt-0.5">Lend assets or borrow against collateral</p>
-                  <div className="flex flex-wrap gap-x-3 gap-y-0.5 mt-2 text-xs">
-                    {byProtocol('tropykus').map(t => (
-                      <span key={t.symbol} className="text-neutral-500">
-                        {t.symbol}: <WeiDisplay wei={protocolBalances[t.symbol] ?? 0n} symbol="" decimals={t.decimals} />
-                      </span>
-                    ))}
-                  </div>
-                </div>
-                <svg viewBox="0 0 24 24" className="w-5 h-5 text-neutral-300 shrink-0 mt-1" fill="none" stroke="currentColor" strokeWidth="2">
-                  <polyline points="9 18 15 12 9 6" />
-                </svg>
-              </div>
-            </Card>
-          </button>
-
           {/* Sovryn Card */}
           <button onClick={() => chainId === 30 ? navigate("/protocols/sovryn/swap") : undefined} className="text-left w-full" disabled={chainId !== 30}>
             <Card className={`p-4 ${chainId !== 30 ? "opacity-60" : ""}`}>

@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { useSelector } from "react-redux";
+import { useNavigate } from "react-router";
 
 import ViewHeader from "@/layout/ViewHeader";
 import PullToRefresh from "@/atoms/PullToRefresh";
@@ -9,13 +10,13 @@ import { TransactionSkeleton } from "@/atoms/LoadingSkeleton";
 import ErrorState from "@/atoms/ErrorState";
 import { selectWalletAddress } from "@/redux/wallet";
 import { selectChainId } from "@/redux/preferences";
-import { buildTxUrl } from "@/util/networks";
 import TransactionHistoryService, { type TxHistoryEntry } from "@/kernel/evm/TransactionHistoryService";
 import TransactionExportService from "@/kernel/evm/TransactionExportService";
 import { getNativeCurrency } from "@/chains";
 import { useTranslation } from "@/translations";
 
 export default function WalletHistory() {
+  const navigate = useNavigate();
   const address = useSelector(selectWalletAddress);
   const chainId = useSelector(selectChainId);
   const [txs, setTxs] = useState<TxHistoryEntry[]>([]);
@@ -102,12 +103,10 @@ export default function WalletHistory() {
             {txs.map((tx) => {
               const isOutgoing = tx.from.toLowerCase() === address.toLowerCase();
               return (
-                <a
+                <button
                   key={tx.hash}
-                  href={buildTxUrl(chainId, tx.hash)}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center justify-between p-3 rounded-lg bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700"
+                  onClick={() => navigate(`/tx/${tx.hash}`)}
+                  className="text-left w-full flex items-center justify-between p-3 rounded-lg bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700"
                 >
                   <div className="flex flex-col gap-1">
                     <div className="flex items-center gap-2">
@@ -128,7 +127,7 @@ export default function WalletHistory() {
                       {new Date(tx.timestamp * 1000).toLocaleDateString()}
                     </div>
                   </div>
-                </a>
+                </button>
               );
             })}
           </div>

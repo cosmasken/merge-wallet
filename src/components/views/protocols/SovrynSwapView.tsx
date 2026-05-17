@@ -1,5 +1,6 @@
 import { useEffect, useState, useCallback } from "react"
 import { useSelector } from "react-redux"
+import { useNavigate } from "react-router"
 import { formatEther, parseEther } from "viem"
 
 import ViewHeader from "@/layout/ViewHeader"
@@ -12,7 +13,6 @@ import SovrynService from "@/rsk/SovrynService"
 import { classifyError } from "@/kernel/evm/errors"
 import SecurityService, { AuthActions } from "@/kernel/app/SecurityService"
 import NotificationService from "@/kernel/app/NotificationService"
-import { buildTxUrl } from "@/util/networks"
 import { XUSD, SOV, SWAPS_EXTERNAL, SOVRYN_PROTOCOL } from "@/rsk/addresses"
 
 type SwapDirection = "rbtcToXusd" | "sovToXusd"
@@ -20,6 +20,7 @@ type SwapDirection = "rbtcToXusd" | "sovToXusd"
 const SLIPPAGE_OPTIONS = [0.1, 0.5, 1, 3, 5]
 
 export default function SovrynSwapView() {
+  const navigate = useNavigate()
   const address = useSelector(selectWalletAddress)
   const chainId = useSelector(selectChainId)
   const balance = useSelector(selectWalletBalance)
@@ -129,7 +130,7 @@ export default function SovrynSwapView() {
           </div>
           <h2 className="text-lg font-bold">Swap Submitted</h2>
           <p className="text-sm text-neutral-500 font-mono break-all">{txHash}</p>
-          <a href={buildTxUrl(chainId, txHash)} target="_blank" rel="noopener noreferrer" className="text-primary text-sm">View on Explorer</a>
+          <button onClick={() => navigate(`/tx/${txHash}`)} className="text-primary text-sm font-semibold hover:underline">View on Explorer</button>
           <Button label="Back" variant="secondary" onClick={() => window.history.back()} />
         </div>
       </div>

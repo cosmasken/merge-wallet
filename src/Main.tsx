@@ -13,6 +13,7 @@ import { routeWallet } from "@/routes/routeWallet";
 import { routeAssets } from "@/routes/routeAssets";
 import { routeSettings } from "@/routes/routeSettings";
 import { routeProtocols } from "@/routes/routeProtocols";
+import { routeTx } from "@/routes/routeTx";
 
 const router = createBrowserRouter([
   {
@@ -25,6 +26,7 @@ const router = createBrowserRouter([
       ...routeAssets,
       ...routeSettings,
       ...routeProtocols,
+      ...routeTx,
     ],
   },
 ]);

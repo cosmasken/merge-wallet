@@ -1,22 +1,24 @@
 import { useEffect, useState, useCallback, useRef } from "react"
 import { useDispatch, useSelector } from "react-redux"
 import { useParams, useNavigate } from "react-router"
-import { formatEther, parseEther, erc20Abi } from "viem"
+import { formatEther, parseEther, encodeFunctionData, erc20Abi } from "viem"
 
 import ViewHeader from "@/layout/ViewHeader"
 import Card from "@/atoms/Card"
 import Button from "@/atoms/Button"
 import LoadingSpinner from "@/atoms/LoadingSpinner"
 import WeiDisplay from "@/atoms/WeiDisplay"
+import ProtocolConfirmation from "@/composite/ProtocolConfirmation"
 import { selectWalletAddress, selectWalletBalance, selectPendingTransactions, addPendingTransaction } from "@/redux/wallet"
 import { selectChainId } from "@/redux/preferences"
 import MoCService from "@/rsk/MoCService"
-import { getProtocolTokens } from "@/rsk/addresses"
+import { getProtocolTokens, MOC_CORE } from "@/rsk/addresses"
+import { mocCoreAbi } from "@/rsk/abis/moc"
 import { getPublicClientByChainId } from "@/kernel/evm/ClientService"
 import { classifyError } from "@/kernel/evm/errors"
 import SecurityService, { AuthActions } from "@/kernel/app/SecurityService"
 import NotificationService from "@/kernel/app/NotificationService"
-import { buildTxUrl } from "@/util/networks"
+
 
 type Action = "mintDoc" | "redeemDoc" | "mintBPro" | "redeemBPro"
 
@@ -76,6 +78,11 @@ export default function MoCView() {
   const [btcPrice, setBtcPrice] = useState<string | null>(null)
   const [mocBalances, setMocBalances] = useState<Record<string, bigint>>({})
   const [isBusy, setIsBusy] = useState(false)
+  const [showConfirmation, setShowConfirmation] = useState(false)
+  const [fee, setFee] = useState<bigint | null>(null)
+  const [isLoadingFee, setIsLoadingFee] = useState(false)
+  const [estimatedOutput, setEstimatedOutput] = useState<string | null>(null)
+  const [isLoadingOutput, setIsLoadingOutput] = useState(false)
   const [error, setError] = useState("")
   const [txHash, setTxHash] = useState("")
   const redirecting = useRef(false)
@@ -110,12 +117,14 @@ export default function MoCView() {
 
   const handleSubmit = useCallback(async () => {
     if (!isOk || isLow) return
+    setShowConfirmation(true)
+  }, [isOk, isLow])
+
+  const executeTransaction = useCallback(async () => {
+    setShowConfirmation(false)
     setIsBusy(true)
     setError("")
     try {
-      const auth = await SecurityService().authorize(AuthActions.SendTransaction)
-      if (!auth) { NotificationService().error("Authorization required"); setIsBusy(false); return }
-
       const hash = await ({
         mintDoc: () => moc.mintDoc(amount),
         redeemDoc: () => moc.redeemDoc(amount),
@@ -137,7 +146,62 @@ export default function MoCView() {
       NotificationService().error(err.message)
     }
     setIsBusy(false)
-  }, [action, amount, isOk, isLow, chainId])
+  }, [action, amount, chainId])
+
+  const abiActionName: Record<string, string> = {
+    mintDoc: "mintDoc",
+    redeemDoc: "redeemFreeDoc",
+    mintBPro: "mintBPro",
+    redeemBPro: "redeemBPro",
+  }
+
+  useEffect(() => {
+    if (!showConfirmation || !amount || !address) { setFee(null); return }
+    setIsLoadingFee(true)
+    const client = getPublicClientByChainId(chainId)
+    const mocCore = MOC_CORE[chainId] as `0x${string}`
+    const wei = isRbtcIn ? parseEther(amount) : 0n
+    const fnName = abiActionName[action]
+    const data = fnName ? encodeFunctionData({ abi: mocCoreAbi, functionName: fnName as any, args: [parseEther(amount)] }) : undefined
+
+    Promise.all([
+      client.estimateGas({ to: mocCore, value: wei, data, account: address as `0x${string}` }).catch(() => undefined),
+      client.getGasPrice().catch(() => undefined),
+    ]).then(([gas, gasPrice]) => {
+      if (gas && gasPrice) {
+        setFee(gas * gasPrice)
+      } else if (gasPrice) {
+        setFee(gasPrice * 200000n)
+      }
+      setIsLoadingFee(false)
+    })
+  }, [showConfirmation, action, amount, chainId, address, isRbtcIn])
+
+  useEffect(() => {
+    if (!showConfirmation || !amount) { setEstimatedOutput(null); return }
+    setIsLoadingOutput(true)
+    const estimate = async () => {
+      try {
+        let result: bigint
+        if (action === "mintDoc") {
+          result = await moc.estimateDocForBtc(amount)
+        } else if (action === "redeemDoc") {
+          result = await moc.estimateBtcForDoc(amount)
+        } else if (action === "mintBPro") {
+          const btcPrice = await moc.getBtcPrice().catch(() => null)
+          const bproPrice = await moc.getBProPrice().catch(() => null)
+          if (btcPrice && bproPrice) {
+            result = parseEther(amount) * btcPrice / bproPrice
+          } else { setIsLoadingOutput(false); return }
+        } else {
+          result = await moc.estimateBtcForBPro(amount)
+        }
+        setEstimatedOutput(formatEther(result))
+      } catch { setEstimatedOutput(null) }
+      setIsLoadingOutput(false)
+    }
+    estimate()
+  }, [showConfirmation, action, amount, chainId])
 
   const liveTx = txHash ? pendingTxs.find(t => t.hash === txHash) : undefined
   const txStatus = liveTx?.status
@@ -187,11 +251,34 @@ export default function MoCView() {
               </div>
               <h2 className="text-lg font-bold">Confirming Transaction</h2>
               <p className="text-sm text-neutral-500">Waiting for block confirmation...</p>
+              <p className="text-xs text-neutral-400">You can leave and check status in Settings → Transaction History</p>
+              <Button label="Leave" variant="ghost" size="sm" onClick={() => navigate("/protocols/moc")} />
             </>
           )}
           <p className="text-xs text-neutral-400 font-mono break-all">{txHash}</p>
-          <a href={buildTxUrl(chainId, txHash)} target="_blank" rel="noopener noreferrer" className="text-primary text-sm">View on Explorer</a>
+          <button onClick={() => navigate(`/tx/${txHash}`)} className="text-primary text-sm font-semibold hover:underline">View on Explorer</button>
         </div>
+      </div>
+    )
+  }
+
+  if (showConfirmation && a) {
+    return (
+      <div className="animate-in fade-in slide-in-from-bottom-4 duration-300">
+        <ViewHeader title="Money On Chain" showBack onBack={() => setShowConfirmation(false)} />
+        <ProtocolConfirmation
+          title={a.title}
+          description={a.desc}
+          amount={amount}
+          inputSymbol={isRbtcIn ? "RBTC" : a.title.includes("DOC") ? "DOC" : "BPro"}
+          outputSymbol={isRbtcIn ? a.title.includes("DOC") ? "DOC" : "BPro" : "RBTC"}
+          estimatedOutput={estimatedOutput}
+          isLoadingOutput={isLoadingOutput}
+          isLoadingFee={isLoadingFee}
+          fee={fee ? formatEther(fee) : undefined}
+          onConfirm={executeTransaction}
+          onCancel={() => setShowConfirmation(false)}
+        />
       </div>
     )
   }

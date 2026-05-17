@@ -6,6 +6,7 @@ import AboutView from "@/views/settings/AboutView";
 import LanguageSettings from "@/views/settings/LanguageSettings";
 import AddressBook from "@/views/wallet/AddressBook";
 import GovernanceView from "@/views/settings/GovernanceView";
+import TransactionHistoryView from "@/views/settings/TransactionHistoryView";
 
 export const routeSettings = [
   {
@@ -42,6 +43,10 @@ export const routeSettings = [
       {
         path: "governance",
         element: <GovernanceView />,
+      },
+      {
+        path: "history",
+        element: <TransactionHistoryView />,
       },
     ],
   },

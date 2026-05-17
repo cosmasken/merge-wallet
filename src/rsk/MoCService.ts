@@ -20,9 +20,9 @@ export default function MoCService(chainId: number) {
   async function getBtcPrice(): Promise<bigint> {
     requireAvailable()
     return publicClient.readContract({
-      address: mocCore,
-      abi: mocCoreAbi,
-      functionName: "getBtcPrice",
+      address: mocState,
+      abi: mocStateAbi,
+      functionName: "getBitcoinPrice",
     }) as Promise<bigint>
   }
 
@@ -31,7 +31,40 @@ export default function MoCService(chainId: number) {
     return publicClient.readContract({
       address: mocState,
       abi: mocStateAbi,
-      functionName: "getBitProPrice",
+      functionName: "bproUsdPrice",
+    }) as Promise<bigint>
+  }
+
+  async function estimateDocForBtc(rbtcAmount: string): Promise<bigint> {
+    requireAvailable()
+    const wei = parseEther(rbtcAmount)
+    return publicClient.readContract({
+      address: mocState,
+      abi: mocStateAbi,
+      functionName: "btcToDoc",
+      args: [wei],
+    }) as Promise<bigint>
+  }
+
+  async function estimateBtcForDoc(docAmount: string): Promise<bigint> {
+    requireAvailable()
+    const wei = parseEther(docAmount)
+    return publicClient.readContract({
+      address: mocState,
+      abi: mocStateAbi,
+      functionName: "docsToBtc",
+      args: [wei],
+    }) as Promise<bigint>
+  }
+
+  async function estimateBtcForBPro(bproAmount: string): Promise<bigint> {
+    requireAvailable()
+    const wei = parseEther(bproAmount)
+    return publicClient.readContract({
+      address: mocState,
+      abi: mocStateAbi,
+      functionName: "bproToBtc",
+      args: [wei],
     }) as Promise<bigint>
   }
 
@@ -61,7 +94,7 @@ export default function MoCService(chainId: number) {
     const data = encodeFunctionData({
       abi: mocCoreAbi,
       functionName: "mintDoc",
-      args: [wei, 0n],
+      args: [wei],
     })
     const { hash } = await txManager.sendContractTransaction(mocCore, wei, data)
     return hash
@@ -72,8 +105,8 @@ export default function MoCService(chainId: number) {
     const wei = parseEther(docAmount)
     const data = encodeFunctionData({
       abi: mocCoreAbi,
-      functionName: "redeemDoc",
-      args: [wei, 0n],
+      functionName: "redeemFreeDoc",
+      args: [wei],
     })
     const { hash } = await txManager.sendContractTransaction(mocCore, 0n, data)
     return hash
@@ -85,7 +118,7 @@ export default function MoCService(chainId: number) {
     const data = encodeFunctionData({
       abi: mocCoreAbi,
       functionName: "mintBPro",
-      args: [wei, 0n],
+      args: [wei],
     })
     const { hash } = await txManager.sendContractTransaction(mocCore, wei, data)
     return hash
@@ -97,7 +130,7 @@ export default function MoCService(chainId: number) {
     const data = encodeFunctionData({
       abi: mocCoreAbi,
       functionName: "redeemBPro",
-      args: [wei, 0n],
+      args: [wei],
     })
     const { hash } = await txManager.sendContractTransaction(mocCore, 0n, data)
     return hash
@@ -108,6 +141,9 @@ export default function MoCService(chainId: number) {
     getBProPrice,
     getDocBalance,
     getBProBalance,
+    estimateDocForBtc,
+    estimateBtcForDoc,
+    estimateBtcForBPro,
     mintDoc,
     redeemDoc,
     mintBPro,

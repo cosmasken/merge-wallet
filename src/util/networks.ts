@@ -13,6 +13,12 @@ export function getExplorerUrl(chainId: number): string {
   return config?.blockExplorer?.url ?? "";
 }
 
+export function getBlockscoutApiUrl(chainId: number): string {
+  if (chainId === 30) return "https://rootstock.blockscout.com";
+  if (chainId === 31) return "https://rootstock-testnet.blockscout.com";
+  return getExplorerUrl(chainId);
+}
+
 export function buildTxUrl(chainId: number, txHash: string): string {
   return `${getExplorerUrl(chainId)}/tx/${txHash}`;
 }

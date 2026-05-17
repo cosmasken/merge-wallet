@@ -1,12 +1,12 @@
 import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
+import { useNavigate } from "react-router";
 import { isAddress, parseEther, formatEther, encodeFunctionData, erc20Abi, parseUnits } from "viem";
 
 import ViewHeader from "@/layout/ViewHeader";
 import { selectWalletAddress, selectWalletBalance } from "@/redux/wallet";
 import { selectChainId } from "@/redux/preferences";
 import { selectIsConnected } from "@/redux/device";
-import { buildTxUrl } from "@/util/networks";
 import { getPublicClient } from "@/kernel/evm/ClientService";
 import TransactionBuilderService from "@/kernel/evm/TransactionBuilderService";
 import TransactionManagerService from "@/kernel/evm/TransactionManagerService";
@@ -31,6 +31,7 @@ interface TokenOption {
 }
 
 export default function WalletSend() {
+  const navigate = useNavigate();
   const dispatch = useDispatch();
   const address = useSelector(selectWalletAddress);
   const balance = useSelector(selectWalletBalance);
@@ -123,7 +124,12 @@ export default function WalletSend() {
         setGasEstimate(gas);
       }
     } catch (e) {
-      setError(classifyError(e).message);
+      const msg = classifyError(e).message
+      if (msg.includes("gas") || msg.includes("intrinsic")) {
+        setGasEstimate(0n)
+      } else {
+        setError(msg);
+      }
     }
     setIsEstimating(false);
   };
@@ -134,13 +140,14 @@ export default function WalletSend() {
       setError(t("wallet.send.insufficient", { symbol: selectedToken.symbol }));
       return;
     }
-
-    if (gasEstimate === null) {
-      await handleEstimateGas();
-    }
-
     setIsConfirming(true);
   };
+
+  useEffect(() => {
+    if (isConfirming && gasEstimate === null) {
+      handleEstimateGas()
+    }
+  }, [isConfirming])
 
   const handleSend = async () => {
     // Prevent multiple simultaneous transactions
@@ -224,14 +231,12 @@ export default function WalletSend() {
           </div>
           <h2 className="text-lg font-bold">{t("wallet.send.success_title")}</h2>
           <p className="text-sm text-neutral-500 font-mono break-all">{txHash}</p>
-          <a
-            href={buildTxUrl(chainId, txHash)}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-primary text-sm"
+          <button
+            onClick={() => navigate(`/tx/${txHash}`)}
+            className="text-primary text-sm font-semibold hover:underline"
           >
             {t("wallet.send.view_explorer")}
-          </a>
+          </button>
           <button
             onClick={() => window.history.go(-2)}
             className="mt-4 px-6 py-3 rounded-full bg-primary text-white font-semibold"
@@ -244,27 +249,40 @@ export default function WalletSend() {
   }
 
   if (isConfirming) {
+    const gasReady = gasEstimate !== null && gasPrice !== null
     return (
       <div>
         <ViewHeader title={t("wallet.send.confirm_title")} showBack onBack={() => setIsConfirming(false)} />
-        <TransactionConfirmation
-          transaction={{
-            to: to as `0x${string}`,
-            value: valueWei,
-            gasEstimate: gasEstimate ?? 0n,
-            gasPrice: gasPrice ?? 0n,
-            total: valueWei + (gasEstimate ?? 0n) * (gasPrice ?? 0n),
-            token: {
-              symbol: selectedToken.symbol,
-              decimals: selectedToken.decimals,
-              type: selectedToken.type,
-              address: selectedToken.address,
-            }
-          }}
-          onConfirm={handleSend}
-          onEdit={() => setIsConfirming(false)}
-          onCancel={() => setIsConfirming(false)}
-        />
+        {isEstimating && !gasReady ? (
+          <div className="flex flex-col items-center gap-4 px-4 pt-16 text-center animate-in fade-in duration-300">
+            <div className="w-12 h-12 rounded-full bg-neutral-100 dark:bg-neutral-800 flex items-center justify-center animate-pulse">
+              <svg viewBox="0 0 24 24" className="w-6 h-6 text-neutral-400" fill="none" stroke="currentColor" strokeWidth="1.5">
+                <rect x="2" y="3" width="20" height="14" rx="2" /><line x1="8" y1="21" x2="16" y2="21" /><line x1="12" y1="17" x2="12" y2="21" />
+              </svg>
+            </div>
+            <h2 className="text-lg font-bold">Estimating network fee</h2>
+            <p className="text-sm text-neutral-500">Please wait...</p>
+          </div>
+        ) : (
+          <TransactionConfirmation
+            transaction={{
+              to: to as `0x${string}`,
+              value: valueWei,
+              gasEstimate: gasEstimate ?? 0n,
+              gasPrice: gasPrice ?? 0n,
+              total: valueWei + (gasEstimate ?? 0n) * (gasPrice ?? 0n),
+              token: {
+                symbol: selectedToken.symbol,
+                decimals: selectedToken.decimals,
+                type: selectedToken.type,
+                address: selectedToken.address,
+              }
+            }}
+            onConfirm={handleSend}
+            onEdit={() => setIsConfirming(false)}
+            onCancel={() => setIsConfirming(false)}
+          />
+        )}
         {error && (
           <p className="text-error text-sm bg-error/10 p-3 m-4 rounded-lg">{error}</p>
         )}
@@ -376,22 +394,16 @@ export default function WalletSend() {
           <p className="text-error text-sm bg-error/10 p-3 rounded-lg">{t("wallet.home.no_internet")}</p>
         )}
 
-        {isConnected && isValidAddress && isValidAmount && gasEstimate === null && (
-          <button
-            onClick={handleEstimateGas}
-            disabled={isEstimating}
-            className="w-full p-3 rounded-full bg-neutral-200 dark:bg-neutral-700 text-neutral-600 dark:text-neutral-300 font-semibold"
-          >
-            {isEstimating ? t("wallet.send.estimating") : t("wallet.send.estimate_gas")}
-          </button>
+        {isEstimating && (
+          <div className="flex items-center gap-2 text-sm text-neutral-500">
+            <LoadingSpinner size="sm" />
+            <span>{t("wallet.send.estimating")}</span>
+          </div>
         )}
 
-        {gasEstimate !== null && (
+        {gasEstimate !== null && gasPrice !== null && !isEstimating && (
           <div className="text-sm text-neutral-500">
-            {t("wallet.send.estimated_gas_label")}: {gasEstimate.toString()} units
-            {gasPrice !== null && (
-              <span> · {t("wallet.send.max_fee_label")}: {formatEther(gasEstimate * gasPrice)} {selectedToken.symbol}</span>
-            )}
+            {t("wallet.send.max_fee_label")}: {formatEther(gasEstimate * gasPrice)} {selectedToken.symbol}
           </div>
         )}
 

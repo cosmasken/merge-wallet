@@ -1,6 +1,5 @@
 import ProtocolDashboard from "@/views/protocols/ProtocolDashboard";
 import MoCView from "@/views/protocols/MoCView";
-import TropykusView from "@/views/protocols/TropykusView";
 import SovrynSwapView from "@/views/protocols/SovrynSwapView";
 import SovrynEarnView from "@/views/protocols/SovrynEarnView";
 
@@ -19,14 +18,6 @@ export const routeProtocols = [
       {
         path: "moc/:action",
         element: <MoCView />,
-      },
-      {
-        path: "tropykus",
-        element: <TropykusView />,
-      },
-      {
-        path: "tropykus/:action",
-        element: <TropykusView />,
       },
       {
         path: "sovryn/swap",

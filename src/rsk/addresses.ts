@@ -26,28 +26,6 @@ export const MOC_TOKEN: Record<number, string> = {
   [TESTNET]: '0x45A97b54021A3F99827641AFE1bFae574431E6ab',
 }
 
-// ── Tropykus (Compound v2 fork) ─────────────────────────────
-export const TRO_COMPTROLLER: Record<number, string> = {
-  [MAINNET]: '0x962308Fef8EdfAdD705384840e7701f8F39ed0c0',
-  [TESTNET]: '0xb1BEc5376929b4E0235F1353819DBa92c4B0C6bb',
-}
-export const kRBTC: Record<number, string> = {
-  [MAINNET]: '0x0aeadb9d4c6a80462a47e87e76e487fa8b9a37d7',
-  [TESTNET]: '0x5b35072cd6110606c8421e013304110fa04a32a3',
-}
-export const kDOC: Record<number, string> = {
-  [MAINNET]: '0x544eb90e766b405134b3b3f62b6b4c23fcd5fda2',
-  [TESTNET]: '0x71e6b108d823c2786f8ef63a3e0589576b4f3914',
-}
-export const kBPRO: Record<number, string> = {
-  [MAINNET]: '0x405062731d8656af5950ef952be9fa110878036b',
-  [TESTNET]: '0x844a99Ba756539Aee698ce2915d678bA0FeE4d9d',
-}
-export const kUSDRIF: Record<number, string> = {
-  [MAINNET]: '0xDdf3CE45fcf080DF61ee61dac5Ddefef7ED4F46C',
-  [TESTNET]: '0xfbee4444493194468df1de7450a37d840eb8b555',
-}
-
 // ── Sovryn (mainnet only — testnet requires per-dev deployment) ──
 export const SOVRYN_PROTOCOL: Record<number, string> = {
   [MAINNET]: '0x5A0D867e0D70Fcc6Ade25C3F1B89d618b5B4Eaa7',
@@ -99,7 +77,7 @@ export interface ProtocolToken {
   symbol: string
   address: `0x${string}`
   decimals: number
-  protocol: 'moc' | 'tropykus' | 'sovryn'
+  protocol: 'moc' | 'sovryn'
 }
 
 const TOKEN_REGISTRY: Record<number, ProtocolToken[]> = {
@@ -107,10 +85,6 @@ const TOKEN_REGISTRY: Record<number, ProtocolToken[]> = {
     { symbol: 'DOC', address: DOC[MAINNET] as `0x${string}`, decimals: 18, protocol: 'moc' },
     { symbol: 'BPro', address: BPRO[MAINNET] as `0x${string}`, decimals: 18, protocol: 'moc' },
     { symbol: 'MOC', address: MOC_TOKEN[MAINNET] as `0x${string}`, decimals: 18, protocol: 'moc' },
-    { symbol: 'kRBTC', address: kRBTC[MAINNET] as `0x${string}`, decimals: 8, protocol: 'tropykus' },
-    { symbol: 'kDOC', address: kDOC[MAINNET] as `0x${string}`, decimals: 8, protocol: 'tropykus' },
-    { symbol: 'kBPRO', address: kBPRO[MAINNET] as `0x${string}`, decimals: 8, protocol: 'tropykus' },
-    { symbol: 'kUSDRIF', address: kUSDRIF[MAINNET] as `0x${string}`, decimals: 8, protocol: 'tropykus' },
     { symbol: 'SOV', address: SOV[MAINNET] as `0x${string}`, decimals: 18, protocol: 'sovryn' },
     { symbol: 'XUSD', address: XUSD[MAINNET] as `0x${string}`, decimals: 18, protocol: 'sovryn' },
     { symbol: 'ZUSD', address: ZUSD[MAINNET] as `0x${string}`, decimals: 18, protocol: 'sovryn' },
@@ -120,10 +94,6 @@ const TOKEN_REGISTRY: Record<number, ProtocolToken[]> = {
     { symbol: 'DOC', address: DOC[TESTNET] as `0x${string}`, decimals: 18, protocol: 'moc' },
     { symbol: 'BPro', address: BPRO[TESTNET] as `0x${string}`, decimals: 18, protocol: 'moc' },
     { symbol: 'MOC', address: MOC_TOKEN[TESTNET] as `0x${string}`, decimals: 18, protocol: 'moc' },
-    { symbol: 'kRBTC', address: kRBTC[TESTNET] as `0x${string}`, decimals: 8, protocol: 'tropykus' },
-    { symbol: 'kDOC', address: kDOC[TESTNET] as `0x${string}`, decimals: 8, protocol: 'tropykus' },
-    { symbol: 'kBPRO', address: kBPRO[TESTNET] as `0x${string}`, decimals: 8, protocol: 'tropykus' },
-    { symbol: 'kUSDRIF', address: kUSDRIF[TESTNET] as `0x${string}`, decimals: 8, protocol: 'tropykus' },
   ],
 }
 

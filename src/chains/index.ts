@@ -2,14 +2,11 @@ import type { Chain as ViemChain } from "viem";
 
 import { rootstock, rootstockTestnet } from "./rootstock";
 
-export type GasStrategy = "legacy" | "eip1559";
-
 export interface ChainConfig {
   id: number;
   name: string;
   rpcUrls: string[];
   nativeCurrency: { name: string; symbol: string; decimals: number };
-  gasType: GasStrategy;
   slip44: number;
   blockExplorer?: { name: string; url: string };
 }
