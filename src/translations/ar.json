@@ -61,7 +61,10 @@
       "no_internet": "لا يوجد اتصال بالإنترنت",
       "network_error": "تعذر الوصول إلى شبكة Rootstock",
       "add_token": "إضافة رمز",
-      "history_button": "سجل المعاملات"
+      "history_button": "سجل المعاملات",
+      "wallet_type_standard": "EOA قياسي",
+      "wallet_type_smart": "محفظة RIF الذكية",
+      "gasless_badge": "بدون غاز"
     },
     "import": {
       "title": "استيراد المحفظة",
@@ -99,7 +102,12 @@
       "amount_label": "المبلغ",
       "estimated_gas_label": "الغاز المقدر",
       "max_fee_label": "الرسوم القصوى",
-      "authorization_required": "التفويض مطلوب"
+      "authorization_required": "التفويض مطلوب",
+      "rif_title": "إرسال من محفظة RIF الذكية",
+      "rif_subtitle": "المعاملات المدعومة / بدون غاز مفعلة",
+      "success_rif_native": "تم ترحيل المعاملة بنجاح عبر RIF!",
+      "success_rif_erc20": "تم ترحيل نقل الرمز بنجاح عبر RIF!",
+      "rif_error": "فشل RIF Enveloping في بث المعاملة"
     },
     "history": {
       "title": "السجل",
@@ -122,7 +130,10 @@
       "subtitle": "شارك عنوانك لاستلام RBTC",
       "copy_address": "نسخ العنوان",
       "copied": "تم النسخ!",
-      "warning": "أرسل فقط RSK (RBTC) والرموز المميزة القائمة على RSK إلى هذا العنوان. قد يؤدي إرسال أصول أخرى إلى خسارة دائمة."
+      "warning": "أرسل فقط RSK (RBTC) والرموز المميزة القائمة على RSK إلى هذا العنوان. قد يؤدي إرسال أصول أخرى إلى خسارة دائمة.",
+      "rif_title": "استلام على محفظة RIF الذكية",
+      "rif_subtitle": "استلم الأموال على عنوان محفظتك الذكية",
+      "rif_warning": "أرسل فقط RBTC أو رموز RIF المجتمعية المدعومة إلى عنوان محفظة RIF الذكية هذا. إرسال أصول أخرى غير مدعومة سيؤدي إلى خسارة دائمة."
     },
     "contacts": {
       "title": "دفتر العناوين",

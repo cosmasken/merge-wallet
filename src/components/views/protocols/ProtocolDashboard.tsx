@@ -3,17 +3,18 @@ import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 
 import ViewHeader from "@/layout/ViewHeader";
+import DashboardHeader from "@/components/composite/DashboardHeader";
 import Card from "@/atoms/Card";
 import WeiDisplay from "@/atoms/WeiDisplay";
 import PullToRefresh from "@/atoms/PullToRefresh";
-import { selectWalletAddress } from "@/redux/wallet";
+import { selectActiveAddress } from "@/redux/wallet";
 import { selectChainId } from "@/redux/preferences";
 import MoCService from "@/rsk/MoCService";
 import { getProtocolTokens } from "@/rsk/addresses";
 
 export default function ProtocolDashboard() {
   const navigate = useNavigate();
-  const address = useSelector(selectWalletAddress);
+  const address = useSelector(selectActiveAddress);
   const chainId = useSelector(selectChainId);
   const [btcPrice, setBtcPrice] = useState<string | null>(null);
   const [protocolBalances, setProtocolBalances] = useState<Record<string, bigint>>({});
@@ -56,7 +57,10 @@ export default function ProtocolDashboard() {
   return (
     <>
       <PullToRefresh onRefresh={async () => { window.location.reload(); }}>
-      <div>
+      <div className="pt-4">
+        <div className="px-4">
+          <DashboardHeader />
+        </div>
         <ViewHeader title="Explore" subtitle="DeFi protocols & earning opportunities" />
         {!hasProtocols && (
           <div className="mx-4 p-3 rounded-lg bg-warn-light/20 border border-warn/30 text-xs text-warn-dark">

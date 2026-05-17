@@ -3,13 +3,14 @@ import { useDispatch, useSelector } from "react-redux";
 import { isAddress } from "viem";
 
 import ViewHeader from "@/layout/ViewHeader";
+import DashboardHeader from "@/components/composite/DashboardHeader";
 import PullToRefresh from "@/atoms/PullToRefresh";
 import WeiDisplay from "@/atoms/WeiDisplay";
 import FiatValue from "@/atoms/FiatValue";
 import Button from "@/atoms/Button";
 import { TokenSkeleton } from "@/atoms/LoadingSkeleton";
 import ErrorState from "@/atoms/ErrorState";
-import { selectWalletAddress, selectWalletBalance, addTrackedNft, removeTrackedNft, selectTrackedNfts } from "@/redux/wallet";
+import { selectWalletAddress, selectWalletBalance, selectActiveAddress, addTrackedNft, removeTrackedNft, selectTrackedNfts } from "@/redux/wallet";
 import { selectChainId } from "@/redux/preferences";
 import TokenManagerService, { getTokenList } from "@/kernel/evm/TokenManagerService";
 import type { TokenBalance } from "@/kernel/evm/TokenManagerService";
@@ -21,7 +22,7 @@ type Tab = "tokens" | "nfts";
 
 export default function AssetsView() {
   const dispatch = useDispatch();
-  const address = useSelector(selectWalletAddress);
+  const address = useSelector(selectActiveAddress);
   const balance = useSelector(selectWalletBalance);
   const chainId = useSelector(selectChainId);
   const trackedNfts = useSelector(selectTrackedNfts);
@@ -114,7 +115,10 @@ export default function AssetsView() {
 
   return (
     <PullToRefresh onRefresh={refreshAll}>
-      <div>
+      <div className="pt-4">
+        <div className="px-4">
+          <DashboardHeader />
+        </div>
         <ViewHeader title="Assets" />
         <div className="flex border-b border-neutral-200 dark:border-neutral-700 px-4">
           <button

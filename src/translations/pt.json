@@ -61,7 +61,10 @@
       "no_internet": "Sem conexão com a internet",
       "network_error": "Não foi possível conectar à rede Rootstock",
       "add_token": "Adicionar Token",
-      "history_button": "Histórico de Transações"
+      "history_button": "Histórico de Transações",
+      "wallet_type_standard": "EOA Padrão",
+      "wallet_type_smart": "Carteira Inteligente RIF",
+      "gasless_badge": "Sem Gás"
     },
     "import": {
       "title": "Importar Carteira",
@@ -99,7 +102,12 @@
       "amount_label": "Valor",
       "estimated_gas_label": "Gás estimado",
       "max_fee_label": "Taxa máxima",
-      "authorization_required": "Autorização necessária"
+      "authorization_required": "Autorização necessária",
+      "rif_title": "Envio da Carteira Inteligente RIF",
+      "rif_subtitle": "Transações patrocinadas / sem gás ativadas",
+      "success_rif_native": "Transação transmitida com sucesso via RIF!",
+      "success_rif_erc20": "Transferência de token transmitida com sucesso via RIF!",
+      "rif_error": "RIF Enveloping não pôde transmitir a transação"
     },
     "history": {
       "title": "Histórico",
@@ -122,7 +130,10 @@
       "subtitle": "Compartilhe seu endereço para receber RBTC",
       "copy_address": "Copiar Endereço",
       "copied": "Copiado!",
-      "warning": "Envie apenas RSK (RBTC) e tokens baseados em RSK para este endereço. O envio de outros ativos pode resultar em perda permanente."
+      "warning": "Envie apenas RSK (RBTC) e tokens baseados em RSK para este endereço. O envio de outros ativos pode resultar em perda permanente.",
+      "rif_title": "Receber na Carteira Inteligente RIF",
+      "rif_subtitle": "Receba fundos no seu endereço de Carteira Inteligente",
+      "rif_warning": "Envie apenas RBTC ou tokens comunitários RIF compatíveis para este endereço de Carteira Inteligente RIF. O envio de outros ativos não compatíveis resultará em perda permanente."
     },
     "contacts": {
       "title": "Agenda de Endereços",

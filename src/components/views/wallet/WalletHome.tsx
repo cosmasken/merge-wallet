@@ -12,27 +12,34 @@ import LoadingSkeleton from "@/atoms/LoadingSkeleton";
 import SendIcon from "@/icons/SendIcon";
 import ReceiveIcon from "@/icons/ReceiveIcon";
 import HistoryIcon from "@/icons/HistoryIcon";
-import { selectWalletAddress, selectWalletBalance, selectSeedBackedUp, setWalletBalance, selectTrackedTokens } from "@/redux/wallet";
+import { selectWalletAddress, selectWalletBalance, selectSeedBackedUp, setWalletBalance, selectTrackedTokens, selectUseSmartWallet, selectSmartWalletAddress, selectActiveAddress } from "@/redux/wallet";
 import { selectShouldHideBalance, toggleHideBalance, selectChainId } from "@/redux/preferences";
 import AddTokenModal from "@/components/composite/AddTokenModal";
-import WalletSwitcher from "@/components/composite/WalletSwitcher";
+import DashboardHeader from "@/components/composite/DashboardHeader";
 import { selectIsConnected } from "@/redux/device";
 import BalanceService from "@/kernel/evm/BalanceService";
 import TokenManagerService, { getTokenList } from "@/kernel/evm/TokenManagerService";
 import type { TokenBalance, TokenInfo } from "@/kernel/evm/TokenManagerService";
 import { getNativeCurrency } from "@/chains";
 import { useTranslation } from "@/translations";
+import RifRelayService from "@/kernel/evm/RifRelayService";
 
 export default function WalletHome() {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const address = useSelector(selectWalletAddress);
-  const balance = useSelector(selectWalletBalance);
+  const reduxBalance = useSelector(selectWalletBalance);
   const chainId = useSelector(selectChainId);
   const seedBackedUp = useSelector(selectSeedBackedUp);
   const isConnected = useSelector(selectIsConnected);
   const hideBalance = useSelector(selectShouldHideBalance);
   const trackedTokens = useSelector(selectTrackedTokens);
+  
+  const useSmartWallet = useSelector(selectUseSmartWallet);
+  const smartWalletAddress = useSelector(selectSmartWalletAddress);
+  const activeAddress = useSelector(selectActiveAddress);
+  const [activeBalance, setActiveBalance] = useState("0");
+  
   const [isLoading, setIsLoading] = useState(true);
   const [isAddTokenOpen, setIsAddTokenOpen] = useState(false);
   const [connectionError, setConnectionError] = useState(false);
@@ -40,18 +47,27 @@ export default function WalletHome() {
   const nativeCurrency = getNativeCurrency(chainId);
   const { t } = useTranslation();
 
+  // Sync activeBalance with Redux balance initially or when switching to EOA
+  useEffect(() => {
+    if (!useSmartWallet) {
+      setActiveBalance(reduxBalance);
+    }
+  }, [useSmartWallet, reduxBalance]);
+
   useEffect(function fetchBalance() {
-    if (!address) return;
+    if (!activeAddress) return;
 
     setIsLoading(true);
     setConnectionError(false);
     const Balance = BalanceService(chainId);
 
-
     Balance.startAutoRefresh(
-      address as `0x${string}`,
+      activeAddress as `0x${string}`,
       (value) => {
-        dispatch(setWalletBalance(value.toString()));
+        setActiveBalance(value.toString());
+        if (!useSmartWallet) {
+          dispatch(setWalletBalance(value.toString()));
+        }
         setIsLoading(false);
         setConnectionError(false);
       },
@@ -62,10 +78,10 @@ export default function WalletHome() {
     );
 
     return () => Balance.stopAutoRefresh();
-  }, [address, dispatch]);
+  }, [activeAddress, chainId, useSmartWallet, dispatch]);
 
   useEffect(function fetchTokens() {
-    if (!address) return;
+    if (!activeAddress) return;
     const allTokens: TokenInfo[] = [...getTokenList(chainId), ...trackedTokens.filter(t => t.chainId === chainId).map(t => ({
       address: t.address as `0x${string}`,
       symbol: t.symbol,
@@ -73,12 +89,12 @@ export default function WalletHome() {
       chainId: t.chainId
     }))];
     TokenManagerService(chainId)
-      .getAllTokenBalances(address as `0x${string}`, allTokens)
+      .getAllTokenBalances(activeAddress as `0x${string}`, allTokens)
       .then(setTokens);
-  }, [address, chainId, trackedTokens]);
+  }, [activeAddress, chainId, trackedTokens]);
 
   const refreshAll = useCallback(async () => {
-    if (!address) return;
+    if (!activeAddress) return;
     setIsLoading(true);
     const Balance = BalanceService(chainId);
     const allTokens: TokenInfo[] = [...getTokenList(chainId), ...trackedTokens.filter(t => t.chainId === chainId).map(t => ({
@@ -89,29 +105,22 @@ export default function WalletHome() {
     }))];
 
     const [b, t] = await Promise.all([
-      Balance.getBalance(address as `0x${string}`),
-      TokenManagerService(chainId).getAllTokenBalances(address as `0x${string}`, allTokens),
+      Balance.getBalance(activeAddress as `0x${string}`),
+      TokenManagerService(chainId).getAllTokenBalances(activeAddress as `0x${string}`, allTokens),
     ]);
-    dispatch(setWalletBalance(b.toString()));
+    
+    setActiveBalance(b.toString());
+    if (!useSmartWallet) {
+      dispatch(setWalletBalance(b.toString()));
+    }
     setTokens(t);
     setIsLoading(false);
-  }, [address, chainId, dispatch, trackedTokens]);
+  }, [activeAddress, chainId, dispatch, useSmartWallet, trackedTokens]);
 
   return (
     <PullToRefresh onRefresh={refreshAll}>
     <div className="flex flex-col gap-6 px-4 pt-4">
-      <div className="flex items-center justify-between px-1">
-        <WalletSwitcher />
-        <button
-          onClick={() => navigate("/settings")}
-          className="w-8 h-8 flex items-center justify-center rounded-full bg-neutral-200 dark:bg-neutral-800 active:bg-neutral-300 dark:active:bg-neutral-700"
-        >
-          <svg viewBox="0 0 24 24" className="w-5 h-5 text-neutral-600 dark:text-neutral-300" fill="none" stroke="currentColor" strokeWidth="2">
-            <circle cx="12" cy="12" r="3" />
-            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z" />
-          </svg>
-        </button>
-      </div>
+      <DashboardHeader />
 
       {!isConnected && (
         <div className="w-full p-3 rounded-lg bg-error/10 border border-error/30 flex items-center gap-2">
@@ -139,14 +148,13 @@ export default function WalletHome() {
       )}
 
 
-
       <div className="flex flex-col items-center gap-3">
         <div className="flex items-center justify-center gap-3">
           <div className="text-4xl font-bold font-display text-neutral-800 dark:text-neutral-100">
             {isLoading ? (
               <LoadingSkeleton variant="text" className="w-32 h-8 mx-auto" />
             ) : (
-              <WeiDisplay wei={BigInt(balance)} hideBalance={hideBalance} symbol={nativeCurrency.symbol} />
+              <WeiDisplay wei={BigInt(activeBalance)} hideBalance={hideBalance} symbol={nativeCurrency.symbol} />
             )}
           </div>
           <button
@@ -169,12 +177,12 @@ export default function WalletHome() {
 
         {!hideBalance && (
           <FiatValue
-            value={BigInt(balance)}
+            value={BigInt(activeBalance)}
             className="text-lg text-neutral-500"
           />
         )}
 
-        <Address address={address} short className="text-xs text-neutral-400" />
+        <Address address={activeAddress} short className="text-xs text-neutral-400" />
       </div>
 
       <div className="flex gap-4 w-full">
@@ -183,14 +191,14 @@ export default function WalletHome() {
           icon={SendIcon}
           variant="primary"
           fullWidth
-          onClick={() => navigate("/wallet/send")}
+          onClick={() => navigate("/wallet/send", { state: { useSmartWallet } })}
         />
         <Button
           label={t("common.receive")}
           icon={ReceiveIcon}
           variant="secondary"
           fullWidth
-          onClick={() => navigate("/wallet/receive")}
+          onClick={() => navigate("/wallet/receive", { state: { useSmartWallet, smartWalletAddress } })}
         />
       </div>
 
@@ -217,7 +225,7 @@ export default function WalletHome() {
               {isLoading ? (
                 <LoadingSkeleton variant="text" className="w-16 h-4" />
               ) : (
-                <WeiDisplay wei={BigInt(balance)} hideBalance={hideBalance} symbol={nativeCurrency.symbol} />
+                <WeiDisplay wei={BigInt(activeBalance)} hideBalance={hideBalance} symbol={nativeCurrency.symbol} />
               )}
             </span>
           </div>

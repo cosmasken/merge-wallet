@@ -161,6 +161,7 @@ export default function KeyManagerService() {
     getAddress,
     getMnemonic,
     getImportType,
+    getAccount,
     clearMnemonic,
     signTransaction,
     signTransactionWithAuth,

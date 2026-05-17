@@ -6,18 +6,22 @@ import { Clipboard } from "@capacitor/clipboard";
 import ViewHeader from "@/layout/ViewHeader";
 import Address from "@/atoms/Address";
 import Card from "@/atoms/Card";
-import { selectWalletAddress } from "@/redux/wallet";
+import { selectWalletAddress, selectUseSmartWallet, selectSmartWalletAddress, selectActiveAddress } from "@/redux/wallet";
 import { useTranslation } from "@/translations";
 
 export default function WalletReceive() {
   const address = useSelector(selectWalletAddress);
+  const useSmartWallet = useSelector(selectUseSmartWallet);
+  const smartWalletAddress = useSelector(selectSmartWalletAddress);
+  const activeAddress = useSelector(selectActiveAddress);
+
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [copied, setCopied] = useState(false);
   const { t } = useTranslation();
 
   useEffect(() => {
-    if (!address || !canvasRef.current) return;
-    QRCode.toCanvas(canvasRef.current, address, {
+    if (!activeAddress || !canvasRef.current) return;
+    QRCode.toCanvas(canvasRef.current, activeAddress, {
       width: 192,
       margin: 2,
       color: {
@@ -25,13 +29,14 @@ export default function WalletReceive() {
         light: "#ffffff",
       },
     });
-  }, [address]);
+  }, [activeAddress]);
 
   async function handleCopy() {
+    if (!activeAddress) return;
     try {
-      await Clipboard.write({ string: address });
+      await Clipboard.write({ string: activeAddress });
     } catch {
-      await navigator.clipboard.writeText(address);
+      await navigator.clipboard.writeText(activeAddress);
     }
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
@@ -39,12 +44,16 @@ export default function WalletReceive() {
 
   return (
     <div>
-      <ViewHeader title={t("wallet.receive.title")} subtitle={t("wallet.receive.subtitle")} showBack />
+      <ViewHeader 
+        title={useSmartWallet ? t("wallet.receive.rif_title") : t("wallet.receive.title")} 
+        subtitle={useSmartWallet ? t("wallet.receive.rif_subtitle") : t("wallet.receive.subtitle")} 
+        showBack 
+      />
       <div className="flex flex-col items-center gap-6 px-4">
         <Card className="p-8 flex flex-col items-center gap-4">
           <canvas ref={canvasRef} className="w-48 h-48 rounded-lg" />
           <div className="text-center font-mono text-sm break-all">
-            <Address address={address} />
+            <Address address={activeAddress} />
           </div>
           <button
             onClick={handleCopy}
@@ -54,7 +63,9 @@ export default function WalletReceive() {
           </button>
         </Card>
         <p className="text-sm text-neutral-500 text-center max-w-sm">
-          {t("wallet.receive.warning")}
+          {useSmartWallet 
+            ? t("wallet.receive.rif_warning")
+            : t("wallet.receive.warning")}
         </p>
       </div>
     </div>

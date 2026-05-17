@@ -61,7 +61,10 @@
       "no_internet": "Pas de connexion internet",
       "network_error": "Impossible de joindre le réseau Rootstock",
       "add_token": "Ajouter un jeton",
-      "history_button": "Historique des transactions"
+      "history_button": "Historique des transactions",
+      "wallet_type_standard": "EOA Standard",
+      "wallet_type_smart": "Portefeuille Intelligent RIF",
+      "gasless_badge": "Sans Gaz"
     },
     "import": {
       "title": "Importer le portefeuille",
@@ -99,7 +102,12 @@
       "amount_label": "Montant",
       "estimated_gas_label": "Gaz estimé",
       "max_fee_label": "Frais maximum",
-      "authorization_required": "Autorisation requise"
+      "authorization_required": "Autorisation requise",
+      "rif_title": "Envoi de Portefeuille Intelligent RIF",
+      "rif_subtitle": "Transactions sponsorisées / sans gaz activées",
+      "success_rif_native": "Transaction relayée avec succès via RIF !",
+      "success_rif_erc20": "Transfert de jeton relayé avec succès via RIF !",
+      "rif_error": "RIF Enveloping n'a pas pu relayer la transaction"
     },
     "history": {
       "title": "Historique",
@@ -122,7 +130,10 @@
       "subtitle": "Partagez votre adresse pour recevoir des RBTC",
       "copy_address": "Copier l'adresse",
       "copied": "Copié !",
-      "warning": "Envoyez uniquement des RSK (RBTC) et des jetons basés sur RSK à cette adresse. L'envoi d'autres actifs peut entraîner une perte permanente."
+      "warning": "Envoyez uniquement des RSK (RBTC) et des jetons basés sur RSK à cette adresse. L'envoi d'autres actifs peut entraîner une perte permanente.",
+      "rif_title": "Recevoir sur Portefeuille Intelligent RIF",
+      "rif_subtitle": "Recevoir des fonds sur votre adresse de Portefeuille Intelligent",
+      "rif_warning": "Envoyez uniquement des RBTC ou des jetons communautaires RIF pris en charge à cette adresse de Portefeuille Intelligent RIF. L'envoi d'autres actifs non pris en charge entraînera une perte permanente."
     },
     "contacts": {
       "title": "Carnet d'adresses",

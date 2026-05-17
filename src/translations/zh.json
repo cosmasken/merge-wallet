@@ -61,7 +61,10 @@
       "no_internet": "无网络连接",
       "network_error": "无法连接到 Rootstock 网络",
       "add_token": "添加代币",
-      "history_button": "交易历史"
+      "history_button": "交易历史",
+      "wallet_type_standard": "标准 EOA 账户",
+      "wallet_type_smart": "RIF 智能钱包",
+      "gasless_badge": "免 Gas"
     },
     "import": {
       "title": "导入钱包",
@@ -99,7 +102,12 @@
       "amount_label": "金额",
       "estimated_gas_label": "预估 Gas",
       "max_fee_label": "最大费用",
-      "authorization_required": "需要授权"
+      "authorization_required": "需要授权",
+      "rif_title": "RIF 智能钱包发送",
+      "rif_subtitle": "已启用赞助免 Gas 交易机制",
+      "success_rif_native": "交易已通过 RIF 成功广播！",
+      "success_rif_erc20": "代币划转已通过 RIF 成功广播！",
+      "rif_error": "RIF Enveloping 广播交易失败"
     },
     "history": {
       "title": "历史",
@@ -122,7 +130,10 @@
       "subtitle": "分享您的地址以接收 RBTC",
       "copy_address": "复制地址",
       "copied": "已复制！",
-      "warning": "仅向此地址发送 RSK (RBTC) 和基于 RSK 的代币。发送其他资产可能会导致永久丢失。"
+      "warning": "仅向此地址发送 RSK (RBTC) 和基于 RSK 的代币。发送其他资产可能会导致永久丢失。",
+      "rif_title": "接收至 RIF 智能钱包",
+      "rif_subtitle": "接收资金到您的智能钱包地址",
+      "rif_warning": "请仅向此 RIF 智能钱包地址发送 RBTC 或支持的 RIF 社区代币。发送其他不支持的资产会导致永久性资金丢失。"
     },
     "contacts": {
       "title": "通讯录",

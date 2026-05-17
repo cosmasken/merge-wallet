@@ -61,7 +61,10 @@
       "no_internet": "No internet connection",
       "network_error": "Unable to reach Rootstock network",
       "add_token": "Add Token",
-      "history_button": "Transaction History"
+      "history_button": "Transaction History",
+      "wallet_type_standard": "Standard EOA",
+      "wallet_type_smart": "RIF Smart Wallet",
+      "gasless_badge": "Gasless"
     },
     "import": {
       "title": "Import Wallet",
@@ -99,7 +102,12 @@
       "amount_label": "Amount",
       "estimated_gas_label": "Estimated gas",
       "max_fee_label": "Max fee",
-      "authorization_required": "Authorization required"
+      "authorization_required": "Authorization required",
+      "rif_title": "RIF Smart Wallet Send",
+      "rif_subtitle": "Sponsored / gasless transactions enabled",
+      "success_rif_native": "Transaction relayed successfully via RIF!",
+      "success_rif_erc20": "Token transfer relayed successfully via RIF!",
+      "rif_error": "RIF Enveloping failed to broadcast transaction"
     },
     "history": {
       "title": "History",
@@ -122,7 +130,10 @@
       "subtitle": "Share your address to receive RBTC",
       "copy_address": "Copy Address",
       "copied": "Copied!",
-      "warning": "Send only RSK (RBTC) and RSK-based tokens to this address. Sending other assets may result in permanent loss."
+      "warning": "Send only RSK (RBTC) and RSK-based tokens to this address. Sending other assets may result in permanent loss.",
+      "rif_title": "RIF Smart Wallet Receive",
+      "rif_subtitle": "Receive funds on your Smart Wallet address",
+      "rif_warning": "Send only RBTC or supported RIF community tokens to this RIF Smart Wallet address. Sending other unsupported assets will result in permanent loss."
     },
     "contacts": {
       "title": "Address Book",

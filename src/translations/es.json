@@ -61,7 +61,10 @@
       "no_internet": "Sin conexión a internet",
       "network_error": "No se pudo conectar con la red Rootstock",
       "add_token": "Añadir Token",
-      "history_button": "Historial de Transacciones"
+      "history_button": "Historial de Transacciones",
+      "wallet_type_standard": "EOA Estándar",
+      "wallet_type_smart": "Billetera Inteligente RIF",
+      "gasless_badge": "Sin Gas"
     },
     "import": {
       "title": "Importar Billetera",
@@ -99,7 +102,12 @@
       "amount_label": "Monto",
       "estimated_gas_label": "Gas estimado",
       "max_fee_label": "Comisión máxima",
-      "authorization_required": "Se requiere autorización"
+      "authorization_required": "Se requiere autorización",
+      "rif_title": "Envío de Billetera Inteligente RIF",
+      "rif_subtitle": "Transacciones patrocinadas / sin gas activadas",
+      "success_rif_native": "¡Transacción transmitida con éxito a través de RIF!",
+      "success_rif_erc20": "¡Transferencia de token transmitida con éxito a través de RIF!",
+      "rif_error": "RIF Enveloping no pudo transmitir la transacción"
     },
     "history": {
       "title": "Historial",
@@ -122,7 +130,10 @@
       "subtitle": "Comparte tu dirección para recibir RBTC",
       "copy_address": "Copiar Dirección",
       "copied": "¡Copiado!",
-      "warning": "Envía solo RSK (RBTC) y tokens basados en RSK a esta dirección. Enviar otros activos puede resultar en una pérdida permanente."
+      "warning": "Envía solo RSK (RBTC) y tokens basados en RSK a esta dirección. Enviar otros activos puede resultar en una pérdida permanente.",
+      "rif_title": "Recibir en Billetera Inteligente RIF",
+      "rif_subtitle": "Recibe fondos en tu dirección de Billetera Inteligente",
+      "rif_warning": "Envía únicamente RBTC o tokens comunitarios de RIF compatibles a esta dirección de Billetera Inteligente RIF. Enviar otros activos no compatibles resultará en una pérdida permanente."
     },
     "contacts": {
       "title": "Libreta de Direcciones",

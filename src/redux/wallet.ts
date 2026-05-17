@@ -36,6 +36,8 @@ interface WalletState {
     timestamp: number;
     chainId: number;
   }[];
+  useSmartWallet: boolean;
+  smartWalletAddress: string;
 }
 
 const initialState: WalletState = {
@@ -49,6 +51,8 @@ const initialState: WalletState = {
   trackedTokens: [],
   contacts: [],
   pendingTransactions: [],
+  useSmartWallet: false,
+  smartWalletAddress: "",
 };
 
 export const setWalletAddress = createAction<string>("wallet/setAddress");
@@ -64,6 +68,8 @@ export const removeContact = createAction<string>("wallet/removeContact");
 export const addPendingTransaction = createAction<{ hash: string; type: "send" | "receive" | "contract"; amount: string; symbol: string; chainId: number }>("wallet/addPendingTransaction");
 export const updatePendingTransaction = createAction<{ hash: string; status: "success" | "failed" }>("wallet/updatePendingTransaction");
 export const hydrateWallet = createAction<Partial<WalletState>>("wallet/hydrate");
+export const setUseSmartWallet = createAction<boolean>("wallet/setUseSmartWallet");
+export const setSmartWalletAddress = createAction<string>("wallet/setSmartWalletAddress");
 
 // Multi-wallet actions
 export const addWallet = createAction<WalletMeta>("wallet/addWallet");
@@ -75,9 +81,16 @@ export const walletReducer = createReducer(initialState, (builder) => {
   builder
     .addCase(setWalletAddress, (state, action) => {
       state.address = action.payload;
+      state.smartWalletAddress = "";
     })
     .addCase(setWalletBalance, (state, action) => {
       state.balance = action.payload;
+    })
+    .addCase(setUseSmartWallet, (state, action) => {
+      state.useSmartWallet = action.payload;
+    })
+    .addCase(setSmartWalletAddress, (state, action) => {
+      state.smartWalletAddress = action.payload;
     })
     .addCase(setWalletName, (state, action) => {
       state.name = action.payload;
@@ -211,4 +224,19 @@ export const selectActiveWalletId = createSelector(
 export const selectActiveWallet = createSelector(
   [selectWallets, selectActiveWalletId],
   (wallets, id) => wallets.find(w => w.id === id) ?? null,
+);
+
+export const selectUseSmartWallet = createSelector(
+  selectWallet,
+  (wallet) => wallet.useSmartWallet ?? false,
+);
+
+export const selectSmartWalletAddress = createSelector(
+  selectWallet,
+  (wallet) => wallet.smartWalletAddress ?? "",
+);
+
+export const selectActiveAddress = createSelector(
+  [selectWalletAddress, selectUseSmartWallet, selectSmartWalletAddress],
+  (address, useSmart, smartAddress) => (useSmart && smartAddress ? smartAddress : address),
 );
