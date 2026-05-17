@@ -101,6 +101,10 @@ const TOKEN_REGISTRY: Record<number, ProtocolToken[]> = {
     { symbol: 'XUSD', address: XUSD[MAINNET] as `0x${string}`, decimals: 18, protocol: 'sovryn' },
     { symbol: 'ZUSD', address: ZUSD[MAINNET] as `0x${string}`, decimals: 18, protocol: 'sovryn' },
     { symbol: 'DLLR', address: DLLR[MAINNET] as `0x${string}`, decimals: 18, protocol: 'sovryn' },
+    { symbol: 'iXUSD', address: IXUSD[MAINNET] as `0x${string}`, decimals: 18, protocol: 'sovryn' },
+    { symbol: 'iRBTC', address: IRBTC[MAINNET] as `0x${string}`, decimals: 18, protocol: 'sovryn' },
+    { symbol: 'iDOC', address: IDOC[MAINNET] as `0x${string}`, decimals: 18, protocol: 'sovryn' },
+    { symbol: 'iBPro', address: IBPRO[MAINNET] as `0x${string}`, decimals: 18, protocol: 'sovryn' },
   ],
   [TESTNET]: [
     { symbol: 'DOC', address: DOC[TESTNET] as `0x${string}`, decimals: 18, protocol: 'moc' },
@@ -109,6 +113,10 @@ const TOKEN_REGISTRY: Record<number, ProtocolToken[]> = {
     { symbol: 'SOV', address: SOV[TESTNET] as `0x${string}`, decimals: 18, protocol: 'sovryn' },
     { symbol: 'XUSD', address: XUSD[TESTNET] as `0x${string}`, decimals: 18, protocol: 'sovryn' },
     { symbol: 'DLLR', address: DLLR[TESTNET] as `0x${string}`, decimals: 18, protocol: 'sovryn' },
+    { symbol: 'iXUSD', address: IXUSD[TESTNET] as `0x${string}`, decimals: 18, protocol: 'sovryn' },
+    { symbol: 'iRBTC', address: IRBTC[TESTNET] as `0x${string}`, decimals: 18, protocol: 'sovryn' },
+    { symbol: 'iDOC', address: IDOC[TESTNET] as `0x${string}`, decimals: 18, protocol: 'sovryn' },
+    { symbol: 'iBPro', address: IBPRO[TESTNET] as `0x${string}`, decimals: 18, protocol: 'sovryn' },
   ],
 }
 

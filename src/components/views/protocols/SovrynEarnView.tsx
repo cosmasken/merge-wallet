@@ -177,21 +177,26 @@ export default function SovrynEarnView() {
           <h2 className="text-sm font-bold mb-2">Your Position</h2>
           <div className="grid grid-cols-2 gap-3 text-sm">
             <div>
-              <span className="text-neutral-500 text-xs">Balance</span>
+              <span className="text-neutral-500 text-xs">Wallet Balance</span>
               <WeiDisplay wei={sourceBal} symbol={underlyingLabel} />
             </div>
             <div>
-              <span className="text-neutral-500 text-xs">{isRbtcPool ? "iRBTC" : "iXUSD"}</span>
+              <span className="text-neutral-500 text-xs">Lent ({isRbtcPool ? "iRBTC" : "iXUSD"})</span>
               <WeiDisplay wei={iTokenBal} symbol={isRbtcPool ? "iRBTC" : "iXUSD"} />
             </div>
             <div>
-              <span className="text-neutral-500 text-xs">Earning</span>
+              <span className="text-neutral-500 text-xs">Redeemable Value</span>
               <WeiDisplay wei={assetBal} symbol={underlyingLabel} />
             </div>
             <div>
               <span className="text-neutral-500 text-xs">{isRbtcPool ? "iRBTC" : "iXUSD"} Price</span>
               <WeiDisplay wei={tokenPrice} symbol={underlyingLabel} />
             </div>
+          </div>
+          <div className="mt-4 pt-3 border-t border-neutral-100 dark:border-neutral-800 text-xs text-neutral-400 leading-relaxed">
+            💡 <strong>i{underlyingLabel}</strong> is your interest-bearing token representing your share of the pool. 
+            The <strong>Redeemable Value</strong> shows the total underlying <strong>{underlyingLabel}</strong> you can withdraw right now. 
+            As borrowers pay interest, the <strong>i{underlyingLabel} Price</strong> rises, meaning your earnings continuously compound!
           </div>
         </Card>
 

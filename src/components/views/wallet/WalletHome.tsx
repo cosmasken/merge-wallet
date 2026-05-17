@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
+import { isAddress } from "viem";
 
 import Button from "@/atoms/Button";
 import Card from "@/atoms/Card";
@@ -12,7 +13,19 @@ import LoadingSkeleton from "@/atoms/LoadingSkeleton";
 import SendIcon from "@/icons/SendIcon";
 import ReceiveIcon from "@/icons/ReceiveIcon";
 import HistoryIcon from "@/icons/HistoryIcon";
-import { selectWalletAddress, selectWalletBalance, selectSeedBackedUp, setWalletBalance, selectTrackedTokens, selectUseSmartWallet, selectSmartWalletAddress, selectActiveAddress } from "@/redux/wallet";
+import {
+  selectWalletAddress,
+  selectWalletBalance,
+  selectSeedBackedUp,
+  setWalletBalance,
+  selectTrackedTokens,
+  selectUseSmartWallet,
+  selectSmartWalletAddress,
+  selectActiveAddress,
+  addTrackedNft,
+  removeTrackedNft,
+  selectTrackedNfts,
+} from "@/redux/wallet";
 import { selectShouldHideBalance, toggleHideBalance, selectChainId } from "@/redux/preferences";
 import AddTokenModal from "@/components/composite/AddTokenModal";
 import DashboardHeader from "@/components/composite/DashboardHeader";
@@ -20,6 +33,8 @@ import { selectIsConnected } from "@/redux/device";
 import BalanceService from "@/kernel/evm/BalanceService";
 import TokenManagerService, { getTokenList } from "@/kernel/evm/TokenManagerService";
 import type { TokenBalance, TokenInfo } from "@/kernel/evm/TokenManagerService";
+import NftService from "@/kernel/evm/NftService";
+import type { NftInfo } from "@/kernel/evm/NftService";
 import { getNativeCurrency } from "@/chains";
 import { useTranslation } from "@/translations";
 import RifRelayService from "@/kernel/evm/RifRelayService";
@@ -46,6 +61,15 @@ export default function WalletHome() {
   const [tokens, setTokens] = useState<TokenBalance[]>([]);
   const nativeCurrency = getNativeCurrency(chainId);
   const { t } = useTranslation();
+
+  // NFT State
+  const trackedNfts = useSelector(selectTrackedNfts);
+  const [activeTab, setActiveTab] = useState<"tokens" | "nfts">("tokens");
+  const [nfts, setNfts] = useState<NftInfo[]>([]);
+  const [showImport, setShowImport] = useState(false);
+  const [importAddress, setImportAddress] = useState("");
+  const [importError, setImportError] = useState("");
+  const [importing, setImporting] = useState(false);
 
   // Sync activeBalance with Redux balance initially or when switching to EOA
   useEffect(() => {
@@ -93,6 +117,20 @@ export default function WalletHome() {
       .then(setTokens);
   }, [activeAddress, chainId, trackedTokens]);
 
+  useEffect(function fetchNfts() {
+    if (!activeAddress || trackedNfts.length === 0) {
+      setNfts([]);
+      return;
+    }
+
+    NftService()
+      .getNftBalances(
+        activeAddress as `0x${string}`,
+        trackedNfts as `0x${string}`[],
+      )
+      .then(setNfts);
+  }, [activeAddress, trackedNfts]);
+
   const refreshAll = useCallback(async () => {
     if (!activeAddress) return;
     setIsLoading(true);
@@ -104,9 +142,12 @@ export default function WalletHome() {
       chainId: t.chainId
     }))];
 
-    const [b, t] = await Promise.all([
+    const [b, t, n] = await Promise.all([
       Balance.getBalance(activeAddress as `0x${string}`),
       TokenManagerService(chainId).getAllTokenBalances(activeAddress as `0x${string}`, allTokens),
+      trackedNfts.length > 0
+        ? NftService().getNftBalances(activeAddress as `0x${string}`, trackedNfts as `0x${string}`[])
+        : Promise.resolve([] as NftInfo[]),
     ]);
     
     setActiveBalance(b.toString());
@@ -114,8 +155,40 @@ export default function WalletHome() {
       dispatch(setWalletBalance(b.toString()));
     }
     setTokens(t);
+    setNfts(n);
     setIsLoading(false);
-  }, [activeAddress, chainId, dispatch, useSmartWallet, trackedTokens]);
+  }, [activeAddress, chainId, dispatch, useSmartWallet, trackedTokens, trackedNfts]);
+
+  const handleImport = useCallback(async () => {
+    const trimmed = importAddress.trim();
+    if (!isAddress(trimmed)) {
+      setImportError("Invalid contract address");
+      return;
+    }
+
+    setImporting(true);
+    setImportError("");
+
+    try {
+      const info = await NftService().getNftBalance(
+        trimmed as `0x${string}`,
+        activeAddress as `0x${string}`,
+      );
+
+      if (!info) {
+        setImportError("Could not verify NFT contract at this address");
+        return;
+      }
+
+      dispatch(addTrackedNft(trimmed as `0x${string}`));
+      setShowImport(false);
+      setImportAddress("");
+    } catch {
+      setImportError("Failed to verify contract address");
+    } finally {
+      setImporting(false);
+    }
+  }, [importAddress, activeAddress, dispatch]);
 
   return (
     <PullToRefresh onRefresh={refreshAll}>
@@ -203,62 +276,165 @@ export default function WalletHome() {
       </div>
 
       <div className="w-full">
-        <Card className="p-4">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-sm font-semibold text-neutral-500">{t("common.tokens")}</h2>
-            <button 
-              onClick={() => setIsAddTokenOpen(true)}
-              className="text-xs font-semibold text-primary px-2 py-1 rounded-md hover:bg-primary/5 transition-colors"
-            >
-              + {t("wallet.home.add_token")}
-            </button>
-          </div>
-          <div 
-            onClick={() => navigate(`/wallet/token/${nativeCurrency.symbol}`)}
-            className="flex items-center justify-between py-2 cursor-pointer active:opacity-70"
+        {/* Tab Selector */}
+        <div className="flex border-b border-neutral-200 dark:border-neutral-700 mb-4 px-1">
+          <button
+            className={`pb-2.5 px-4 text-sm font-bold border-b-2 transition-all duration-200 ${
+              activeTab === "tokens"
+                ? "border-primary text-primary"
+                : "border-transparent text-neutral-400 hover:text-neutral-600 dark:text-neutral-500 dark:hover:text-neutral-300"
+            }`}
+            onClick={() => setActiveTab("tokens")}
           >
-            <div className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center text-white text-xs font-bold">{nativeCurrency.symbol}</div>
-              <span className="font-medium">{nativeCurrency.name}</span>
+            {t("common.tokens")}
+          </button>
+          <button
+            className={`pb-2.5 px-4 text-sm font-bold border-b-2 transition-all duration-200 ${
+              activeTab === "nfts"
+                ? "border-primary text-primary"
+                : "border-transparent text-neutral-400 hover:text-neutral-600 dark:text-neutral-500 dark:hover:text-neutral-300"
+            }`}
+            onClick={() => setActiveTab("nfts")}
+          >
+            NFTs
+          </button>
+        </div>
+
+        {activeTab === "tokens" ? (
+          <Card className="p-4">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-sm font-bold text-neutral-500">{t("common.tokens")}</h2>
+              <button 
+                onClick={() => setIsAddTokenOpen(true)}
+                className="text-xs font-semibold text-primary px-2 py-1 rounded-md hover:bg-primary/5 transition-colors"
+              >
+                + {t("wallet.home.add_token")}
+              </button>
             </div>
-            <span className="font-mono text-sm">
-              {isLoading ? (
-                <LoadingSkeleton variant="text" className="w-16 h-4" />
-              ) : (
-                <WeiDisplay wei={BigInt(activeBalance)} hideBalance={hideBalance} symbol={nativeCurrency.symbol} />
-              )}
-            </span>
-          </div>
-          {tokens.map((token) => (
             <div 
-              key={token.symbol} 
-              onClick={() => navigate(`/wallet/token/${token.symbol}`)}
-              className="flex items-center justify-between py-2 border-t border-neutral-100 dark:border-neutral-700 cursor-pointer active:opacity-70"
+              onClick={() => navigate(`/wallet/token/${nativeCurrency.symbol}`)}
+              className="flex items-center justify-between py-2.5 cursor-pointer active:opacity-70"
             >
               <div className="flex items-center gap-2">
-                <div className="w-8 h-8 rounded-full bg-primary-200 dark:bg-primarydark-200 flex items-center justify-center text-xs font-bold text-primary-900 dark:text-primarydark-900">
-                  {token.symbol.slice(0, 3)}
-                </div>
-                <div>
-                  <span className="font-medium">{token.symbol}</span>
-                  {!hideBalance && (
-                    <div className="text-xs text-neutral-400">
-                      <FiatValue wei={token.balance} fallbackClassName="inline" />
-                    </div>
-                  )}
-                </div>
+                <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center text-white text-xs font-bold">{nativeCurrency.symbol}</div>
+                <span className="font-semibold text-sm">{nativeCurrency.name}</span>
               </div>
-              <span className="font-mono text-sm">
-                <WeiDisplay 
-                  wei={token.balance} 
-                  hideBalance={hideBalance} 
-                  symbol={token.symbol} 
-                  decimals={token.decimals} 
-                />
+              <span className="font-mono text-sm font-medium">
+                {isLoading ? (
+                  <LoadingSkeleton variant="text" className="w-16 h-4" />
+                ) : (
+                  <WeiDisplay wei={BigInt(activeBalance)} hideBalance={hideBalance} symbol={nativeCurrency.symbol} />
+                )}
               </span>
             </div>
-          ))}
-        </Card>
+            {tokens.map((token) => (
+              <div 
+                key={token.symbol} 
+                onClick={() => navigate(`/wallet/token/${token.symbol}`)}
+                className="flex items-center justify-between py-2.5 border-t border-neutral-100 dark:border-neutral-800 cursor-pointer active:opacity-70 animate-in fade-in duration-300"
+              >
+                <div className="flex items-center gap-2">
+                  <div className="w-8 h-8 rounded-full bg-primary-200 dark:bg-primarydark-200 flex items-center justify-center text-xs font-bold text-primary-900 dark:text-primarydark-900">
+                    {token.symbol.slice(0, 3)}
+                  </div>
+                  <div>
+                    <span className="font-semibold text-sm">{token.symbol}</span>
+                    {!hideBalance && (
+                      <div className="text-xs text-neutral-400 mt-0.5">
+                        <FiatValue wei={token.balance} fallbackClassName="inline" />
+                      </div>
+                    )}
+                  </div>
+                </div>
+                <span className="font-mono text-sm font-medium">
+                  <WeiDisplay 
+                    wei={token.balance} 
+                    hideBalance={hideBalance} 
+                    symbol={token.symbol} 
+                    decimals={token.decimals} 
+                  />
+                </span>
+              </div>
+            ))}
+          </Card>
+        ) : (
+          <Card className="p-4">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-sm font-bold text-neutral-500">NFT Collections</h2>
+              <button 
+                onClick={() => setShowImport(true)}
+                className="text-xs font-semibold text-primary px-2 py-1 rounded-md hover:bg-primary/5 transition-colors"
+              >
+                + Import NFT
+              </button>
+            </div>
+
+            {nfts.length === 0 ? (
+              <div className="flex flex-col items-center gap-3 py-8 text-center animate-in fade-in duration-300">
+                <div className="w-12 h-12 rounded-full bg-neutral-50 dark:bg-neutral-800 flex items-center justify-center">
+                  <svg viewBox="0 0 24 24" className="w-6 h-6 text-neutral-300 dark:text-neutral-600" fill="none" stroke="currentColor" strokeWidth="1.5">
+                    <rect x="3" y="3" width="18" height="18" rx="2" />
+                    <circle cx="8.5" cy="8.5" r="1.5" />
+                    <path d="M21 15l-5-5L5 21" />
+                  </svg>
+                </div>
+                <div>
+                  <p className="text-sm font-semibold text-neutral-500">No NFTs tracked</p>
+                  <p className="text-xs text-neutral-400 mt-0.5 max-w-xs mx-auto">Import an ERC-721 contract address to track your digital collectibles</p>
+                </div>
+              </div>
+            ) : (
+              <div className="grid grid-cols-2 gap-3.5 animate-in fade-in duration-300">
+                {nfts.map((nft) => (
+                  <div
+                    key={nft.address}
+                    className="flex flex-col rounded-xl overflow-hidden bg-neutral-50 dark:bg-neutral-900/40 border border-neutral-100 dark:border-neutral-800 shadow-sm"
+                  >
+                    <div className="relative aspect-square w-full bg-neutral-100 dark:bg-neutral-950 flex items-center justify-center overflow-hidden border-b border-neutral-100 dark:border-neutral-800">
+                      {nft.image ? (
+                        <img
+                          src={nft.image}
+                          alt={nft.name}
+                          className="w-full h-full object-cover animate-in fade-in duration-500"
+                          onError={(e) => {
+                            (e.target as HTMLElement).style.display = "none";
+                          }}
+                        />
+                      ) : (
+                        <div className="w-full h-full bg-gradient-to-tr from-primary/10 via-primary/5 to-transparent flex flex-col items-center justify-center p-3 text-center">
+                          <span className="text-lg font-bold text-primary tracking-wide">
+                            {nft.symbol.slice(0, 4)}
+                          </span>
+                          <span className="text-[9px] text-neutral-400 mt-1 uppercase tracking-wider font-semibold truncate max-w-full">
+                            {nft.name.slice(0, 16)}
+                          </span>
+                        </div>
+                      )}
+
+                      <span className="absolute top-2 right-2 px-2 py-0.5 rounded-full text-[9px] font-bold bg-black/60 text-white backdrop-blur-sm">
+                        {nft.balance.toString()} Owned
+                      </span>
+                    </div>
+
+                    <div className="p-2.5 flex flex-col gap-1.5 justify-between flex-1">
+                      <div>
+                        <div className="font-bold text-xs truncate text-neutral-800 dark:text-neutral-100">{nft.name}</div>
+                        <div className="text-[9px] text-neutral-400 font-mono truncate">{nft.address.slice(0, 6)}...{nft.address.slice(-4)}</div>
+                      </div>
+
+                      <button
+                        onClick={() => dispatch(removeTrackedNft(nft.address))}
+                        className="w-full py-1.5 rounded-lg border border-red-100 hover:bg-red-50 dark:border-red-950/20 dark:hover:bg-red-950/20 text-red-500 text-[10px] font-bold transition-colors"
+                      >
+                        Remove
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </Card>
+        )}
       </div>
 
       <Button
@@ -272,6 +448,46 @@ export default function WalletHome() {
         isOpen={isAddTokenOpen} 
         onClose={() => setIsAddTokenOpen(false)} 
       />
+      {showImport && (
+        <div
+          className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in duration-200"
+          onClick={() => { setShowImport(false); setImportError(""); }}
+        >
+          <div
+            className="bg-white dark:bg-neutral-900 rounded-xl p-6 w-full max-w-sm border border-neutral-200 dark:border-neutral-700 animate-in zoom-in-95 duration-200"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h3 className="text-lg font-bold mb-1">Import NFT Collection</h3>
+            <p className="text-xs text-neutral-500 mb-4">
+              Enter the ERC-721 contract address to track this collection in your wallet.
+            </p>
+            <input
+              className="w-full px-3.5 py-2.5 rounded-lg border border-neutral-300 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-sm font-mono outline-none focus:border-primary"
+              placeholder="0x..."
+              value={importAddress}
+              onChange={(e) => { setImportAddress(e.target.value); setImportError(""); }}
+            />
+            {importError && (
+              <p className="text-xs text-red-500 mt-1.5 font-medium">{importError}</p>
+            )}
+            <div className="flex gap-2 mt-5">
+              <Button
+                label="Cancel"
+                variant="ghost"
+                fullWidth
+                onClick={() => { setShowImport(false); setImportError(""); }}
+              />
+              <Button
+                label={importing ? "Verifying..." : "Import"}
+                variant="primary"
+                fullWidth
+                disabled={!importAddress.trim() || importing}
+                onClick={handleImport}
+              />
+            </div>
+          </div>
+        </div>
+      )}
     </PullToRefresh>
   );
 }
