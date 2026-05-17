@@ -148,7 +148,10 @@ export default function SovrynSwapView() {
         if (swapsExternal) {
           const allowance = await sovryn.getAllowance(fromToken.address, swapsExternal)
           if (allowance < amountWei) {
-            await sovryn.approveToken(fromToken.address, swapsExternal, amountWei)
+            NotificationService().info(`Approving ${fromToken.symbol}...`)
+            const approveHash = await sovryn.approveToken(fromToken.address, swapsExternal, amountWei)
+            await sovryn.waitForTransaction(approveHash)
+            NotificationService().success(`${fromToken.symbol} Approved!`)
           }
         }
         hash = await sovryn.convertByPath(path, amountWei, minReturn, 0n)

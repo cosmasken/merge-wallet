@@ -86,6 +86,7 @@ export default function SovrynService(chainId: number) {
       args: [spender, amountWei],
     })
     const { hash } = await txManager.sendContractTransaction(token, 0n, data)
+    await txManager.waitForReceipt(hash)
     return hash
   }
 
@@ -403,6 +404,10 @@ export default function SovrynService(chainId: number) {
     }) as Promise<bigint>
   }
 
+  async function waitForTransaction(hash: `0x${string}`): Promise<any> {
+    return publicClient.waitForTransactionReceipt({ hash })
+  }
+
   return {
     getSovBalance,
     getXusdBalance,
@@ -422,6 +427,7 @@ export default function SovrynService(chainId: number) {
     lendRbtc,
     withdrawRbtc,
     getRateByPath,
+    waitForTransaction,
     protocol,
     wrbtc,
   }

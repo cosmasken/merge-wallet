@@ -93,12 +93,19 @@ export default function SovrynEarnView() {
       if (!auth) { NotificationService().error("Authorization required"); setIsBusy(false); return }
 
       const wei = parseEther(supplyAmt)
-      const hash = isRbtcPool
-        ? await sovryn.lendRbtc(wei)
-        : (await sovryn.getAllowance(xusd!, ixusd!) < wei
-            ? await sovryn.approveToken(xusd!, ixusd!, wei)
-            : null,
-           await sovryn.lend(ixusd!, wei))
+      let hash: `0x${string}`
+      if (isRbtcPool) {
+        hash = await sovryn.lendRbtc(wei)
+      } else {
+        const allowance = await sovryn.getAllowance(xusd!, ixusd!)
+        if (allowance < wei) {
+          NotificationService().info("Approving XUSD...")
+          const approveHash = await sovryn.approveToken(xusd!, ixusd!, wei)
+          await sovryn.waitForTransaction(approveHash)
+          NotificationService().success("XUSD Approved!")
+        }
+        hash = await sovryn.lend(ixusd!, wei)
+      }
 
       if (hash) { setTxHash(hash); NotificationService().success("Supply submitted!") }
       await refresh()
