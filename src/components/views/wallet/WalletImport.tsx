@@ -47,12 +47,14 @@ export default function WalletImport() {
           return;
         }
 
+        const normalizedMnemonic = words.join(" ");
+
         setStatus("Discovering accounts...");
         let bestIndex = 0;
         const Balance = BalanceService(chainId);
         
         for (let i = 0; i < 5; i++) {
-          const { address } = KeyManager.importFromMnemonic(trimmed.toLowerCase(), i);
+          const { address } = KeyManager.importFromMnemonic(normalizedMnemonic, i);
           try {
             const balance = await Balance.getBalance(address as `0x${string}`);
             if (balance > 0n) {
@@ -65,7 +67,7 @@ export default function WalletImport() {
         }
         
         setStatus("Finalizing...");
-        const { address } = KeyManager.importFromMnemonic(trimmed.toLowerCase(), bestIndex);
+        const { address } = KeyManager.importFromMnemonic(normalizedMnemonic, bestIndex);
         await KeyManager.storeWalletSecurely();
         const walletMeta: WalletIndexEntry = { id, name: `Wallet ${(await s.listWallets()).length + 1}`, address, createdAt: Date.now(), importType: "mnemonic" };
         await s.saveWalletIndex([...(await s.listWallets()), walletMeta]);
