@@ -16,6 +16,7 @@ import { getProtocolTokens, MOC_CORE } from "@/rsk/addresses"
 import { mocCoreAbi } from "@/rsk/abis/moc"
 import { getPublicClientByChainId } from "@/kernel/evm/ClientService"
 import { classifyError } from "@/kernel/evm/errors"
+import TokenManagerService from "@/kernel/evm/TokenManagerService"
 import SecurityService, { AuthActions } from "@/kernel/app/SecurityService"
 import NotificationService from "@/kernel/app/NotificationService"
 import { useTranslation } from "@/translations"
@@ -92,17 +93,13 @@ export default function MoCView() {
 
   useEffect(() => {
     if (!address) return
-    const client = getPublicClientByChainId(chainId)
-    Promise.all(mocTokens.map(async t => {
-      try {
-        const bal = await client.readContract({ address: t.address, abi: erc20Abi, functionName: "balanceOf", args: [address as `0x${string}`] }) as bigint
-        return { symbol: t.symbol, balance: bal }
-      } catch { return { symbol: t.symbol, balance: 0n } }
-    })).then(results => {
-      const map: Record<string, bigint> = {}
-      results.forEach(r => { map[r.symbol] = r.balance })
-      setMocBalances(map)
-    })
+    TokenManagerService(chainId)
+      .getAllTokenBalances(address as `0x${string}`, mocTokens)
+      .then(results => {
+        const map: Record<string, bigint> = {}
+        results.forEach(r => { map[r.symbol] = r.balance })
+        setMocBalances(map)
+      })
   }, [address, chainId])
 
   const handleSubmit = useCallback(async () => {

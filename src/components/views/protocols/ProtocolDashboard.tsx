@@ -11,6 +11,7 @@ import { selectActiveAddress } from "@/redux/wallet";
 import { selectChainId } from "@/redux/preferences";
 import MoCService from "@/rsk/MoCService";
 import { getProtocolTokens } from "@/rsk/addresses";
+import TokenManagerService from "@/kernel/evm/TokenManagerService";
 
 export default function ProtocolDashboard() {
   const navigate = useNavigate();
@@ -30,20 +31,13 @@ export default function ProtocolDashboard() {
       try {
         const price = await moc.getBtcPrice().catch(() => null);
         if (price) setBtcPrice(price.toString());
-        const { erc20Abi } = await import("viem");
-        const { getPublicClientByChainId } = await import("@/kernel/evm/ClientService");
-        const client = getPublicClientByChainId(chainId);
-        for (const t of protocolTokens) {
-          try {
-            const bal = await client.readContract({
-              address: t.address,
-              abi: erc20Abi,
-              functionName: "balanceOf",
-              args: [address as `0x${string}`],
-            }) as bigint;
-            setProtocolBalances(prev => ({ ...prev, [t.symbol]: bal }));
-          } catch {}
-        }
+        
+        const balances = await TokenManagerService(chainId).getAllTokenBalances(address as `0x${string}`, protocolTokens);
+        const map: Record<string, bigint> = {};
+        balances.forEach(b => { map[b.symbol] = b.balance });
+        setProtocolBalances(map);
+      } catch (e) {
+        console.error("Failed to load explore protocol balances:", e);
       } finally {
         setLoading(false);
       }
