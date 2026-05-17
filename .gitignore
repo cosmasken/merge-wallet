@@ -23,5 +23,6 @@ summary.md
 intro.md
 .kiro
 *.md
+!release-notes.md
 
 scratch/
