@@ -115,6 +115,7 @@ export default function ProtocolDashboard() {
             <Card className="p-4">
               <div className="flex items-center justify-between mb-3">
                 <h2 className="text-sm font-bold">Sovryn</h2>
+                <a href="https://sovryn.app" target="_blank" rel="noopener noreferrer" className="text-xs text-primary font-semibold">Open dapp ↗</a>
               </div>
               <div className="flex flex-col gap-2 text-sm">
                 {byProtocol('sovryn').map(t => (
@@ -127,6 +128,20 @@ export default function ProtocolDashboard() {
               <div className="flex gap-2 mt-3 pt-3 border-t border-neutral-100 dark:border-neutral-800">
                 <Button label="Swap" variant="secondary" size="sm" onClick={() => navigate("/protocols/sovryn/swap")} />
                 <Button label="Earn" variant="secondary" size="sm" onClick={() => navigate("/protocols/sovryn/earn")} />
+              </div>
+              <div className="flex gap-2 mt-2">
+                <a href="https://sovryn.app/trade" target="_blank" rel="noopener noreferrer"
+                  className="flex-1 p-2 text-center text-xs rounded-lg border border-neutral-300 dark:border-neutral-600 text-neutral-500 hover:border-primary/50 transition-colors">
+                  Margin Trade ↗
+                </a>
+                <a href="https://sovryn.app/lending" target="_blank" rel="noopener noreferrer"
+                  className="flex-1 p-2 text-center text-xs rounded-lg border border-neutral-300 dark:border-neutral-600 text-neutral-500 hover:border-primary/50 transition-colors">
+                  Loans ↗
+                </a>
+                <a href="https://sovryn.app/staking" target="_blank" rel="noopener noreferrer"
+                  className="flex-1 p-2 text-center text-xs rounded-lg border border-neutral-300 dark:border-neutral-600 text-neutral-500 hover:border-primary/50 transition-colors">
+                  Staking ↗
+                </a>
               </div>
             </Card>
           )}

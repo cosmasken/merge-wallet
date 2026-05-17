@@ -132,6 +132,10 @@ export default function SovrynEarnView() {
   return (
     <div>
       <ViewHeader title="Earn with Sovryn" subtitle="Supply to earn interest" showBack />
+      <a href="https://sovryn.app/lending" target="_blank" rel="noopener noreferrer"
+        className="mx-4 mb-1 block text-center text-xs text-primary font-semibold py-1.5 rounded-lg bg-primary/5 border border-primary/20">
+        Margin trading, loans & staking on Sovryn dapp ↗
+      </a>
       <div className="flex flex-col gap-4 px-4">
 
         {/* Pool selector */}

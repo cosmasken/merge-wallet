@@ -139,6 +139,10 @@ export default function SovrynSwapView() {
   return (
     <div>
       <ViewHeader title="Sovryn Swap" subtitle="RBTC / SOV → XUSD" showBack />
+      <a href="https://sovryn.app" target="_blank" rel="noopener noreferrer"
+        className="mx-4 mb-1 block text-center text-xs text-primary font-semibold py-1.5 rounded-lg bg-primary/5 border border-primary/20">
+        Margin trading, loans & staking on Sovryn dapp ↗
+      </a>
       <div className="flex flex-col gap-4 px-4">
         <Card className="p-4">
           {/* Direction toggle */}
