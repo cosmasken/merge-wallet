@@ -1,15 +1,18 @@
 import { useEffect, useState, useCallback } from "react"
 import { useSelector } from "react-redux"
 import { useParams, useNavigate } from "react-router"
-import { formatEther, parseEther } from "viem"
+import { formatEther, parseEther, erc20Abi } from "viem"
 
 import ViewHeader from "@/layout/ViewHeader"
 import Card from "@/atoms/Card"
 import Button from "@/atoms/Button"
 import LoadingSpinner from "@/atoms/LoadingSpinner"
+import WeiDisplay from "@/atoms/WeiDisplay"
 import { selectWalletAddress, selectWalletBalance } from "@/redux/wallet"
 import { selectChainId } from "@/redux/preferences"
 import MoCService from "@/rsk/MoCService"
+import { getProtocolTokens } from "@/rsk/addresses"
+import { getPublicClientByChainId } from "@/kernel/evm/ClientService"
 import { classifyError } from "@/kernel/evm/errors"
 import SecurityService, { AuthActions } from "@/kernel/app/SecurityService"
 import NotificationService from "@/kernel/app/NotificationService"
@@ -61,27 +64,46 @@ const PILL_ORDER: { slug: string; label: string; action: Action }[] = [
 export default function MoCView() {
   const navigate = useNavigate()
   const { action: urlAction } = useParams<{ action: string }>()
-  const action = VALID_ACTIONS[urlAction ?? ""] ?? "mintDoc"
+  const isOverview = !urlAction || !VALID_ACTIONS[urlAction]
+  const action = isOverview ? "mintDoc" : VALID_ACTIONS[urlAction]
 
   const address = useSelector(selectWalletAddress)
   const chainId = useSelector(selectChainId)
   const balance = useSelector(selectWalletBalance)
   const [amount, setAmount] = useState("")
   const [btcPrice, setBtcPrice] = useState<string | null>(null)
+  const [mocBalances, setMocBalances] = useState<Record<string, bigint>>({})
   const [isBusy, setIsBusy] = useState(false)
   const [error, setError] = useState("")
   const [txHash, setTxHash] = useState("")
 
   const moc = MoCService(chainId)
+  const mocTokens = getProtocolTokens(chainId).filter(t => t.protocol === "moc")
 
-  const a = ACTION_LABELS[action]
+  const a = isOverview ? null : ACTION_LABELS[action]
   const isRbtcIn = action === "mintDoc" || action === "mintBPro"
   const isOk = amount && !isNaN(Number(amount)) && Number(amount) > 0
   const isLow = isOk && parseEther(amount) > BigInt(balance)
+  const isEmptyOverview = isOverview && mocTokens.every(t => !mocBalances[t.symbol] || mocBalances[t.symbol] === 0n)
 
   useEffect(() => {
     moc.getBtcPrice().then(p => setBtcPrice(p.toString())).catch(() => {})
   }, [chainId])
+
+  useEffect(() => {
+    if (!address || !isOverview) return
+    const client = getPublicClientByChainId(chainId)
+    Promise.all(mocTokens.map(async t => {
+      try {
+        const bal = await client.readContract({ address: t.address, abi: erc20Abi, functionName: "balanceOf", args: [address as `0x${string}`] }) as bigint
+        return { symbol: t.symbol, balance: bal }
+      } catch { return { symbol: t.symbol, balance: 0n } }
+    })).then(results => {
+      const map: Record<string, bigint> = {}
+      results.forEach(r => { map[r.symbol] = r.balance })
+      setMocBalances(map)
+    })
+  }, [address, chainId, isOverview])
 
   const handleSubmit = useCallback(async () => {
     if (!isOk || isLow) return
@@ -99,7 +121,7 @@ export default function MoCView() {
       })[action]()
 
       setTxHash(hash)
-      NotificationService().success(`${a.btn} submitted!`)
+      NotificationService().success(`${a!.btn} submitted!`)
     } catch (e) {
       const err = classifyError(e)
       setError(err.message)
@@ -129,7 +151,7 @@ export default function MoCView() {
 
   return (
     <div className="animate-in fade-in slide-in-from-bottom-4 duration-300">
-      <ViewHeader title="Money On Chain" subtitle={a.subtitle} showBack />
+      <ViewHeader title="Money On Chain" subtitle={isOverview ? "Mint and redeem RBTC-backed assets" : a!.subtitle} showBack />
       <div className="flex flex-col gap-4 px-4">
 
         {/* Pill nav */}
@@ -137,7 +159,7 @@ export default function MoCView() {
           {PILL_ORDER.map(p => (
             <button key={p.slug} onClick={() => navigate(`/protocols/moc/${p.slug}`)}
               className={`shrink-0 px-3.5 py-2 rounded-full border-2 text-xs font-semibold transition-colors ${
-                action === p.action
+                !isOverview && action === p.action
                   ? "border-primary bg-primary text-white"
                   : "border-neutral-200 dark:border-neutral-700 text-neutral-500 dark:text-neutral-400"
               }`}>
@@ -146,35 +168,85 @@ export default function MoCView() {
           ))}
         </div>
 
-        <Card className="p-4">
-          <h2 className="text-sm font-bold mb-1">{a.title}</h2>
-          <p className="text-xs text-neutral-500 mb-3">{a.desc}</p>
-          {btcPrice && (
-            <div className="text-xs text-neutral-400 mb-2">
-              BTC Price: ${(BigInt(btcPrice) / 10n ** 18n).toString()}
+        {isOverview ? (
+          <>
+            {/* Portfolio overview */}
+            <Card className="p-4">
+              <div className="flex items-center gap-3 mb-3">
+                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-cyan-400 flex items-center justify-center text-white font-bold text-sm shrink-0">
+                  MoC
+                </div>
+                <div>
+                  <h2 className="text-sm font-bold">Your Portfolio</h2>
+                  {btcPrice && <span className="text-xs text-neutral-400">BTC ${(BigInt(btcPrice) / 10n ** 18n).toString()}</span>}
+                </div>
+              </div>
+
+              {isEmptyOverview ? (
+                <div className="flex flex-col items-center gap-3 py-6 text-center">
+                  <div className="w-12 h-12 rounded-full bg-neutral-100 dark:bg-neutral-800 flex items-center justify-center">
+                    <svg viewBox="0 0 24 24" className="w-6 h-6 text-neutral-300" fill="none" stroke="currentColor" strokeWidth="1.5">
+                      <path d="M12 2v20M2 12h20" />
+                    </svg>
+                  </div>
+                  <div>
+                    <p className="text-sm font-semibold text-neutral-500">No assets yet</p>
+                    <p className="text-xs text-neutral-400 mt-0.5">Create DOC or Buy BPro to get started</p>
+                  </div>
+                  <Button label="Create DOC" size="sm" onClick={() => navigate("/protocols/moc/create-doc")} />
+                </div>
+              ) : (
+                <div className="flex flex-col gap-2 text-sm">
+                  {mocTokens.map(t => (
+                    <div key={t.symbol} className="flex justify-between items-center">
+                      <span className="text-neutral-500">{t.symbol}</span>
+                      <WeiDisplay wei={mocBalances[t.symbol] ?? 0n} symbol={t.symbol} decimals={t.decimals} />
+                    </div>
+                  ))}
+                </div>
+              )}
+            </Card>
+
+            <div className="grid grid-cols-2 gap-2">
+              <Button label="Create DOC" size="sm" variant="secondary" onClick={() => navigate("/protocols/moc/create-doc")} />
+              <Button label="Redeem DOC" size="sm" variant="secondary" onClick={() => navigate("/protocols/moc/redeem-doc")} />
+              <Button label="Buy BPro" size="sm" variant="secondary" onClick={() => navigate("/protocols/moc/buy-bpro")} />
+              <Button label="Sell BPro" size="sm" variant="secondary" onClick={() => navigate("/protocols/moc/sell-bpro")} />
             </div>
-          )}
+          </>
+        ) : (
+          <>
+            <Card className="p-4">
+              <h2 className="text-sm font-bold mb-1">{a!.title}</h2>
+              <p className="text-xs text-neutral-500 mb-3">{a!.desc}</p>
+              {btcPrice && (
+                <div className="text-xs text-neutral-400 mb-2">
+                  BTC Price: ${(BigInt(btcPrice) / 10n ** 18n).toString()}
+                </div>
+              )}
 
-          <div className="flex items-center justify-between mb-1">
-            <label className="text-xs text-neutral-500">{isRbtcIn ? "RBTC amount" : `${action === "redeemDoc" ? "DOC" : "BPro"} amount`}</label>
-            <span className="text-xs text-neutral-400 font-mono">RBTC bal: {formatEther(BigInt(balance))}</span>
-          </div>
-          <input type="text" placeholder="0.00" value={amount} onChange={e => setAmount(e.target.value)}
-            className="w-full p-3 rounded-lg border border-neutral-300 bg-white dark:bg-neutral-800 dark:border-neutral-600 text-lg font-mono" />
-          {isRbtcIn && (
-            <button onClick={() => setAmount(formatEther(BigInt(balance)))} className="text-xs text-primary font-semibold mt-1">Max</button>
-          )}
-        </Card>
+              <div className="flex items-center justify-between mb-1">
+                <label className="text-xs text-neutral-500">{isRbtcIn ? "RBTC amount" : `${action === "redeemDoc" ? "DOC" : "BPro"} amount`}</label>
+                <span className="text-xs text-neutral-400 font-mono">RBTC bal: {formatEther(BigInt(balance))}</span>
+              </div>
+              <input type="text" placeholder="0.00" value={amount} onChange={e => setAmount(e.target.value)}
+                className="w-full p-3 rounded-lg border border-neutral-300 bg-white dark:bg-neutral-800 dark:border-neutral-600 text-lg font-mono" />
+              {isRbtcIn && (
+                <button onClick={() => setAmount(formatEther(BigInt(balance)))} className="text-xs text-primary font-semibold mt-1">Max</button>
+              )}
+            </Card>
 
-        {isLow && <p className="text-error text-sm bg-error/10 p-3 rounded-lg">Insufficient RBTC balance</p>}
-        {error && <p className="text-error text-sm bg-error/10 p-3 rounded-lg">{error}</p>}
+            {isLow && <p className="text-error text-sm bg-error/10 p-3 rounded-lg">Insufficient RBTC balance</p>}
+            {error && <p className="text-error text-sm bg-error/10 p-3 rounded-lg">{error}</p>}
 
-        <Button
-          label={isBusy ? <div className="flex items-center gap-2"><LoadingSpinner size="sm" color="white" /><span>Processing...</span></div> : a.btn}
-          onClick={handleSubmit}
-          disabled={!isOk || isLow || isBusy}
-          fullWidth
-        />
+            <Button
+              label={isBusy ? <div className="flex items-center gap-2"><LoadingSpinner size="sm" color="white" /><span>Processing...</span></div> : a!.btn}
+              onClick={handleSubmit}
+              disabled={!isOk || isLow || isBusy}
+              fullWidth
+            />
+          </>
+        )}
       </div>
     </div>
   )

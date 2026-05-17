@@ -71,7 +71,7 @@ export default function ProtocolDashboard() {
         <div className="flex flex-col gap-4 px-4 mt-4">
 
           {/* MoC Card */}
-          <button onClick={() => navigate("/protocols/moc/create-doc")} className="text-left w-full">
+          <button onClick={() => navigate("/protocols/moc")} className="text-left w-full">
             <Card className="p-4">
               <div className="flex items-start gap-3">
                 <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-cyan-400 flex items-center justify-center text-white font-bold text-sm shrink-0">
@@ -99,7 +99,7 @@ export default function ProtocolDashboard() {
           </button>
 
           {/* Tropykus Card */}
-          <button onClick={() => navigate("/protocols/tropykus/lend")} className="text-left w-full">
+          <button onClick={() => navigate("/protocols/tropykus")} className="text-left w-full">
             <Card className="p-4">
               <div className="flex items-start gap-3">
                 <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-green-500 to-emerald-300 flex items-center justify-center text-white font-bold text-sm shrink-0">
