@@ -6,6 +6,7 @@ import WalletImport from "@/views/wallet/WalletImport";
 import SeedBackup from "@/views/wallet/SeedBackup";
 import TokenDetailView from "@/views/wallet/TokenDetailView";
 import WalletManager from "@/views/settings/WalletManager";
+import AddressBook from "@/views/wallet/AddressBook";
 
 export const routeWallet = [
   {
@@ -38,6 +39,10 @@ export const routeWallet = [
       {
         path: "manage",
         element: <WalletManager />,
+      },
+      {
+        path: "contacts",
+        element: <AddressBook />,
       },
     ],
   },

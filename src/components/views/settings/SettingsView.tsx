@@ -17,14 +17,14 @@ export default function SettingsView() {
   const sections = [
     { title: t("settings.section_security"), path: "/settings/security", desc: t("settings.section_security_desc") },
     { title: t("settings.section_language"), path: "/settings/language", desc: t("settings.section_language_desc") },
-    { title: t("settings.section_contacts"), path: "/settings/contacts", desc: t("settings.section_contacts_desc") },
+    { title: t("settings.section_contacts"), path: "/wallet/contacts", desc: t("settings.section_contacts_desc") },
     { title: t("settings.section_network"), path: "/settings/network", desc: t("settings.section_network_desc") },
     { title: t("settings.section_currency"), path: "/settings/currency", desc: t("settings.section_currency_desc") },
     // Only show governance on mainnet
     ...(isGovernanceAvailable(chainId) ? [
       { title: t("settings.section_governance"), path: "/settings/governance", desc: t("settings.section_governance_desc") }
     ] : []),
-    { title: "Transaction History", path: "/settings/history", desc: "View past transactions" },
+    { title: "Transaction History", path: "/wallet/history", desc: "View past transactions" },
     { title: "Explore", path: "/protocols", desc: "MoC & Sovryn" },
     { title: t("settings.section_import"), path: "/wallet/import", desc: t("settings.section_import_desc") },
     { title: t("settings.section_about"), path: "/settings/about", desc: t("settings.section_about_desc") },

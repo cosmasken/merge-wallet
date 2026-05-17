@@ -9,7 +9,7 @@ import LoadingSpinner from "@/atoms/LoadingSpinner"
 import Button from "@/atoms/Button"
 import { selectChainId } from "@/redux/preferences"
 import { getPublicClientByChainId } from "@/kernel/evm/ClientService"
-import { getBlockscoutApiUrl } from "@/util/networks"
+import { getBlockscoutApiUrl, buildTxUrl } from "@/util/networks"
 
 interface BlockscoutTx {
   hash: string
@@ -173,10 +173,25 @@ export default function TransactionDetailView() {
 
         {/* Timestamp from RPC block */}
         {blockNumber && !bsTx?.timestamp && (
-          <p className="text-xs text-neutral-400 text-center pb-4">
+          <p className="text-xs text-neutral-400 text-center pb-2">
             Block #{blockNumber.toString()}
           </p>
         )}
+
+        {/* View on External Explorer button */}
+        <div className="mt-2 pb-6">
+          <a
+            href={buildTxUrl(chainId, hash ?? "")}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="w-full flex items-center justify-center gap-2 p-3 rounded-lg bg-neutral-200 dark:bg-neutral-800 text-neutral-800 dark:text-neutral-200 text-xs font-semibold active:bg-neutral-300 dark:active:bg-neutral-700 transition-colors"
+          >
+            <svg viewBox="0 0 24 24" className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6M15 3h6v6M10 14L21 3" />
+            </svg>
+            View on External Explorer
+          </a>
+        </div>
 
       </div>
     </div>

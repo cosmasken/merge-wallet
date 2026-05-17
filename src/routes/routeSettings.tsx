@@ -4,9 +4,7 @@ import NetworkSettings from "@/views/settings/NetworkSettings";
 import CurrencySettings from "@/views/settings/CurrencySettings";
 import AboutView from "@/views/settings/AboutView";
 import LanguageSettings from "@/views/settings/LanguageSettings";
-import AddressBook from "@/views/wallet/AddressBook";
 import GovernanceView from "@/views/settings/GovernanceView";
-import TransactionHistoryView from "@/views/settings/TransactionHistoryView";
 
 export const routeSettings = [
   {
@@ -37,16 +35,8 @@ export const routeSettings = [
         element: <LanguageSettings />,
       },
       {
-        path: "contacts",
-        element: <AddressBook />,
-      },
-      {
         path: "governance",
         element: <GovernanceView />,
-      },
-      {
-        path: "history",
-        element: <TransactionHistoryView />,
       },
     ],
   },

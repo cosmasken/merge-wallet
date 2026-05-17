@@ -8,7 +8,7 @@ import WeiDisplay from "@/atoms/WeiDisplay";
 import Address from "@/atoms/Address";
 import { TransactionSkeleton } from "@/atoms/LoadingSkeleton";
 import ErrorState from "@/atoms/ErrorState";
-import { selectWalletAddress } from "@/redux/wallet";
+import { selectWalletAddress, selectPendingTransactions } from "@/redux/wallet";
 import { selectChainId } from "@/redux/preferences";
 import TransactionHistoryService, { type TxHistoryEntry } from "@/kernel/evm/TransactionHistoryService";
 import TransactionExportService from "@/kernel/evm/TransactionExportService";
@@ -19,6 +19,7 @@ export default function WalletHistory() {
   const navigate = useNavigate();
   const address = useSelector(selectWalletAddress);
   const chainId = useSelector(selectChainId);
+  const pendingTxs = useSelector(selectPendingTransactions);
   const [txs, setTxs] = useState<TxHistoryEntry[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -60,6 +61,23 @@ export default function WalletHistory() {
     setExporting(false);
   };
 
+  const allTxs = [
+    ...pendingTxs
+      .filter(tx => tx.chainId === chainId)
+      .map(tx => ({
+        hash: tx.hash as `0x${string}`,
+        from: address as `0x${string}`,
+        to: "" as `0x${string}`,
+        value: 0n,
+        blockNumber: 0,
+        timestamp: tx.timestamp / 1000,
+        status: tx.status as "pending" | "success" | "failed",
+        amount: tx.amount,
+        symbol: tx.symbol,
+      })),
+    ...txs.filter(h => !pendingTxs.some(p => p.hash === h.hash)),
+  ].sort((a, b) => b.timestamp - a.timestamp);
+
   return (
     <PullToRefresh onRefresh={refreshHistory}>
       <div>
@@ -79,7 +97,7 @@ export default function WalletHistory() {
               onClick: refreshHistory
             }}
           />
-        ) : txs.length === 0 ? (
+        ) : allTxs.length === 0 ? (
           <div className="flex flex-col items-center justify-center gap-4 px-4 pt-16 text-center">
             <div className="w-16 h-16 rounded-full bg-neutral-100 dark:bg-neutral-800 flex items-center justify-center">
               <svg viewBox="0 0 24 24" className="w-8 h-8 text-neutral-400" fill="none" stroke="currentColor" strokeWidth="2">
@@ -100,8 +118,9 @@ export default function WalletHistory() {
             >
               {exporting ? t("wallet.history.exporting") : t("wallet.history.export_csv")}
             </button>
-            {txs.map((tx) => {
+            {allTxs.map((tx) => {
               const isOutgoing = tx.from.toLowerCase() === address.toLowerCase();
+              const hasCustomDisplay = "amount" in tx && "symbol" in tx && tx.amount;
               return (
                 <button
                   key={tx.hash}
@@ -117,11 +136,20 @@ export default function WalletHistory() {
                         {t(`wallet.history.status_${tx.status}`)}
                       </span>
                     </div>
-                    <Address address={isOutgoing ? tx.to : tx.from} short className="text-xs text-neutral-500" />
+                    {tx.to || tx.from ? (
+                      <Address address={isOutgoing ? tx.to : tx.from} short className="text-xs text-neutral-500" />
+                    ) : (
+                      <span className="text-xs text-neutral-500 font-mono">{tx.hash.slice(0, 10)}...</span>
+                    )}
                   </div>
                   <div className="text-right">
                     <div className={`font-mono text-sm ${isOutgoing ? "text-error" : "text-success"}`}>
-                      {isOutgoing ? "-" : "+"}<WeiDisplay value={tx.value} symbol={nativeCurrency.symbol} />
+                      {isOutgoing ? "-" : "+"}
+                      {hasCustomDisplay ? (
+                        `${tx.amount} ${tx.symbol}`
+                      ) : (
+                        <WeiDisplay value={"value" in tx ? (tx.value as bigint) : 0n} symbol={nativeCurrency.symbol} />
+                      )}
                     </div>
                     <div className="text-xs text-neutral-400">
                       {new Date(tx.timestamp * 1000).toLocaleDateString()}
