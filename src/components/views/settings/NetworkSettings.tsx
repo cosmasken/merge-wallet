@@ -6,6 +6,7 @@ import ViewHeader from "@/layout/ViewHeader";
 import PullToRefresh from "@/atoms/PullToRefresh";
 import Button from "@/atoms/Button";
 import Card from "@/atoms/Card";
+import MainnetWarningModal from "@/composite/MainnetWarningModal";
 import { selectChainId, setChainId } from "@/redux/preferences";
 import { addRpcUrl, removeRpcUrl, resetRpcUrls, toggleRpcUrl, selectRpcOverrides } from "@/redux/rpc";
 import { getChainConfig } from "@/chains";
@@ -27,6 +28,7 @@ export default function NetworkSettings() {
   const [urlStatus, setUrlStatus] = useState<Record<string, UrlStatus>>({});
   const [addingUrl, setAddingUrl] = useState(false);
   const [newUrl, setNewUrl] = useState("");
+  const [showMainnetWarning, setShowMainnetWarning] = useState(false);
   const addRef = useRef<HTMLInputElement>(null);
 
   const isMainnet = currentChainId === MAINNET;
@@ -75,8 +77,21 @@ export default function NetworkSettings() {
   }, [activeChainId, testConnection]);
 
   const switchChain = (mainnet: boolean) => {
-    const chainId = mainnet ? MAINNET : TESTNET;
-    dispatch(setChainId(chainId));
+    if (mainnet && !isMainnet) {
+      if (localStorage.getItem("mainnetWarningDismissed") === "true") {
+        dispatch(setChainId(MAINNET));
+      } else {
+        setShowMainnetWarning(true);
+      }
+      return;
+    }
+    dispatch(setChainId(mainnet ? MAINNET : TESTNET));
+  };
+
+  const handleMainnetConfirm = (dontShowAgain: boolean) => {
+    if (dontShowAgain) localStorage.setItem("mainnetWarningDismissed", "true");
+    dispatch(setChainId(MAINNET));
+    setShowMainnetWarning(false);
   };
 
   const handleAddUrl = () => {
@@ -233,7 +248,12 @@ export default function NetworkSettings() {
           </Card>
         </div>
       </div>
-    </PullToRefresh>
+      </PullToRefresh>
+      <MainnetWarningModal
+        isOpen={showMainnetWarning}
+        onConfirm={handleMainnetConfirm}
+        onCancel={() => setShowMainnetWarning(false)}
+      />
     </>
   );
 }
