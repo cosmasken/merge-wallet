@@ -15,7 +15,7 @@ import { routeAssets } from "@/routes/routeAssets";
 import { routeSettings } from "@/routes/routeSettings";
 import { routeProtocols } from "@/routes/routeProtocols";
 
-const routes = [
+const router = createBrowserRouter([
   {
     element: <MainLayout />,
     errorElement: <ErrorBoundary />,
@@ -34,22 +34,14 @@ const routes = [
       ...routeProtocols,
     ],
   },
-];
+]);
 
-const router = createBrowserRouter(routes);
-
-function App() {
-  return (
+createRoot(document.getElementById("root")!).render(
+  <StrictMode>
     <Provider store={store}>
       <AppProvider>
         <RouterProvider router={router} />
       </AppProvider>
     </Provider>
-  );
-}
-
-createRoot(document.getElementById("root")!).render(
-  <StrictMode>
-    <App />
   </StrictMode>,
 );
