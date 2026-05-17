@@ -6,36 +6,18 @@ import ViewHeader from "@/layout/ViewHeader";
 import PullToRefresh from "@/atoms/PullToRefresh";
 import Button from "@/atoms/Button";
 import Card from "@/atoms/Card";
+import MainnetWarningModal from "@/composite/MainnetWarningModal";
 import { selectChainId, setChainId } from "@/redux/preferences";
 import { addRpcUrl, removeRpcUrl, resetRpcUrls, toggleRpcUrl, selectRpcOverrides } from "@/redux/rpc";
-import { NETWORK_FAMILIES, getFamilyForChain, getFamilyChainIds, getChainConfig } from "@/chains";
-import type { NetworkFamily } from "@/chains";
+import { getChainConfig } from "@/chains";
+
+const MAINNET = 30;
+const TESTNET = 31;
 
 interface UrlStatus {
   url: string;
   ok: boolean | null;
   testing: boolean;
-}
-
-const FAMILY_KEYS = Object.keys(NETWORK_FAMILIES) as NetworkFamily[];
-
-function ToggleSwitch({ checked, onChange, label }: { checked: boolean; onChange: () => void; label?: string }) {
-  return (
-    <div className="flex items-center justify-between">
-      <span className="text-sm font-medium text-neutral-700 dark:text-neutral-300">{label ?? (checked ? "Mainnet" : "Testnet")}</span>
-      <div className="flex items-center gap-3">
-        <span className={`text-xs font-medium ${!checked ? "text-neutral-900 dark:text-neutral-100" : "text-neutral-400"}`}>Testnet</span>
-        <button
-          onClick={onChange}
-          type="button"
-          className={`relative w-11 h-6 rounded-full transition-colors ${checked ? "bg-primary" : "bg-neutral-300 dark:bg-neutral-600"}`}
-        >
-          <span className={`absolute top-0.5 left-0.5 w-5 h-5 rounded-full bg-white shadow-sm transition-transform ${checked ? "translate-x-5" : ""}`} />
-        </button>
-        <span className={`text-xs font-medium ${checked ? "text-neutral-900 dark:text-neutral-100" : "text-neutral-400"}`}>Mainnet</span>
-      </div>
-    </div>
-  );
 }
 
 export default function NetworkSettings() {
@@ -46,49 +28,18 @@ export default function NetworkSettings() {
   const [urlStatus, setUrlStatus] = useState<Record<string, UrlStatus>>({});
   const [addingUrl, setAddingUrl] = useState(false);
   const [newUrl, setNewUrl] = useState("");
-  const [familyOpen, setFamilyOpen] = useState(false);
-  const familyRef = useRef<HTMLDivElement>(null);
+  const [showMainnetWarning, setShowMainnetWarning] = useState(false);
   const addRef = useRef<HTMLInputElement>(null);
 
-  const currentFamily = getFamilyForChain(currentChainId) ?? FAMILY_KEYS[0];
-  const [selectedFamily, setSelectedFamily] = useState<NetworkFamily>(currentFamily);
-  const [isMainnet, setIsMainnet] = useState(() => {
-    const info = NETWORK_FAMILIES[selectedFamily];
-    return currentChainId === info.mainnet;
-  });
-
-  const activeChainId = isMainnet
-    ? NETWORK_FAMILIES[selectedFamily].mainnet
-    : NETWORK_FAMILIES[selectedFamily].testnet;
-
+  const isMainnet = currentChainId === MAINNET;
+  const activeChainId = currentChainId;
   const chainConfig = getChainConfig(activeChainId);
-
-  useEffect(() => {
-    const family = getFamilyForChain(currentChainId);
-    if (family) {
-      setSelectedFamily(family);
-      const info = NETWORK_FAMILIES[family];
-      setIsMainnet(currentChainId === info.mainnet);
-    }
-  }, [currentChainId]);
 
   useEffect(() => {
     if (addingUrl && addRef.current) {
       addRef.current.focus();
     }
   }, [addingUrl]);
-
-  useEffect(() => {
-    function handleClickOutside(e: MouseEvent) {
-      if (familyRef.current && !familyRef.current.contains(e.target as Node)) {
-        setFamilyOpen(false);
-      }
-    }
-    if (familyOpen) {
-      document.addEventListener("mousedown", handleClickOutside);
-      return () => document.removeEventListener("mousedown", handleClickOutside);
-    }
-  }, [familyOpen]);
 
   const testUrl = useCallback(async (url: string) => {
     setUrlStatus(prev => ({ ...prev, [url]: { url, ok: null, testing: true } }));
@@ -103,25 +54,20 @@ export default function NetworkSettings() {
   }, []);
 
   const testConnection = useCallback(async (chainId: number) => {
-    const family = getFamilyForChain(chainId);
-    if (!family) return;
-    const info = NETWORK_FAMILIES[family];
-    const chainIds = [info.mainnet, info.testnet];
-    for (const cid of chainIds) {
-      const config = getChainConfig(cid);
-      if (!config) continue;
-      const entry = overrides[cid];
-      const urls = [...config.rpcUrls, ...(entry?.customUrls ?? [])];
-      for (const url of urls) {
-        if (entry?.disabledUrls.includes(url)) continue;
-        try {
-          const transport = http(url);
-          const client = createPublicClient({ transport });
-          await client.getBlockNumber();
-          setUrlStatus(prev => ({ ...prev, [url]: { url, ok: true, testing: false } }));
-        } catch {
-          setUrlStatus(prev => ({ ...prev, [url]: { url, ok: false, testing: false } }));
-        }
+    const config = getChainConfig(chainId);
+    if (!config) return;
+    const entry = overrides[chainId];
+    const urls = [...config.rpcUrls, ...(entry?.customUrls ?? [])];
+    for (const url of urls) {
+      if (entry?.disabledUrls.includes(url)) continue;
+      setUrlStatus(prev => ({ ...prev, [url]: { url, ok: null, testing: true } }));
+      try {
+        const transport = http(url);
+        const client = createPublicClient({ transport });
+        await client.getBlockNumber();
+        setUrlStatus(prev => ({ ...prev, [url]: { url, ok: true, testing: false } }));
+      } catch {
+        setUrlStatus(prev => ({ ...prev, [url]: { url, ok: false, testing: false } }));
       }
     }
   }, [overrides]);
@@ -131,20 +77,21 @@ export default function NetworkSettings() {
   }, [activeChainId, testConnection]);
 
   const switchChain = (mainnet: boolean) => {
-    const info = NETWORK_FAMILIES[selectedFamily];
-    const chainId = mainnet ? info.mainnet : info.testnet;
-    dispatch(setChainId(chainId));
-    setIsMainnet(mainnet);
+    if (mainnet && !isMainnet) {
+      if (localStorage.getItem("mainnetWarningDismissed") === "true") {
+        dispatch(setChainId(MAINNET));
+      } else {
+        setShowMainnetWarning(true);
+      }
+      return;
+    }
+    dispatch(setChainId(mainnet ? MAINNET : TESTNET));
   };
 
-  const switchFamily = (family: NetworkFamily) => {
-    setSelectedFamily(family);
-    const info = NETWORK_FAMILIES[family];
-    const chainId = info.mainnet;
-    dispatch(setChainId(chainId));
-    setIsMainnet(true);
-    setUrlStatus({});
-    setFamilyOpen(false);
+  const handleMainnetConfirm = (dontShowAgain: boolean) => {
+    if (dontShowAgain) localStorage.setItem("mainnetWarningDismissed", "true");
+    dispatch(setChainId(MAINNET));
+    setShowMainnetWarning(false);
   };
 
   const handleAddUrl = () => {
@@ -174,92 +121,31 @@ export default function NetworkSettings() {
     <>
       <PullToRefresh onRefresh={() => testConnection(activeChainId)}>
       <div>
-        <ViewHeader title="Network" subtitle="Multichain network configuration" showBack />
+        <ViewHeader title="Network" showBack />
         <div className="flex flex-col gap-4 px-4">
 
-          {/* Network Family Dropdown — overlay style */}
-          <div ref={familyRef} className="relative">
-            <button
-              onClick={() => setFamilyOpen(!familyOpen)}
-              className="w-full text-left"
-              type="button"
-            >
-              <Card className="p-0">
-                <div className="flex items-center justify-between p-4">
-                  <div>
-                    <div className="text-xs text-neutral-500 mb-0.5">Network</div>
-                    <div className="font-medium">{NETWORK_FAMILIES[selectedFamily].name}</div>
-                  </div>
-                  <svg
-                    viewBox="0 0 20 20"
-                    className={`w-5 h-5 text-neutral-400 transition-transform ${familyOpen ? "rotate-180" : ""}`}
-                    fill="currentColor"
-                  >
-                    <path fillRule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clipRule="evenodd" />
-                  </svg>
-                </div>
-              </Card>
-            </button>
-
-            {familyOpen && (
-              <>
-                <div className="fixed inset-0 z-40" onClick={() => setFamilyOpen(false)} />
-                <div className="fixed inset-x-4 z-50 top-1/4 bottom-24 overflow-y-auto bg-white dark:bg-neutral-800 rounded-xl border border-neutral-200 dark:border-neutral-700 shadow-xl">
-                  {FAMILY_KEYS.map(family => {
-                    const isActive = family === selectedFamily;
-                    const [m, t] = getFamilyChainIds(family);
-                    const statuses = [m, t].flatMap(cid => {
-                      const config = getChainConfig(cid);
-                      if (!config) return [];
-                      const e = overrides[cid];
-                      return [...config.rpcUrls, ...(e?.customUrls ?? [])].filter(u => !e?.disabledUrls.includes(u));
-                    });
-                    const anyOnline = statuses.some(u => urlStatus[u]?.ok === true);
-                    const anyOffline = statuses.some(u => urlStatus[u]?.ok === false);
-                    return (
-                      <button
-                        key={family}
-                        onClick={() => switchFamily(family)}
-                        className={`w-full flex items-center justify-between px-4 py-3 text-left transition-colors border-b border-neutral-100 dark:border-neutral-700 last:border-0 ${
-                          isActive
-                            ? "bg-primary/10 text-primary font-medium"
-                            : "text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-neutral-700/50"
-                        }`}
-                      >
-                        <span>{NETWORK_FAMILIES[family].name}</span>
-                        <div className="flex items-center gap-2">
-                          {anyOnline && !anyOffline ? (
-                            <div className="w-2 h-2 rounded-full bg-success" />
-                          ) : anyOffline && !anyOnline ? (
-                            <div className="w-2 h-2 rounded-full bg-error" />
-                          ) : (
-                            <div className="w-2 h-2 rounded-full bg-neutral-300" />
-                          )}
-                          {isActive && (
-                            <svg viewBox="0 0 16 16" className="w-4 h-4 text-primary" fill="currentColor">
-                              <path d="M13.78 4.22a.75.75 0 0 1 0 1.06l-7.25 7.25a.75.75 0 0 1-1.06 0L2.22 9.28a.75.75 0 0 1 1.06-1.06L6 10.94l6.72-6.72a.75.75 0 0 1 1.06 0z" />
-                            </svg>
-                          )}
-                        </div>
-                      </button>
-                    );
-                  })}
-                </div>
-              </>
-            )}
-          </div>
-
-          {/* Mainnet / Testnet Toggle Switch */}
           <Card className="p-4">
-            <ToggleSwitch checked={isMainnet} onChange={() => switchChain(!isMainnet)} />
+            <div className="flex items-center justify-between">
+              <span className="text-sm font-medium text-neutral-700 dark:text-neutral-300">Network</span>
+              <div className="flex items-center gap-3">
+                <span className={`text-xs font-medium ${!isMainnet ? "text-neutral-900 dark:text-neutral-100" : "text-neutral-400"}`}>Testnet</span>
+                <button
+                  onClick={() => switchChain(!isMainnet)}
+                  type="button"
+                  className={`relative w-11 h-6 rounded-full transition-colors ${isMainnet ? "bg-primary" : "bg-neutral-300 dark:bg-neutral-600"}`}
+                >
+                  <span className={`absolute top-0.5 left-0.5 w-5 h-5 rounded-full bg-white shadow-sm transition-transform ${isMainnet ? "translate-x-5" : ""}`} />
+                </button>
+                <span className={`text-xs font-medium ${isMainnet ? "text-neutral-900 dark:text-neutral-100" : "text-neutral-400"}`}>Mainnet</span>
+              </div>
+            </div>
           </Card>
 
-          {/* Active Chain Info */}
           <div className="flex items-center justify-between">
             <div>
               <div className="font-medium">{chainConfig.name}</div>
               <div className="text-xs text-neutral-500">
-                Chain ID: {chainConfig.id} · {chainConfig.nativeCurrency.symbol} · {chainConfig.gasType === "eip1559" ? "EIP-1559" : "Legacy"}
+                Chain ID: {chainConfig.id} · {chainConfig.nativeCurrency.symbol}
               </div>
             </div>
             <Button
@@ -271,14 +157,12 @@ export default function NetworkSettings() {
             />
           </div>
 
-          {/* Block Explorer */}
           {chainConfig.blockExplorer && (
             <div className="text-xs text-neutral-500">
               Explorer: <span className="text-primary font-mono">{chainConfig.blockExplorer.url}</span>
             </div>
           )}
 
-          {/* RPC URLs */}
           <Card className="p-4">
             <div className="flex items-center justify-between mb-3">
               <h3 className="text-sm font-semibold text-neutral-500">RPC Endpoints</h3>
@@ -345,7 +229,7 @@ export default function NetworkSettings() {
                   className="flex-1 px-2 py-1 text-xs rounded border border-neutral-300 dark:border-neutral-600 bg-white dark:bg-neutral-800 font-mono outline-none focus:border-primary"
                   onKeyDown={e => {
                     if (e.key === 'Enter') handleAddUrl();
-                    if (e.key === 'Escape') { setAddingUrl(false); setNewUrl(""); }
+                    if (e.key === 'Key') { setAddingUrl(false); setNewUrl(""); }
                   }}
                 />
                 <button onClick={handleAddUrl} className="text-xs text-primary font-medium hover:underline">Add</button>
@@ -364,7 +248,12 @@ export default function NetworkSettings() {
           </Card>
         </div>
       </div>
-    </PullToRefresh>
+      </PullToRefresh>
+      <MainnetWarningModal
+        isOpen={showMainnetWarning}
+        onConfirm={handleMainnetConfirm}
+        onCancel={() => setShowMainnetWarning(false)}
+      />
     </>
   );
 }

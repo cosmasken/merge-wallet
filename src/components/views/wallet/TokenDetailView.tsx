@@ -11,7 +11,7 @@ import Button from "@/atoms/Button";
 import LoadingSkeleton from "@/atoms/LoadingSkeleton";
 import SendIcon from "@/icons/SendIcon";
 import ReceiveIcon from "@/icons/ReceiveIcon";
-import { selectWalletAddress, selectWalletBalance, selectTrackedTokens } from "@/redux/wallet";
+import { selectWalletAddress, selectWalletBalance, selectTrackedTokens, selectActiveAddress } from "@/redux/wallet";
 import { selectChainId, selectShouldHideBalance } from "@/redux/preferences";
 import { buildAddressUrl } from "@/util/networks";
 import { getNativeCurrency } from "@/chains";
@@ -23,7 +23,7 @@ import TokenManagerService, { TokenBalance } from "@/kernel/evm/TokenManagerServ
 export default function TokenDetailView() {
   const { symbol } = useParams<{ symbol: string }>();
   const navigate = useNavigate();
-  const address = useSelector(selectWalletAddress);
+  const address = useSelector(selectActiveAddress);
   const nativeBalance = useSelector(selectWalletBalance);
   const chainId = useSelector(selectChainId);
   const hideBalance = useSelector(selectShouldHideBalance);
@@ -56,9 +56,20 @@ export default function TokenDetailView() {
       TokenManagerService(chainId)
         .getTokenBalance(address as `0x${string}`, tokenInfo.address!)
         .then(res => {
-          setToken(res);
+          if (res) {
+            setToken({ ...res, symbol: tokenInfo.symbol, decimals: tokenInfo.decimals });
+          } else {
+            setToken({
+              address: tokenInfo.address as `0x${string}`,
+              symbol: tokenInfo.symbol,
+              decimals: tokenInfo.decimals,
+              balance: 0n,
+            });
+          }
           setLoading(false);
         });
+    } else {
+      setLoading(false);
     }
   }, [symbol, address, nativeBalance, chainId, trackedTokens]);
 
@@ -87,7 +98,7 @@ export default function TokenDetailView() {
           )}
         </div>
         {!hideBalance && token && (
-          <FiatValue wei={token.balance} decimals={token.decimals} className="text-neutral-500" />
+          <FiatValue wei={token.balance} symbol={token.symbol} decimals={token.decimals} className="text-neutral-500" />
         )}
       </div>
 
@@ -108,31 +119,69 @@ export default function TokenDetailView() {
         />
       </div>
 
-      <div className="px-4">
-        <button
-          disabled
-          className="w-full p-4 rounded-2xl bg-neutral-100 dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 flex items-center justify-between opacity-60"
-        >
-          <span className="font-bold text-neutral-800 dark:text-neutral-100 italic">Buy</span>
-          <span className="text-xs text-neutral-400">(coming soon)</span>
-        </button>
-      </div>
+      {symbol === "DOC" ? (
+        <div className="flex gap-4 px-4">
+          <Button
+            label={t("protocols.moc.mintDoc_btn")}
+            variant="secondary"
+            fullWidth
+            onClick={() => navigate("/protocols/moc/create-doc")}
+          />
+          <Button
+            label={t("protocols.moc.redeemDoc_btn")}
+            variant="secondary"
+            fullWidth
+            onClick={() => navigate("/protocols/moc/redeem-doc")}
+          />
+        </div>
+      ) : symbol === "BPro" ? (
+        <div className="flex gap-4 px-4">
+          <Button
+            label={t("protocols.moc.mintBPro_btn")}
+            variant="secondary"
+            fullWidth
+            onClick={() => navigate("/protocols/moc/buy-bpro")}
+          />
+          <Button
+            label={t("protocols.moc.redeemBPro_btn")}
+            variant="secondary"
+            fullWidth
+            onClick={() => navigate("/protocols/moc/sell-bpro")}
+          />
+        </div>
+      ) : isNative ? (
+        <div className="flex gap-4 px-4">
+          <Button
+            label="Swap to XUSD"
+            variant="secondary"
+            fullWidth
+            onClick={() => navigate("/protocols/sovryn/swap")}
+          />
+          <Button
+            label="Lend RBTC"
+            variant="secondary"
+            fullWidth
+            onClick={() => navigate("/protocols/sovryn/lend")}
+          />
+        </div>
+      ) : (
+        <div className="px-4">
+          <button
+            disabled
+            className="w-full p-4 rounded-2xl bg-neutral-100 dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 flex items-center justify-between opacity-60"
+          >
+            <span className="font-bold text-neutral-800 dark:text-neutral-100 italic">Buy</span>
+            <span className="text-xs text-neutral-400">(coming soon)</span>
+          </button>
+        </div>
+      )}
 
       <div className="px-4 flex flex-col gap-4">
         <Card className="p-4 flex flex-col gap-3">
           <div>
             <label className="text-xs text-neutral-400 block mb-1">Your Wallet Address</label>
             <div className="flex items-center justify-between">
-              <Address address={address} className="text-sm font-mono text-neutral-700 dark:text-neutral-300" />
-              <button 
-                onClick={() => {
-                  navigator.clipboard.writeText(address);
-                  // Optional: Add toast or feedback
-                }}
-                className="text-primary text-xs font-bold"
-              >
-                Copy
-              </button>
+              <Address address={address} copyable className="text-sm font-mono text-neutral-700 dark:text-neutral-300" />
             </div>
           </div>
           

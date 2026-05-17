@@ -1,6 +1,5 @@
 import { parseEther } from "viem"
 import { getPublicClient } from "@/kernel/evm/ClientService"
-import { getChainConfig } from "@/chains"
 
 export default function TransactionBuilderService(chainId?: number) {
   async function estimateGas(
@@ -24,12 +23,11 @@ export default function TransactionBuilderService(chainId?: number) {
   ) {
     const publicClient = getPublicClient(chainId)
     const chainIdResolved = await publicClient.getChainId()
-    const config = getChainConfig(chainIdResolved)
 
     const gas = await estimateGas(to, amount, from)
 
     const [gasPrice, nonce] = await Promise.all([
-      config?.gasType === "eip1559" ? Promise.resolve(undefined) : publicClient.getGasPrice(),
+      publicClient.getGasPrice(),
       publicClient.getTransactionCount({ address: from, blockTag: "pending" }),
     ])
 

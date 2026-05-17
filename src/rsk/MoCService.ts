@@ -1,0 +1,228 @@
+import { parseEther, getAddress, encodeFunctionData, erc20Abi } from "viem"
+import { getPublicClientByChainId } from "@/kernel/evm/ClientService"
+import TransactionManagerService from "@/kernel/evm/TransactionManagerService"
+import KeyManagerService from "@/kernel/evm/KeyManagerService"
+import RifRelayService from "@/kernel/evm/RifRelayService"
+import { MOC_CORE, MOC_STATE, DOC, BPRO } from "./addresses"
+import { mocCoreAbi, mocStateAbi } from "./abis/moc"
+
+export default function MoCService(chainId: number, useSmartWallet = false, smartWalletAddress = "") {
+  const publicClient = getPublicClientByChainId(chainId)
+  const txManager = TransactionManagerService(chainId)
+  const keyManager = KeyManagerService()
+  const relay = RifRelayService(chainId)
+
+  const mocCore = MOC_CORE[chainId] as `0x${string}`
+  const mocState = MOC_STATE[chainId] as `0x${string}`
+  const doc = DOC[chainId] as `0x${string}`
+  const bpro = BPRO[chainId] as `0x${string}`
+
+  function requireAvailable() {
+    if (!mocCore || !doc) throw new Error(`MoC not available on chain ${chainId}`)
+  }
+
+  function getUserAddress(): `0x${string}` {
+    if (useSmartWallet && smartWalletAddress) {
+      return getAddress(smartWalletAddress)
+    }
+    return getAddress(keyManager.getAddress())
+  }
+
+  async function getAllowance(token: `0x${string}`, spender: `0x${string}`): Promise<bigint> {
+    requireAvailable()
+    return publicClient.readContract({
+      address: token,
+      abi: erc20Abi,
+      functionName: "allowance",
+      args: [getUserAddress(), spender],
+    }) as Promise<bigint>
+  }
+
+  async function approveToken(
+    token: `0x${string}`,
+    spender: `0x${string}`,
+    amountWei: bigint,
+  ): Promise<`0x${string}`> {
+    requireAvailable()
+    const data = encodeFunctionData({
+      abi: erc20Abi,
+      functionName: "approve",
+      args: [spender, amountWei],
+    })
+    if (useSmartWallet) {
+      const res = await relay.relayTransaction(token, data, 0n)
+      if (!res.success) throw new Error(res.error || "RIF Relay approve failed")
+      const hash = res.txHash as `0x${string}`
+      await txManager.waitForReceipt(hash)
+      return hash
+    } else {
+      const { hash } = await txManager.sendContractTransaction(token, 0n, data)
+      await txManager.waitForReceipt(hash)
+      return hash
+    }
+  }
+
+  async function getBtcPrice(): Promise<bigint> {
+    requireAvailable()
+    return publicClient.readContract({
+      address: mocState,
+      abi: mocStateAbi,
+      functionName: "getBitcoinPrice",
+    }) as Promise<bigint>
+  }
+
+  async function getBProPrice(): Promise<bigint> {
+    requireAvailable()
+    return publicClient.readContract({
+      address: mocState,
+      abi: mocStateAbi,
+      functionName: "bproUsdPrice",
+    }) as Promise<bigint>
+  }
+
+  async function estimateDocForBtc(rbtcAmount: string): Promise<bigint> {
+    requireAvailable()
+    const wei = parseEther(rbtcAmount)
+    return publicClient.readContract({
+      address: mocState,
+      abi: mocStateAbi,
+      functionName: "btcToDoc",
+      args: [wei],
+    }) as Promise<bigint>
+  }
+
+  async function estimateBtcForDoc(docAmount: string): Promise<bigint> {
+    requireAvailable()
+    const wei = parseEther(docAmount)
+    return publicClient.readContract({
+      address: mocState,
+      abi: mocStateAbi,
+      functionName: "docsToBtc",
+      args: [wei],
+    }) as Promise<bigint>
+  }
+
+  async function estimateBtcForBPro(bproAmount: string): Promise<bigint> {
+    requireAvailable()
+    const wei = parseEther(bproAmount)
+    return publicClient.readContract({
+      address: mocState,
+      abi: mocStateAbi,
+      functionName: "bproToBtc",
+      args: [wei],
+    }) as Promise<bigint>
+  }
+
+  async function getDocBalance(address: `0x${string}`): Promise<bigint> {
+    requireAvailable()
+    return publicClient.readContract({
+      address: doc,
+      abi: erc20Abi,
+      functionName: "balanceOf",
+      args: [getAddress(address)],
+    }) as Promise<bigint>
+  }
+
+  async function getBProBalance(address: `0x${string}`): Promise<bigint> {
+    requireAvailable()
+    return publicClient.readContract({
+      address: bpro,
+      abi: erc20Abi,
+      functionName: "balanceOf",
+      args: [getAddress(address)],
+    }) as Promise<bigint>
+  }
+
+  async function mintDoc(rbtcAmount: string): Promise<`0x${string}`> {
+    requireAvailable()
+    const wei = parseEther(rbtcAmount)
+    const data = encodeFunctionData({
+      abi: mocCoreAbi,
+      functionName: "mintDoc",
+      args: [wei],
+    })
+    const valueWithBuffer = wei * 1005n / 1000n
+    if (useSmartWallet) {
+      const res = await relay.relayTransaction(mocCore, data, valueWithBuffer)
+      if (!res.success) throw new Error(res.error || "RIF Relay mintDoc failed")
+      return res.txHash as `0x${string}`
+    } else {
+      const { hash } = await txManager.sendContractTransaction(mocCore, valueWithBuffer, data)
+      return hash
+    }
+  }
+
+  async function redeemDoc(docAmount: string): Promise<`0x${string}`> {
+    requireAvailable()
+    const wei = parseEther(docAmount)
+    const data = encodeFunctionData({
+      abi: mocCoreAbi,
+      functionName: "redeemFreeDoc",
+      args: [wei],
+    })
+    if (useSmartWallet) {
+      const res = await relay.relayTransaction(mocCore, data, 0n)
+      if (!res.success) throw new Error(res.error || "RIF Relay redeemFreeDoc failed")
+      return res.txHash as `0x${string}`
+    } else {
+      const { hash } = await txManager.sendContractTransaction(mocCore, 0n, data)
+      return hash
+    }
+  }
+
+  async function mintBPro(rbtcAmount: string): Promise<`0x${string}`> {
+    requireAvailable()
+    const wei = parseEther(rbtcAmount)
+    const data = encodeFunctionData({
+      abi: mocCoreAbi,
+      functionName: "mintBPro",
+      args: [wei],
+    })
+    const valueWithBuffer = wei * 1005n / 1000n
+    if (useSmartWallet) {
+      const res = await relay.relayTransaction(mocCore, data, valueWithBuffer)
+      if (!res.success) throw new Error(res.error || "RIF Relay mintBPro failed")
+      return res.txHash as `0x${string}`
+    } else {
+      const { hash } = await txManager.sendContractTransaction(mocCore, valueWithBuffer, data)
+      return hash
+    }
+  }
+
+  async function redeemBPro(bproAmount: string): Promise<`0x${string}`> {
+    requireAvailable()
+    const wei = parseEther(bproAmount)
+    const data = encodeFunctionData({
+      abi: mocCoreAbi,
+      functionName: "redeemBPro",
+      args: [wei],
+    })
+    if (useSmartWallet) {
+      const res = await relay.relayTransaction(mocCore, data, 0n)
+      if (!res.success) throw new Error(res.error || "RIF Relay redeemBPro failed")
+      return res.txHash as `0x${string}`
+    } else {
+      const { hash } = await txManager.sendContractTransaction(mocCore, 0n, data)
+      return hash
+    }
+  }
+
+  return {
+    getBtcPrice,
+    getBProPrice,
+    getDocBalance,
+    getBProBalance,
+    estimateDocForBtc,
+    estimateBtcForDoc,
+    estimateBtcForBPro,
+    mintDoc,
+    redeemDoc,
+    mintBPro,
+    redeemBPro,
+    getAllowance,
+    approveToken,
+    mocCore,
+    doc,
+    bpro,
+  }
+}

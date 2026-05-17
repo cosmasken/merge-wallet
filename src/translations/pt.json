@@ -61,7 +61,16 @@
       "no_internet": "Sem conexão com a internet",
       "network_error": "Não foi possível conectar à rede Rootstock",
       "add_token": "Adicionar Token",
-      "history_button": "Histórico de Transações"
+      "history_button": "Histórico de Transações",
+      "wallet_type_standard": "EOA Padrão",
+      "wallet_type_smart": "Carteira Inteligente RIF",
+      "gasless_badge": "Sem Gás",
+      "smart_notice_title": "Bem-vindo à RIF Smart Wallet!",
+      "smart_notice_desc": "Você está mudando para a sua RIF Smart Wallet. Veja o que a torna única:",
+      "smart_notice_bullet1": "Transações sem Gas: Pague as taxas de transação da rede usando stablecoins ou outros tokens em vez de RBTC.",
+      "smart_notice_bullet2": "Autocustódia: A conta é totalmente protegida e controlada pela sua frase de recuperação existente.",
+      "smart_notice_bullet3": "Endereço Único: Sua RIF Smart Wallet possui um endereço endereço diferente da sua conta EOA padrão. Sempre verifique o endereço antes de receber fundos.",
+      "smart_notice_button": "Entendi, ativar Smart Wallet"
     },
     "import": {
       "title": "Importar Carteira",
@@ -99,7 +108,12 @@
       "amount_label": "Valor",
       "estimated_gas_label": "Gás estimado",
       "max_fee_label": "Taxa máxima",
-      "authorization_required": "Autorização necessária"
+      "authorization_required": "Autorização necessária",
+      "rif_title": "Envio da Carteira Inteligente RIF",
+      "rif_subtitle": "Transações patrocinadas / sem gás ativadas",
+      "success_rif_native": "Transação transmitida com sucesso via RIF!",
+      "success_rif_erc20": "Transferência de token transmitida com sucesso via RIF!",
+      "rif_error": "RIF Enveloping não pôde transmitir a transação"
     },
     "history": {
       "title": "Histórico",
@@ -122,7 +136,10 @@
       "subtitle": "Compartilhe seu endereço para receber RBTC",
       "copy_address": "Copiar Endereço",
       "copied": "Copiado!",
-      "warning": "Envie apenas RSK (RBTC) e tokens baseados em RSK para este endereço. O envio de outros ativos pode resultar em perda permanente."
+      "warning": "Envie apenas RSK (RBTC) e tokens baseados em RSK para este endereço. O envio de outros ativos pode resultar em perda permanente.",
+      "rif_title": "Receber na Carteira Inteligente RIF",
+      "rif_subtitle": "Receba fundos no seu endereço de Carteira Inteligente",
+      "rif_warning": "Envie apenas RBTC ou tokens comunitários RIF compatíveis para este endereço de Carteira Inteligente RIF. O envio de outros ativos não compatíveis resultará em perda permanente."
     },
     "contacts": {
       "title": "Agenda de Endereços",
@@ -148,6 +165,26 @@
       "confirmation_label": "Salvei minha frase de recuperação em um local seguro e entendo que, se a perder, meus fundos não poderão ser recuperados.",
       "continue_button": "Continuar para Verificação",
       "verify_again": "Verificar Novamente"
+    }
+  },
+  "protocols": {
+    "moc": {
+      "mintDoc_title": "Tomar Emprestado DOC",
+      "mintDoc_subtitle": "Depositar RBTC → Tomar Emprestado DOC stablecoin",
+      "mintDoc_btn": "Tomar Emprestado DOC",
+      "mintDoc_desc": "Bloqueia RBTC como garantia para tomar emprestado DOC, uma stablecoin atrelada ao dólar. Você pode pagar seu DOC a qualquer momento para recuperar seu RBTC.",
+      "redeemDoc_title": "Pagar DOC",
+      "redeemDoc_subtitle": "Pagar DOC → Receber RBTC de volta",
+      "redeemDoc_btn": "Pagar DOC",
+      "redeemDoc_desc": "Pague seu DOC para liberar a garantia de RBTC subjacente. O preço de DOC é sempre garantido em $1 USD.",
+      "mintBPro_title": "Comprar BPro",
+      "mintBPro_subtitle": "Depositar RBTC → Receber BPro",
+      "mintBPro_btn": "Comprar BPro",
+      "mintBPro_desc": "O BPro oferece exposição alavancada aos movimentos do preço do Bitcoin, além de uma fatia das taxas do protocolo. É uma posição de hashrate de Bitcoin tokenizada.",
+      "redeemBPro_title": "Vender BPro",
+      "redeemBPro_subtitle": "Retornar BPro → Receber RBTC de volta",
+      "redeemBPro_btn": "Vender BPro",
+      "redeemBPro_desc": "Queime seu BPro para liberar o RBTC subjacente. A quantidade de RBTC que você recebe depende do preço de resgate atual do BPro."
     }
   },
   "security": {

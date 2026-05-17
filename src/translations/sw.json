@@ -61,7 +61,10 @@
       "no_internet": "Hakuna muunganisho wa mtandao",
       "network_error": "Imeshindwa kufikia mtandao wa Rootstock",
       "add_token": "Ongeza Tokeni",
-      "history_button": "Historia ya Miamala"
+      "history_button": "Historia ya Miamala",
+      "wallet_type_standard": "EOA ya Kawaida",
+      "wallet_type_smart": "Pochi ya Kujitegemea RIF",
+      "gasless_badge": "Bila Gesi"
     },
     "import": {
       "title": "Ingiza Pochi",
@@ -99,7 +102,12 @@
       "amount_label": "Kiasi",
       "estimated_gas_label": "Gesi inayokadiriwa",
       "max_fee_label": "Ada ya juu",
-      "authorization_required": "Idhini inahitajika"
+      "authorization_required": "Idhini inahitajika",
+      "rif_title": "Tuma kutoka Pochi ya Kujitegemea RIF",
+      "rif_subtitle": "Miamala iliyodhaminiwa / Bila gesi imewezeshwa",
+      "success_rif_native": "Muamala umerushwa kwa mafanikio kupitia RIF!",
+      "success_rif_erc20": "Uhamisho wa tokeni umerushwa kwa mafanikio kupitia RIF!",
+      "rif_error": "RIF Enveloping imeshindwa kurusha muamala"
     },
     "history": {
       "title": "Historia",
@@ -122,7 +130,10 @@
       "subtitle": "Shiriki anwani yako ili kupokea RBTC",
       "copy_address": "Nakili Anwani",
       "copied": "Imenakiliwa!",
-      "warning": "Tuma RSK (RBTC) pekee na tokeni zinazotegemea RSK kwa anwani hii. Kutuma mali nyingine kunaweza kusababisha hasara ya kudumu."
+      "warning": "Tuma RSK (RBTC) pekee na tokeni zinazotegemea RSK kwa anwani hii. Kutuma mali nyingine kunaweza kusababisha hasara ya kudumu.",
+      "rif_title": "Pokea kwenye Pochi ya Kujitegemea RIF",
+      "rif_subtitle": "Pokea fedha kwenye anwani yako ya Pochi ya Kujitegemea",
+      "rif_warning": "Tuma RBTC au tokeni za jamii za RIF zinazoungwa mkono pekee kwenye anwani hii ya Pochi ya Kujitegemea RIF. Kutuma mali nyingine zisizoungwa mkono kutasababisha upotezaji wa kudumu."
     },
     "contacts": {
       "title": "Kitabu cha Anwani",
@@ -148,6 +159,26 @@
       "confirmation_label": "Nimehifadhi maneno yangu ya kurejesha mahali salama na ninaelewa kuwa nikiyapoteza, pesa zangu haziwezi kurejeshwa.",
       "continue_button": "Endelea kwenye Uthibitishaji",
       "verify_again": "Thibitisha Tena"
+    }
+  },
+  "protocols": {
+    "moc": {
+      "mintDoc_title": "Kukopa DOC",
+      "mintDoc_subtitle": "Weka RBTC → Kopa DOC stablecoin",
+      "mintDoc_btn": "Kopa DOC",
+      "mintDoc_desc": "Inafunga RBTC kama dhamana kukopa DOC, stablecoin inayofuatisha dola. Unaweza kulipa DOC wakati wowote kupata RBTC yako.",
+      "redeemDoc_title": "Lipa DOC",
+      "redeemDoc_subtitle": "Lipa DOC → Pata RBTC",
+      "redeemDoc_btn": "Lipa DOC",
+      "redeemDoc_desc": "Lipa DOC yako kuachilia dhamana ya RBTC. Bei ya DOC daima ni sawa na $1 USD.",
+      "mintBPro_title": "Nunua BPro",
+      "mintBPro_subtitle": "Weka RBTC → Pokea BPro",
+      "mintBPro_btn": "Nunua BPro",
+      "mintBPro_desc": "BPro inakupa ufikiaji wa kiwango cha Bitcoin pamoja na sehemu ya ada za itifaki. Ni nafasi ya hashrate ya Bitcoin iliyotiwa alama.",
+      "redeemBPro_title": "Uza BPro",
+      "redeemBPro_subtitle": "Rudisha BPro → Pokea RBTC",
+      "redeemBPro_btn": "Uza BPro",
+      "redeemBPro_desc": "Choma BPro yako kuachilia RBTC. Kiasi cha RBTC unachopata kinategemea bei ya ukombozi wa sasa."
     }
   },
   "security": {

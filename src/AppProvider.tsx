@@ -6,9 +6,10 @@ import { SplashScreen } from "@capacitor/splash-screen";
 import AppLockScreen from "@/views/security/AppLockScreen";
 import ErrorBoundary from "@/layout/ErrorBoundary";
 import KeyManagerService from "@/kernel/evm/KeyManagerService";
+import SecureStorageService from "@/kernel/app/SecureStorageService";
 import SecurityService, { AuthActions } from "@/kernel/app/SecurityService";
 import { ModalProvider } from "@/kernel/app/ModalService";
-import { setWalletAddress, setSeedBackedUp, hydrateWallet } from "@/redux/wallet";
+import { setWalletAddress, setSeedBackedUp, hydrateWallet, setActiveWallet } from "@/redux/wallet";
 import { hydratePreferences, selectLanguageCode, selectSecuritySettings } from "@/redux/preferences";
 import { hydrateRpc } from "@/redux/rpc";
 import { setConnected } from "@/redux/device";
@@ -111,19 +112,24 @@ export default function AppProvider({ children }: AppProviderProps) {
   const boot = async () => {
     try {
       const KeyManager = KeyManagerService();
+      const state = store.getState();
+      const activeWalletId = state.wallet.activeWalletId;
 
-      // If not initialized in memory, try to load from secure storage
       if (!KeyManager.isInitialized()) {
-        const isStored = await KeyManager.isWalletStored();
-        if (isStored) {
-          try {
-            await KeyManager.loadWalletSecurely();
-          } catch (e) {
-            console.error("Failed to load wallet from secure storage", e);
+        // Try loading the active wallet first
+        let loaded = false;
+        if (activeWalletId) {
+          loaded = await KeyManager.loadWalletById(activeWalletId);
+        }
+        // Fall back to any stored wallet
+        if (!loaded) {
+          const wallets = await SecureStorageService().listWallets();
+          if (wallets.length > 0) {
+            loaded = await KeyManager.loadWalletById(wallets[0].id);
+            if (loaded) dispatch(setActiveWallet(wallets[0].id));
           }
         }
       }
-
 
       if (KeyManager.isInitialized()) {
         dispatch(setWalletAddress(KeyManager.getAddress()));

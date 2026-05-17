@@ -1,5 +1,5 @@
 import { getPublicClient } from "@/kernel/evm/ClientService"
-import { getExplorerUrl } from "@/util/networks"
+import { getBlockscoutApiUrl } from "@/util/networks"
 
 export interface TxHistoryEntry {
   hash: `0x${string}`
@@ -11,15 +11,14 @@ export interface TxHistoryEntry {
   status: "success" | "pending" | "failed"
 }
 
-interface ExplorerTx {
+interface BlockscoutTx {
   hash: string
-  from: string
-  to: string
+  from: { hash: string }
+  to: { hash: string } | null
   value: string
-  blockNumber: string
-  timeStamp: string
-  isError: string
-  txreceipt_status: string
+  block_number: number
+  timestamp: string
+  status: "ok" | "error"
 }
 
 export default function TransactionHistoryService(chainId?: number) {
@@ -27,26 +26,28 @@ export default function TransactionHistoryService(chainId?: number) {
 
   async function getHistory(address: `0x${string}`): Promise<TxHistoryEntry[]> {
     try {
-      const explorerUrl = getExplorerUrl(resolvedChainId)
-      if (!explorerUrl) return []
+      const apiUrl = getBlockscoutApiUrl(resolvedChainId)
+      if (!apiUrl) return []
 
-      const apiUrl = `${explorerUrl}/api?module=account&action=txlist&address=${address}&sort=desc&limit=100`
+      const url = `${apiUrl}/api/v2/addresses/${address.toLowerCase()}/transactions?limit=50`
 
-      const response = await fetch(apiUrl)
+      const controller = new AbortController()
+      const timeoutId = setTimeout(() => controller.abort(), 5000)
+
+      const response = await fetch(url, { signal: controller.signal })
+      clearTimeout(timeoutId)
       const data = await response.json()
 
-      if (data.status !== "1" || !data.result) {
-        return []
-      }
+      if (!data.items) return []
 
-      return data.result.map((tx: ExplorerTx): TxHistoryEntry => ({
+      return data.items.map((tx: BlockscoutTx): TxHistoryEntry => ({
         hash: tx.hash as `0x${string}`,
-        from: tx.from as `0x${string}`,
-        to: tx.to as `0x${string}`,
+        from: tx.from.hash as `0x${string}`,
+        to: (tx.to?.hash ?? "") as `0x${string}`,
         value: BigInt(tx.value),
-        blockNumber: Number(tx.blockNumber),
-        timestamp: Number(tx.timeStamp),
-        status: tx.txreceipt_status === "1" ? "success" : tx.isError === "1" ? "failed" : "pending",
+        blockNumber: tx.block_number,
+        timestamp: new Date(tx.timestamp).getTime() / 1000,
+        status: tx.status === "ok" ? "success" : "failed",
       }))
     } catch {
       return []

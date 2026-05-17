@@ -3,7 +3,8 @@ import { useDispatch, useSelector } from "react-redux";
 
 import ViewHeader from "@/layout/ViewHeader";
 import PullToRefresh from "@/atoms/PullToRefresh";
-import { selectLocalCurrency, selectRbtcPrice, setCurrency, setRbtcPrice } from "@/redux/preferences";
+import { selectLocalCurrency, selectRbtcPrice, setCurrency } from "@/redux/preferences";
+import { syncTokenPrices } from "@/kernel/evm/PriceService";
 
 const CURRENCIES = [
   { code: "USD", label: "US Dollar", symbol: "$" },
@@ -31,17 +32,9 @@ export default function CurrencySettings() {
     setPriceLoading(true);
     setPriceError(false);
     try {
-      const res = await fetch(
-        `https://api.coingecko.com/api/v3/simple/price?ids=rootstock&vs_currencies=${currency.toLowerCase()}`,
-      );
-      if (!res.ok) throw new Error('Network response was not ok');
-      const data = await res.json();
-      if (data.rootstock?.[currency.toLowerCase()] != null) {
-        dispatch(setRbtcPrice({ price: data.rootstock[currency.toLowerCase()], currency }));
-      } else {
-        setPriceError(true);
-      }
-    } catch {
+      await syncTokenPrices(dispatch, currency);
+    } catch (e) {
+      console.error("Failed to sync prices", e);
       setPriceError(true);
     }
     setPriceLoading(false);

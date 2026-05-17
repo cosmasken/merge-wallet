@@ -1,13 +1,11 @@
 import { NavLink } from "react-router-dom";
 
 import WalletIcon from "@/icons/WalletIcon";
-import AssetsIcon from "@/icons/AssetsIcon";
-import SettingsIcon from "@/icons/SettingsIcon";
+import ProtocolsIcon from "@/icons/ProtocolsIcon";
 
 const tabs = [
   { to: "/wallet", label: "Wallet", icon: WalletIcon },
-  { to: "/assets", label: "Assets", icon: AssetsIcon },
-  { to: "/settings", label: "Settings", icon: SettingsIcon },
+  { to: "/protocols", label: "Explore", icon: ProtocolsIcon },
 ];
 
 export default function BottomNavigation() {

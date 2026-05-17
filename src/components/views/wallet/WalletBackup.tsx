@@ -8,7 +8,7 @@ import { selectSeedBackedUp, setSeedBackedUp } from "@/redux/wallet";
 import BackupVerification from "@/components/composite/BackupVerification";
 import { useTranslation } from "@/translations";
 
-export default function SeedBackup() {
+export default function WalletBackup() {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const alreadyBackedUp = useSelector(selectSeedBackedUp);
@@ -101,4 +101,3 @@ export default function SeedBackup() {
     </div>
   );
 }
-

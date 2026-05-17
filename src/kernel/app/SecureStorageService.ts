@@ -1,9 +1,18 @@
 import { SimpleEncryption } from "capacitor-simple-encryption";
 import { Preferences } from "@capacitor/preferences";
 
-const STORAGE_KEY = "encrypted_mnemonic";
+const WALLETS_INDEX_KEY = "wallet_index";
+const WALLET_KEY_PREFIX = "wallet_";
 
-export interface EncryptedWallet {
+export interface WalletIndexEntry {
+  id: string;
+  name: string;
+  address: string;
+  createdAt: number;
+  importType: 'mnemonic' | 'privateKey';
+}
+
+interface EncryptedWallet {
   encryptedData: string;
   storageMethod: 'keychain' | 'encrypted' | 'memory';
   createdAt: number;
@@ -13,101 +22,99 @@ export interface EncryptedWallet {
   isRskPath?: boolean;
 }
 
-
+function walletKey(id: string): string {
+  return `${WALLET_KEY_PREFIX}${id}`;
+}
 
 export default function SecureStorageService() {
-  /**
-   * Encrypts and stores the mnemonic using the current active encryption key.
-   * Assumes initialize() has been called and the key is in memory.
-   */
-  async function storeWallet(
-    data: string, 
-    importType: 'mnemonic' | 'privateKey',
-    index = 0, 
-    isRskPath = false
-  ): Promise<void> {
+  async function listWallets(): Promise<WalletIndexEntry[]> {
+    const { value } = await Preferences.get({ key: WALLETS_INDEX_KEY });
+    if (!value) return [];
     try {
-      const { data: encryptedValue } = await SimpleEncryption.encrypt({ 
-        data 
-      });
-
-      const storageData: EncryptedWallet = {
-        encryptedData: encryptedValue,
-        storageMethod: 'encrypted',
-        importType,
-        createdAt: Date.now(),
-        lastAccessed: Date.now(),
-        index,
-        isRskPath
-      };
-
-      await Preferences.set({
-        key: STORAGE_KEY,
-        value: JSON.stringify(storageData)
-      });
-    } catch (error) {
-      console.error("Failed to store wallet securely", error);
-      throw new Error("SECURE_STORAGE_ERROR: Failed to encrypt and persist wallet");
+      return JSON.parse(value) as WalletIndexEntry[];
+    } catch {
+      return [];
     }
   }
 
+  async function saveWalletIndex(entries: WalletIndexEntry[]): Promise<void> {
+    await Preferences.set({ key: WALLETS_INDEX_KEY, value: JSON.stringify(entries) });
+  }
 
-  /**
-   * Decrypts and retrieves the mnemonic using the current active encryption key.
-   * Assumes initialize() has been called and the key is in memory.
-   */
-  async function getWallet(): Promise<{ data: string; importType: 'mnemonic' | 'privateKey'; index: number; isRskPath: boolean } | null> {
-    const { value } = await Preferences.get({ key: STORAGE_KEY });
+  async function storeWallet(
+    id: string,
+    data: string,
+    importType: 'mnemonic' | 'privateKey',
+    index = 0,
+    isRskPath = false,
+  ): Promise<void> {
+    const { data: encryptedValue } = await SimpleEncryption.encrypt({ data });
+
+    const storageData: EncryptedWallet = {
+      encryptedData: encryptedValue,
+      storageMethod: 'encrypted',
+      importType,
+      createdAt: Date.now(),
+      lastAccessed: Date.now(),
+      index,
+      isRskPath,
+    };
+
+    await Preferences.set({
+      key: walletKey(id),
+      value: JSON.stringify(storageData),
+    });
+  }
+
+  async function getWallet(id: string): Promise<{
+    data: string;
+    importType: 'mnemonic' | 'privateKey';
+    index: number;
+    isRskPath: boolean;
+  } | null> {
+    const { value } = await Preferences.get({ key: walletKey(id) });
     if (!value) return null;
 
     try {
       const storageData: EncryptedWallet = JSON.parse(value);
-      
-      const { data: decrypted } = await SimpleEncryption.decrypt({ 
-        data: storageData.encryptedData 
+      const { data: decrypted } = await SimpleEncryption.decrypt({
+        data: storageData.encryptedData,
       });
 
       storageData.lastAccessed = Date.now();
       await Preferences.set({
-        key: STORAGE_KEY,
-        value: JSON.stringify(storageData)
+        key: walletKey(id),
+        value: JSON.stringify(storageData),
       });
 
       return {
         data: decrypted,
-        importType: storageData.importType ?? 'mnemonic', // Default to mnemonic for backward compatibility
+        importType: storageData.importType ?? 'mnemonic',
         index: storageData.index ?? 0,
-        isRskPath: storageData.isRskPath ?? false
+        isRskPath: storageData.isRskPath ?? false,
       };
-    } catch (error) {
-      console.error("Failed to decrypt wallet", error);
+    } catch {
       return null;
     }
   }
 
-
-  async function hasStoredMnemonic(): Promise<boolean> {
-    const { value } = await Preferences.get({ key: STORAGE_KEY });
-    return !!value;
+  async function deleteWallet(id: string): Promise<void> {
+    await Preferences.remove({ key: walletKey(id) });
+    const entries = await listWallets();
+    await saveWalletIndex(entries.filter(e => e.id !== id));
   }
 
-  /**
-   * In the context of capacitor-simple-encryption, changing the PIN 
-   * doesn't necessarily change the underlying encryption key, 
-   * just the protection around it. 
-   */
-  async function rekeyMnemonic(_oldPin: string, _newPin: string): Promise<void> {
-    // Re-verify we can still decrypt
-    const wallet = await getWallet();
+  async function hasStoredWallet(): Promise<boolean> {
+    const entries = await listWallets();
+    return entries.length > 0;
+  }
+
+  async function rekeyMnemonic(id: string): Promise<void> {
+    const wallet = await getWallet(id);
     if (!wallet) {
-      throw new Error("DECRYPTION_FAILED: Could not access wallet with current key state");
+      throw new Error("DECRYPTION_FAILED: Could not access wallet");
     }
-    // The underlying key is persisted by the plugin, so we just re-save to be sure
-    await storeWallet(wallet.data, wallet.importType, wallet.index, wallet.isRskPath);
-  }
-
-  async function deleteMnemonic(): Promise<void> {
-    await Preferences.remove({ key: STORAGE_KEY });
+    await storeWallet(id, wallet.data, wallet.importType, wallet.index, wallet.isRskPath);
   }
 
   function clearFromMemory(): void {
@@ -115,13 +122,15 @@ export default function SecureStorageService() {
   }
 
   return {
+    listWallets,
+    saveWalletIndex,
     storeWallet,
     getWallet,
-    hasStoredWallet: hasStoredMnemonic,
-    deleteWallet: deleteMnemonic,
-    clearFromMemory
+    deleteWallet,
+    hasStoredWallet,
+    rekeyMnemonic,
+    clearFromMemory,
   };
-
 }
 
 

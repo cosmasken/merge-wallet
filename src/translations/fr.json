@@ -61,7 +61,16 @@
       "no_internet": "Pas de connexion internet",
       "network_error": "Impossible de joindre le réseau Rootstock",
       "add_token": "Ajouter un jeton",
-      "history_button": "Historique des transactions"
+      "history_button": "Historique des transactions",
+      "wallet_type_standard": "EOA Standard",
+      "wallet_type_smart": "Portefeuille Intelligent RIF",
+      "gasless_badge": "Sans Gaz",
+      "smart_notice_title": "Bienvenue sur RIF Smart Wallet !",
+      "smart_notice_desc": "Vous passez à votre compte RIF Smart Wallet. Voici ce qui le rend unique :",
+      "smart_notice_bullet1": "Transactions sans Gaz : Payez les frais de réseau avec des stablecoins ou d'autres tokens au lieu du RBTC.",
+      "smart_notice_bullet2": "Auto-garde : Le compte est entièrement sécurisé et contrôlé par votre phrase de récupération existante. Aucune nouvelle sauvegarde n'est requise.",
+      "smart_notice_bullet3": "Adresse Unique : Votre RIF Smart Wallet a une adresse différente de votre compte EOA standard. Vérifiez toujours l'adresse avant de recevoir des fonds.",
+      "smart_notice_button": "J'ai compris, activer Smart Wallet"
     },
     "import": {
       "title": "Importer le portefeuille",
@@ -99,7 +108,12 @@
       "amount_label": "Montant",
       "estimated_gas_label": "Gaz estimé",
       "max_fee_label": "Frais maximum",
-      "authorization_required": "Autorisation requise"
+      "authorization_required": "Autorisation requise",
+      "rif_title": "Envoi de Portefeuille Intelligent RIF",
+      "rif_subtitle": "Transactions sponsorisées / sans gaz activées",
+      "success_rif_native": "Transaction relayée avec succès via RIF !",
+      "success_rif_erc20": "Transfert de jeton relayé avec succès via RIF !",
+      "rif_error": "RIF Enveloping n'a pas pu relayer la transaction"
     },
     "history": {
       "title": "Historique",
@@ -122,7 +136,10 @@
       "subtitle": "Partagez votre adresse pour recevoir des RBTC",
       "copy_address": "Copier l'adresse",
       "copied": "Copié !",
-      "warning": "Envoyez uniquement des RSK (RBTC) et des jetons basés sur RSK à cette adresse. L'envoi d'autres actifs peut entraîner une perte permanente."
+      "warning": "Envoyez uniquement des RSK (RBTC) et des jetons basés sur RSK à cette adresse. L'envoi d'autres actifs peut entraîner une perte permanente.",
+      "rif_title": "Recevoir sur Portefeuille Intelligent RIF",
+      "rif_subtitle": "Recevoir des fonds sur votre adresse de Portefeuille Intelligent",
+      "rif_warning": "Envoyez uniquement des RBTC ou des jetons communautaires RIF pris en charge à cette adresse de Portefeuille Intelligent RIF. L'envoi d'autres actifs non pris en charge entraînera une perte permanente."
     },
     "contacts": {
       "title": "Carnet d'adresses",
@@ -148,6 +165,26 @@
       "confirmation_label": "J'ai enregistré ma phrase de récupération dans un endroit sûr et je comprends que si je la perds, mes fonds ne pourront pas être récupérés.",
       "continue_button": "Continuer vers la vérification",
       "verify_again": "Vérifier à nouveau"
+    }
+  },
+  "protocols": {
+    "moc": {
+      "mintDoc_title": "Emprunter du DOC",
+      "mintDoc_subtitle": "Déposer du RBTC → Emprunter du DOC stablecoin",
+      "mintDoc_btn": "Emprunter du DOC",
+      "mintDoc_desc": "Verrouille le RBTC comme garantie pour emprunter du DOC, un stablecoin indexé sur le dollar. Vous pouvez rembourser le DOC à tout moment pour récupérer votre RBTC.",
+      "redeemDoc_title": "Rembourser du DOC",
+      "redeemDoc_subtitle": "Rembourser du DOC → Récupérer du RBTC",
+      "redeemDoc_btn": "Rembourser du DOC",
+      "redeemDoc_desc": "Remboursez votre DOC pour libérer la garantie RBTC sous-jacente. Le prix du DOC est toujours garanti à 1 $ USD.",
+      "mintBPro_title": "Acheter du BPro",
+      "mintBPro_subtitle": "Déposer du RBTC → Recevoir du BPro",
+      "mintBPro_btn": "Acheter du BPro",
+      "mintBPro_desc": "BPro vous donne une exposition à effet de levier aux mouvements de prix du Bitcoin plus une part des frais de protocole. C'est une position de hashrate Bitcoin tokenisée.",
+      "redeemBPro_title": "Vendre du BPro",
+      "redeemBPro_subtitle": "Retourner du BPro → Récupérer du RBTC",
+      "redeemBPro_btn": "Vendre du BPro",
+      "redeemBPro_desc": "Brûlez votre BPro pour libérer le RBTC sous-jacent. Le montant de RBTC que vous obtenez dépend du prix de rachat actuel du BPro."
     }
   },
   "security": {

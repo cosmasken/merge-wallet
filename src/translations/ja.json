@@ -61,7 +61,10 @@
       "no_internet": "インターネットに接続されていません",
       "network_error": "Rootstockネットワークに接続できません",
       "add_token": "トークンを追加",
-      "history_button": "取引履歴"
+      "history_button": "取引履歴",
+      "wallet_type_standard": "標準EOAアカウント",
+      "wallet_type_smart": "RIFスマートウォレット",
+      "gasless_badge": "ガス代無料"
     },
     "import": {
       "title": "ウォレットをインポート",
@@ -99,7 +102,12 @@
       "amount_label": "金額",
       "estimated_gas_label": "予想ガス量",
       "max_fee_label": "最大手数料",
-      "authorization_required": "承認が必要です"
+      "authorization_required": "承認が必要です",
+      "rif_title": "RIFスマートウォレット送信",
+      "rif_subtitle": "スポンサー付きガス代無料トランザクション有効",
+      "success_rif_native": "RIFを介してトランザクションが正常にブロードキャストされました！",
+      "success_rif_erc20": "RIFを介してトークン転送が正常にブロードキャストされました！",
+      "rif_error": "RIF Envelopingによるトランザクションのブロードキャストに失敗しました"
     },
     "history": {
       "title": "履歴",
@@ -122,7 +130,10 @@
       "subtitle": "RBTCを受け取るためにアドレスを共有する",
       "copy_address": "アドレスをコピー",
       "copied": "コピーしました！",
-      "warning": "このアドレスにはRSK (RBTC)およびRSKベースのトークンのみを送信してください。他の資産を送信すると、永久に失われる可能性があります。"
+      "warning": "このアドレスにはRSK (RBTC)およびRSKベースのトークンのみを送信してください。他の資産を送信すると、永久に失われる可能性があります。",
+      "rif_title": "RIFスマートウォレット受け取り",
+      "rif_subtitle": "スマートウォレットアドレスで資金を受け取る",
+      "rif_warning": "このRIFスマートウォレットアドレスには、RBTCまたはサポートされているRIFコミュニティトークンのみを送信してください。サポートされていないその他の資産を送信すると、永久に失われます。"
     },
     "contacts": {
       "title": "アドレス帳",
@@ -148,6 +159,26 @@
       "confirmation_label": "リカバリーフレーズを安全な場所に保存しました。紛失した場合、資金を回収できないことを理解しています。",
       "continue_button": "確認へ進む",
       "verify_again": "もう一度確認"
+    }
+  },
+  "protocols": {
+    "moc": {
+      "mintDoc_title": "DOCを借りる",
+      "mintDoc_subtitle": "RBTCを入金 → DOCステーブルコインを借りる",
+      "mintDoc_btn": "DOCを借りる",
+      "mintDoc_desc": "RBTCを担保に入れてDOC（ドル連動のステーブルコイン）を借ります。いつでもDOCを返済してRBTCを取り戻せます。",
+      "redeemDoc_title": "DOCを返済",
+      "redeemDoc_subtitle": "DOCを返済 → RBTCを回収",
+      "redeemDoc_btn": "DOCを返済",
+      "redeemDoc_desc": "DOCを返済してRBTC担保を解放します。DOCの価格は常に1米ドルに連動しています。",
+      "mintBPro_title": "BProを購入",
+      "mintBPro_subtitle": "RBTCを入金 → BProを受け取る",
+      "mintBPro_btn": "BProを購入",
+      "mintBPro_desc": "BProはビットコイン価格の動きにレバレッジがかかった形でエクスポージャーを提供し、プロトコル手数料の一部も分配されます。",
+      "redeemBPro_title": "BProを売る",
+      "redeemBPro_subtitle": "BProを返却 → RBTCを回収",
+      "redeemBPro_btn": "BProを売る",
+      "redeemBPro_desc": "BProをバーンしてRBTCを解放します。受け取るRBTCの量は現在の賞還価格に依存します。"
     }
   },
   "security": {

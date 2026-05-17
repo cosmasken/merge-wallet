@@ -1,0 +1,30 @@
+name: Telegram Notify
+
+on:
+    push:
+        branches: [main, master]
+    pull_request:
+        types: [opened, synchronize, closed]
+    issues:
+        types: [opened, closed]
+
+jobs:
+    notify:
+        runs-on: ubuntu-latest
+        steps:
+            - name: Send to Telegram
+              env:
+                EVENT_NAME: ${{ github.event_name }}
+                EVENT_TEXT: ${{ github.event.head_commit.message || github.event.pull_request.title || github.event.issue.title }}
+                ACTOR: ${{ github.actor }}
+                HTML_URL: ${{ github.event.html_url }}
+                TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
+                TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+              run: |
+                  MESSAGE="📢 $EVENT_NAME
+                  $EVENT_TEXT
+                  👤 By: $ACTOR
+                  🔗 $HTML_URL"
+                  curl -s -X POST "https://api.telegram.org/bot$TELEGRAM_TOKEN/sendMessage" \
+                    --data-urlencode "chat_id=$TELEGRAM_CHAT_ID" \
+                    --data-urlencode "text=$MESSAGE"

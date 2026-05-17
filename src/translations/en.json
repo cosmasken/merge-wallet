@@ -61,7 +61,16 @@
       "no_internet": "No internet connection",
       "network_error": "Unable to reach Rootstock network",
       "add_token": "Add Token",
-      "history_button": "Transaction History"
+      "history_button": "Transaction History",
+      "wallet_type_standard": "Standard EOA",
+      "wallet_type_smart": "RIF Smart Wallet",
+      "gasless_badge": "Gasless",
+      "smart_notice_title": "Welcome to RIF Smart Wallet!",
+      "smart_notice_desc": "You are switching to your RIF Smart Wallet. Here is what makes it unique:",
+      "smart_notice_bullet1": "Gasless Transactions: Pay network transaction fees using stablecoins or other standard tokens instead of RBTC.",
+      "smart_notice_bullet2": "Self-Custody: The account is fully secured and controlled by your existing recovery phrase. No new backup is required.",
+      "smart_notice_bullet3": "Unique Address: Your RIF Smart Wallet has a different address from your Standard EOA account. Always check your address before receiving funds.",
+      "smart_notice_button": "Got it, Enable Smart Wallet"
     },
     "import": {
       "title": "Import Wallet",
@@ -99,7 +108,12 @@
       "amount_label": "Amount",
       "estimated_gas_label": "Estimated gas",
       "max_fee_label": "Max fee",
-      "authorization_required": "Authorization required"
+      "authorization_required": "Authorization required",
+      "rif_title": "RIF Smart Wallet Send",
+      "rif_subtitle": "Sponsored / gasless transactions enabled",
+      "success_rif_native": "Transaction relayed successfully via RIF!",
+      "success_rif_erc20": "Token transfer relayed successfully via RIF!",
+      "rif_error": "RIF Enveloping failed to broadcast transaction"
     },
     "history": {
       "title": "History",
@@ -122,7 +136,10 @@
       "subtitle": "Share your address to receive RBTC",
       "copy_address": "Copy Address",
       "copied": "Copied!",
-      "warning": "Send only RSK (RBTC) and RSK-based tokens to this address. Sending other assets may result in permanent loss."
+      "warning": "Send only RSK (RBTC) and RSK-based tokens to this address. Sending other assets may result in permanent loss.",
+      "rif_title": "RIF Smart Wallet Receive",
+      "rif_subtitle": "Receive funds on your Smart Wallet address",
+      "rif_warning": "Send only RBTC or supported RIF community tokens to this RIF Smart Wallet address. Sending other unsupported assets will result in permanent loss."
     },
     "contacts": {
       "title": "Address Book",
@@ -148,6 +165,26 @@
       "confirmation_label": "I have saved my recovery phrase in a secure location and understand that if I lose it, my funds cannot be recovered.",
       "continue_button": "Continue to Verification",
       "verify_again": "Verify Again"
+    }
+  },
+  "protocols": {
+    "moc": {
+      "mintDoc_title": "Borrow DOC",
+      "mintDoc_subtitle": "Deposit RBTC → Borrow DOC stablecoin",
+      "mintDoc_btn": "Borrow DOC",
+      "mintDoc_desc": "Locks RBTC as collateral to borrow DOC, a USD-pegged stablecoin. You can repay DOC anytime to get your RBTC back.",
+      "redeemDoc_title": "Pay DOC",
+      "redeemDoc_subtitle": "Repay DOC → Receive RBTC back",
+      "redeemDoc_btn": "Pay DOC",
+      "redeemDoc_desc": "Repay your DOC to release the underlying RBTC collateral. The price of DOC is always pegged to $1 USD.",
+      "mintBPro_title": "Buy BPro",
+      "mintBPro_subtitle": "Deposit RBTC → Receive BPro",
+      "mintBPro_btn": "Buy BPro",
+      "mintBPro_desc": "BPro gives you leveraged exposure to Bitcoin price movements plus a share of protocol fees. It's a tokenized Bitcoin hashrate position.",
+      "redeemBPro_title": "Sell BPro",
+      "redeemBPro_subtitle": "Return BPro → Receive RBTC back",
+      "redeemBPro_btn": "Sell BPro",
+      "redeemBPro_desc": "Burn your BPro to release the underlying RBTC. The amount of RBTC you get depends on BPro's current redemption price."
     }
   },
   "security": {

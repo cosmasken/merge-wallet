@@ -4,11 +4,17 @@ import { useDispatch, useSelector } from "react-redux";
 
 import ViewHeader from "@/layout/ViewHeader";
 import KeyManagerService from "@/kernel/evm/KeyManagerService";
+import SecureStorageService from "@/kernel/app/SecureStorageService";
 import BalanceService from "@/kernel/evm/BalanceService";
-import { setWalletAddress } from "@/redux/wallet";
+import { setWalletAddress, addWallet, setActiveWallet } from "@/redux/wallet";
 import { selectChainId } from "@/redux/preferences";
+import type { WalletIndexEntry } from "@/kernel/app/SecureStorageService";
 
 type ImportMode = "mnemonic" | "privateKey";
+
+function generateId(): string {
+  return crypto.randomUUID();
+}
 
 export default function WalletImport() {
   const navigate = useNavigate();
@@ -29,6 +35,9 @@ export default function WalletImport() {
 
     try {
       const KeyManager = KeyManagerService();
+      const id = generateId();
+      KeyManager.setActiveWalletId(id);
+      const s = SecureStorageService();
       
       if (mode === "mnemonic") {
         const words = trimmed.toLowerCase().split(/\s+/);
@@ -38,12 +47,14 @@ export default function WalletImport() {
           return;
         }
 
+        const normalizedMnemonic = words.join(" ");
+
         setStatus("Discovering accounts...");
         let bestIndex = 0;
         const Balance = BalanceService(chainId);
         
         for (let i = 0; i < 5; i++) {
-          const { address } = KeyManager.importFromMnemonic(trimmed.toLowerCase(), i);
+          const { address } = KeyManager.importFromMnemonic(normalizedMnemonic, i);
           try {
             const balance = await Balance.getBalance(address as `0x${string}`);
             if (balance > 0n) {
@@ -56,8 +67,12 @@ export default function WalletImport() {
         }
         
         setStatus("Finalizing...");
-        const { address } = KeyManager.importFromMnemonic(trimmed.toLowerCase(), bestIndex);
+        const { address } = KeyManager.importFromMnemonic(normalizedMnemonic, bestIndex);
         await KeyManager.storeWalletSecurely();
+        const walletMeta: WalletIndexEntry = { id, name: `Wallet ${(await s.listWallets()).length + 1}`, address, createdAt: Date.now(), importType: "mnemonic" };
+        await s.saveWalletIndex([...(await s.listWallets()), walletMeta]);
+        dispatch(addWallet({ id, name: walletMeta.name, address, createdAt: walletMeta.createdAt }));
+        dispatch(setActiveWallet(id));
         dispatch(setWalletAddress(address));
       } else {
         // Private Key Import
@@ -69,6 +84,10 @@ export default function WalletImport() {
 
         const { address } = KeyManager.importFromPrivateKey(trimmed);
         await KeyManager.storeWalletSecurely();
+        const walletMeta: WalletIndexEntry = { id, name: `Wallet ${(await s.listWallets()).length + 1}`, address, createdAt: Date.now(), importType: "privateKey" };
+        await s.saveWalletIndex([...(await s.listWallets()), walletMeta]);
+        dispatch(addWallet({ id, name: walletMeta.name, address, createdAt: walletMeta.createdAt }));
+        dispatch(setActiveWallet(id));
         dispatch(setWalletAddress(address));
       }
       

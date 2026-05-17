@@ -61,7 +61,10 @@
       "no_internet": "无网络连接",
       "network_error": "无法连接到 Rootstock 网络",
       "add_token": "添加代币",
-      "history_button": "交易历史"
+      "history_button": "交易历史",
+      "wallet_type_standard": "标准 EOA 账户",
+      "wallet_type_smart": "RIF 智能钱包",
+      "gasless_badge": "免 Gas"
     },
     "import": {
       "title": "导入钱包",
@@ -99,7 +102,12 @@
       "amount_label": "金额",
       "estimated_gas_label": "预估 Gas",
       "max_fee_label": "最大费用",
-      "authorization_required": "需要授权"
+      "authorization_required": "需要授权",
+      "rif_title": "RIF 智能钱包发送",
+      "rif_subtitle": "已启用赞助免 Gas 交易机制",
+      "success_rif_native": "交易已通过 RIF 成功广播！",
+      "success_rif_erc20": "代币划转已通过 RIF 成功广播！",
+      "rif_error": "RIF Enveloping 广播交易失败"
     },
     "history": {
       "title": "历史",
@@ -122,7 +130,10 @@
       "subtitle": "分享您的地址以接收 RBTC",
       "copy_address": "复制地址",
       "copied": "已复制！",
-      "warning": "仅向此地址发送 RSK (RBTC) 和基于 RSK 的代币。发送其他资产可能会导致永久丢失。"
+      "warning": "仅向此地址发送 RSK (RBTC) 和基于 RSK 的代币。发送其他资产可能会导致永久丢失。",
+      "rif_title": "接收至 RIF 智能钱包",
+      "rif_subtitle": "接收资金到您的智能钱包地址",
+      "rif_warning": "请仅向此 RIF 智能钱包地址发送 RBTC 或支持的 RIF 社区代币。发送其他不支持的资产会导致永久性资金丢失。"
     },
     "contacts": {
       "title": "通讯录",
@@ -148,6 +159,26 @@
       "confirmation_label": "我已将助记词保存在安全的地方，并明白如果丢失，我的资金将无法找回。",
       "continue_button": "继续验证",
       "verify_again": "再次验证"
+    }
+  },
+  "protocols": {
+    "moc": {
+      "mintDoc_title": "借出 DOC",
+      "mintDoc_subtitle": "存入 RBTC → 借出 DOC 稳定币",
+      "mintDoc_btn": "借出 DOC",
+      "mintDoc_desc": "以 RBTC 为抖押借出 DOC，一种与美元挂钉的稳定币。您可随时偿还 DOC 来拿回您的 RBTC。",
+      "redeemDoc_title": "偿还 DOC",
+      "redeemDoc_subtitle": "偿还 DOC → 得回 RBTC",
+      "redeemDoc_btn": "偿还 DOC",
+      "redeemDoc_desc": "偿还您的 DOC 以释放底层 RBTC 抖押。DOC 价格始终与 1 美元挂钉。",
+      "mintBPro_title": "购买 BPro",
+      "mintBPro_subtitle": "存入 RBTC → 获得 BPro",
+      "mintBPro_btn": "购买 BPro",
+      "mintBPro_desc": "BPro 让您以杠杆形式暴露于比特币价格波动，并享有协议费用的一部分。",
+      "redeemBPro_title": "出售 BPro",
+      "redeemBPro_subtitle": "返还 BPro → 得回 RBTC",
+      "redeemBPro_btn": "出售 BPro",
+      "redeemBPro_desc": "销毁您的 BPro 以释放底层 RBTC。您获得的 RBTC 数量取决于当前赎回价格。"
     }
   },
   "security": {

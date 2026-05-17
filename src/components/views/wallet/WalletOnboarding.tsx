@@ -3,19 +3,26 @@ import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 
 import KeyManagerService from "@/kernel/evm/KeyManagerService";
+import SecureStorageService from "@/kernel/app/SecureStorageService";
 import NotificationService from "@/kernel/app/NotificationService";
-import { setWalletAddress, setSeedBackedUp, selectWalletAddress } from "@/redux/wallet";
+import TermsAcknowledgment from "@/composite/TermsAcknowledgment";
+import { setWalletAddress, setSeedBackedUp, selectWalletAddress, addWallet, setActiveWallet } from "@/redux/wallet";
 import { clearState } from "@/redux/persistence";
+import type { WalletIndexEntry } from "@/kernel/app/SecureStorageService";
+
+function generateId(): string {
+  return crypto.randomUUID();
+}
 
 export default function WalletOnboarding() {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const existingAddress = useSelector(selectWalletAddress);
   const [creating, setCreating] = useState(false);
+  const [termsAccepted, setTermsAccepted] = useState(() => localStorage.getItem("termsAccepted") === "true");
 
   useEffect(() => {
     if (existingAddress && !KeyManagerService().isInitialized()) {
-      // Stale persisted state without seed — clear it
       clearState();
     }
   }, [existingAddress]);
@@ -24,8 +31,20 @@ export default function WalletOnboarding() {
     setCreating(true);
     try {
       const KeyManager = KeyManagerService();
+      const id = generateId();
+      KeyManager.setActiveWalletId(id);
       const { address } = KeyManager.generateWallet();
       await KeyManager.storeWalletSecurely();
+      const walletMeta: WalletIndexEntry = {
+        id,
+        name: `Wallet ${(await SecureStorageService().listWallets()).length + 1}`,
+        address,
+        createdAt: Date.now(),
+        importType: "mnemonic",
+      };
+      await SecureStorageService().saveWalletIndex([...(await SecureStorageService().listWallets()), walletMeta]);
+      dispatch(addWallet({ id, name: walletMeta.name, address, createdAt: walletMeta.createdAt }));
+      dispatch(setActiveWallet(id));
       dispatch(setWalletAddress(address));
       dispatch(setSeedBackedUp(false));
       NotificationService().success("Wallet created successfully!");
@@ -40,8 +59,12 @@ export default function WalletOnboarding() {
     navigate("/wallet/import", { replace: true });
   };
 
+  if (!termsAccepted) {
+    return <TermsAcknowledgment onAccept={() => setTermsAccepted(true)} />
+  }
+
   return (
-    <div className="flex flex-col items-center justify-center min-h-full px-6 gap-6">
+    <div className="flex flex-col items-center justify-center min-h-full px-6 gap-6 animate-in fade-in slide-in-from-bottom-4 duration-300">
       <div className="text-center">
         <div className="w-16 h-16 rounded-2xl bg-primary flex items-center justify-center mx-auto mb-4">
           <svg viewBox="0 0 24 24" className="w-8 h-8 text-white" fill="none" stroke="currentColor" strokeWidth="2">

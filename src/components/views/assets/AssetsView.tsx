@@ -3,13 +3,14 @@ import { useDispatch, useSelector } from "react-redux";
 import { isAddress } from "viem";
 
 import ViewHeader from "@/layout/ViewHeader";
+import DashboardHeader from "@/components/composite/DashboardHeader";
 import PullToRefresh from "@/atoms/PullToRefresh";
 import WeiDisplay from "@/atoms/WeiDisplay";
 import FiatValue from "@/atoms/FiatValue";
 import Button from "@/atoms/Button";
 import { TokenSkeleton } from "@/atoms/LoadingSkeleton";
 import ErrorState from "@/atoms/ErrorState";
-import { selectWalletAddress, selectWalletBalance, addTrackedNft, removeTrackedNft, selectTrackedNfts } from "@/redux/wallet";
+import { selectWalletAddress, selectWalletBalance, selectActiveAddress, addTrackedNft, removeTrackedNft, selectTrackedNfts } from "@/redux/wallet";
 import { selectChainId } from "@/redux/preferences";
 import TokenManagerService, { getTokenList } from "@/kernel/evm/TokenManagerService";
 import type { TokenBalance } from "@/kernel/evm/TokenManagerService";
@@ -21,7 +22,7 @@ type Tab = "tokens" | "nfts";
 
 export default function AssetsView() {
   const dispatch = useDispatch();
-  const address = useSelector(selectWalletAddress);
+  const address = useSelector(selectActiveAddress);
   const balance = useSelector(selectWalletBalance);
   const chainId = useSelector(selectChainId);
   const trackedNfts = useSelector(selectTrackedNfts);
@@ -114,7 +115,10 @@ export default function AssetsView() {
 
   return (
     <PullToRefresh onRefresh={refreshAll}>
-      <div>
+      <div className="pt-4">
+        <div className="px-4">
+          <DashboardHeader />
+        </div>
         <ViewHeader title="Assets" />
         <div className="flex border-b border-neutral-200 dark:border-neutral-700 px-4">
           <button
@@ -217,30 +221,70 @@ export default function AssetsView() {
                 <p className="text-xs text-neutral-400 max-w-xs">Import an ERC-721 contract address to track your NFTs</p>
               </div>
             ) : (
-              nfts.map((nft) => (
-                <div
-                  key={nft.address}
-                  className="flex items-center justify-between p-3 rounded-lg bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700"
-                >
-                  <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-full bg-primary-200 dark:bg-primarydark-200 flex items-center justify-center text-xs font-bold text-primary-900 dark:text-primarydark-900">
-                      {nft.symbol.slice(0, 3)}
+              <div className="grid grid-cols-2 gap-4">
+                {nfts.map((nft) => (
+                  <div
+                    key={nft.address}
+                    className="flex flex-col rounded-xl overflow-hidden bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 shadow-sm transition-all hover:shadow-md"
+                  >
+                    {/* Image / Fallback Container */}
+                    <div className="relative aspect-square w-full bg-neutral-100 dark:bg-neutral-900 flex items-center justify-center overflow-hidden border-b border-neutral-200 dark:border-neutral-700">
+                      {nft.image ? (
+                        <img
+                          src={nft.image}
+                          alt={nft.name}
+                          className="w-full h-full object-cover animate-in fade-in duration-500"
+                          onError={(e) => {
+                            (e.target as HTMLElement).style.display = "none";
+                          }}
+                        />
+                      ) : (
+                        <div className="w-full h-full bg-gradient-to-tr from-primary/10 via-primary/5 to-transparent flex flex-col items-center justify-center p-4 text-center">
+                          <span className="text-2xl font-bold text-primary dark:text-primary-light tracking-wide font-display">
+                            {nft.symbol.slice(0, 4)}
+                          </span>
+                          <span className="text-[10px] text-neutral-400 mt-1 uppercase tracking-wider font-medium">
+                            {nft.name.slice(0, 16)}
+                          </span>
+                        </div>
+                      )}
+
+                      {/* Badge for balance */}
+                      <span className="absolute top-2 right-2 px-2 py-0.5 rounded-full text-[10px] font-bold bg-black/60 text-white backdrop-blur-sm">
+                        {nft.balance.toString()} Owned
+                      </span>
                     </div>
-                    <div>
-                      <div className="font-medium text-sm">{nft.name}</div>
-                      <div className="text-xs text-neutral-500">
-                        {nft.balance.toString()} owned
+
+                    {/* Metadata & Actions */}
+                    <div className="p-3 flex flex-col gap-2">
+                      <div>
+                        <div className="font-semibold text-sm truncate text-neutral-800 dark:text-neutral-100">{nft.name}</div>
+                        <div className="text-[10px] text-neutral-400 font-mono truncate">{nft.address.slice(0, 6)}...{nft.address.slice(-4)}</div>
+                      </div>
+
+                      <div className="flex gap-1.5 mt-1">
+                        {/* Transfer button (Coming Soon) */}
+                        <button
+                          disabled
+                          className="flex-1 flex items-center justify-center gap-1 py-1.5 rounded-lg bg-neutral-100 dark:bg-neutral-700 text-neutral-400 dark:text-neutral-500 text-[10px] font-bold cursor-not-allowed border border-neutral-200/50 dark:border-neutral-600/50"
+                        >
+                          Transfer
+                          <span className="px-1 py-0.2 rounded bg-neutral-200 dark:bg-neutral-600 text-neutral-500 text-[8px] scale-90 origin-center">Soon</span>
+                        </button>
+
+                        {/* Remove Tracked NFT button */}
+                        <button
+                          onClick={() => dispatch(removeTrackedNft(nft.address))}
+                          className="px-2 py-1.5 rounded-lg border border-red-200 dark:border-red-900/50 hover:bg-red-50 dark:hover:bg-red-950/20 text-red-500 text-[10px] font-bold transition-colors"
+                          title="Stop tracking this NFT collection"
+                        >
+                          Remove
+                        </button>
                       </div>
                     </div>
                   </div>
-                  <button
-                    className="text-xs text-red-500 p-1"
-                    onClick={() => dispatch(removeTrackedNft(nft.address))}
-                  >
-                    Remove
-                  </button>
-                </div>
-              ))
+                ))}
+              </div>
             )}
 
             <div className="pt-2">
