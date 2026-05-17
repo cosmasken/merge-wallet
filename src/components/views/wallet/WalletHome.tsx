@@ -1,7 +1,7 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
-import { isAddress } from "viem";
+import { isAddress, formatUnits } from "viem";
 
 import Button from "@/atoms/Button";
 import Card from "@/atoms/Card";
@@ -26,7 +26,7 @@ import {
   removeTrackedNft,
   selectTrackedNfts,
 } from "@/redux/wallet";
-import { selectShouldHideBalance, toggleHideBalance, selectChainId, selectLocalCurrency } from "@/redux/preferences";
+import { selectShouldHideBalance, toggleHideBalance, selectChainId, selectLocalCurrency, selectTokenPrices, selectRbtcPrice } from "@/redux/preferences";
 import { syncTokenPrices } from "@/kernel/evm/PriceService";
 import AddTokenModal from "@/components/composite/AddTokenModal";
 import DashboardHeader from "@/components/composite/DashboardHeader";
@@ -79,6 +79,55 @@ export default function WalletHome() {
       setActiveBalance(reduxBalance);
     }
   }, [useSmartWallet, reduxBalance]);
+
+  const tokenPrices = useSelector(selectTokenPrices);
+  const rbtcPrice = useSelector(selectRbtcPrice);
+
+  const totalFiatValue = useMemo(() => {
+    // 1. Start with native RBTC balance
+    const rbtcAmount = parseFloat(formatUnits(BigInt(activeBalance), 18));
+    const rbtcPriceVal = tokenPrices["RBTC"]?.price ?? (rbtcPrice?.price ?? 0);
+    let sum = rbtcAmount * rbtcPriceVal;
+
+    // 2. Add each token in the list
+    for (const token of tokens) {
+      const sym = token.symbol.toUpperCase();
+      const decimals = token.decimals;
+      const amount = parseFloat(formatUnits(token.balance, decimals));
+      
+      let price = 0;
+      if (tokenPrices[sym]?.price != null) {
+        price = tokenPrices[sym].price;
+      } else {
+        // Fallback pricing
+        let usdPrice = 1.0;
+        if (sym === "BPRO" || sym === "IBPRO") {
+          usdPrice = 78011.0 * 1.15;
+        } else if (sym === "RIF" || sym === "STRIF") {
+          usdPrice = 0.08;
+        } else if (sym === "SOV") {
+          usdPrice = 0.22;
+        } else if (sym === "MOC") {
+          usdPrice = 0.09;
+        } else if (
+          sym === "DOC" ||
+          sym === "USDRIF" ||
+          sym === "XUSD" ||
+          sym === "ZUSD" ||
+          sym === "DLLR" ||
+          sym === "IXUSD" ||
+          sym === "IDOC"
+        ) {
+          usdPrice = 1.0;
+        }
+        const usdToLocalRate = localCurrency === "USD" ? 1.0 : (rbtcPrice?.price ?? 78011.0) / 78011.0;
+        price = usdPrice * usdToLocalRate;
+      }
+      sum += amount * price;
+    }
+
+    return sum;
+  }, [activeBalance, tokens, tokenPrices, rbtcPrice, localCurrency]);
 
   useEffect(function fetchBalance() {
     if (!activeAddress) return;
@@ -255,10 +304,14 @@ export default function WalletHome() {
         </div>
 
         {!hideBalance && (
-          <FiatValue
-            value={BigInt(activeBalance)}
-            className="text-lg text-neutral-500"
-          />
+          <span className="text-lg font-semibold text-neutral-500">
+            {totalFiatValue.toLocaleString(undefined, {
+              style: "currency",
+              currency: localCurrency,
+              minimumFractionDigits: 2,
+              maximumFractionDigits: 2,
+            })}
+          </span>
         )}
 
         <Address address={activeAddress} short copyable className="text-xs text-neutral-400" />
@@ -323,7 +376,14 @@ export default function WalletHome() {
             >
               <div className="flex items-center gap-2">
                 <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center text-white text-xs font-bold">{nativeCurrency.symbol}</div>
-                <span className="font-semibold text-sm">{nativeCurrency.name}</span>
+                <div>
+                  <span className="font-semibold text-sm">{nativeCurrency.name}</span>
+                  {!hideBalance && (
+                    <div className="text-xs text-neutral-400 mt-0.5 animate-in fade-in duration-200">
+                      <FiatValue wei={BigInt(activeBalance)} symbol={nativeCurrency.symbol} decimals={18} fallbackClassName="inline" />
+                    </div>
+                  )}
+                </div>
               </div>
               <span className="font-mono text-sm font-medium">
                 {isLoading ? (
