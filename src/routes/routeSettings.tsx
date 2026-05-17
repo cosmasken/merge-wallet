@@ -20,6 +20,18 @@ export const routeSettings = [
         element: <AboutView />,
       },
       {
+        path: "security",
+        element: <SecuritySettings />,
+      },
+      {
+        path: "network",
+        element: <NetworkSettings />,
+      },
+      {
+        path: "currency",
+        element: <CurrencySettings />,
+      },
+      {
         path: "language",
         element: <LanguageSettings />,
       },
