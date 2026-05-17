@@ -16,6 +16,22 @@ export default defineConfig({
       "capacitor-plugin-simple-encryption": path.resolve(__dirname, "./plugins/capacitor-plugin-simple-encryption/dist/esm/index.js"),
     },
   },
+  server: {
+    proxy: {
+      // Proxy RSK mainnet RPC to avoid CORS in local dev
+      "/rpc/mainnet": {
+        target: "https://public-node.rsk.co",
+        changeOrigin: true,
+        rewrite: () => "/",
+      },
+      // Proxy RSK testnet RPC to avoid CORS in local dev
+      "/rpc/testnet": {
+        target: "https://public-node.testnet.rsk.co",
+        changeOrigin: true,
+        rewrite: () => "/",
+      },
+    },
+  },
   test: {
     globals: true,
     environment: "node",

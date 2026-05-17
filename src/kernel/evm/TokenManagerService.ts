@@ -21,11 +21,6 @@ const RSK_TOKENS: Record<number, { symbol: string; address: string; decimals: nu
   30: [
     { symbol: "RIF", address: "0x2acc95758f8b5f583470bA265E685CF8e3f4283b", decimals: 18 },
     { symbol: "USDRIF", address: "0x3A15461d8ae0f0fb5fa2629e9da7D66a794a6e37", decimals: 18 },
-    { symbol: "USDC", address: "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48", decimals: 6 },
-    { symbol: "USDT", address: "0xdAC17F958D2ee523a2206206994597C13D831ec7", decimals: 6 },
-    { symbol: "DAI", address: "0x6B175474E89094C44Da98b954EedeAC495271d0F", decimals: 18 },
-    { symbol: "WETH", address: "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2", decimals: 18 },
-    { symbol: "WBTC", address: "0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599", decimals: 8 },
   ],
   31: [
     { symbol: "RIF", address: "0x19F64674D8A5B4E652319F5e239eFd3bc969a1fE", decimals: 18 },
@@ -118,8 +113,8 @@ export default function TokenManagerService(chainId?: number) {
             decimals: token.decimals,
             balance: balance as bigint,
           }
-        } catch (e) {
-          console.error(`Failed to fetch balance for token ${token.symbol} (${token.address}):`, e);
+        } catch {
+          console.debug(`[TokenManagerService] balanceOf returned no data for ${token.symbol} (${token.address}) on chain — skipping`)
           return {
             address: getAddress(token.address),
             symbol: token.symbol,

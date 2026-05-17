@@ -12,9 +12,7 @@ export const rootstock: ChainConfig = {
 export const rootstockTestnet: ChainConfig = {
   id: 31,
   name: "Rootstock Testnet",
-  rpcUrls: [
-    "https://public-node.testnet.rsk.co",
-  ],
+  rpcUrls: ["https://public-node.testnet.rsk.co"],
   nativeCurrency: { name: "RBTC", symbol: "RBTC", decimals: 18 },
   slip44: 137,
   blockExplorer: { name: "RSK Testnet Explorer", url: "https://explorer.testnet.rootstock.io" },

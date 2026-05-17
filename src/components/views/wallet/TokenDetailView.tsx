@@ -149,6 +149,21 @@ export default function TokenDetailView() {
             onClick={() => navigate("/protocols/moc/sell-bpro")}
           />
         </div>
+      ) : isNative ? (
+        <div className="flex gap-4 px-4">
+          <Button
+            label="Swap to XUSD"
+            variant="secondary"
+            fullWidth
+            onClick={() => navigate("/protocols/sovryn/swap")}
+          />
+          <Button
+            label="Lend RBTC"
+            variant="secondary"
+            fullWidth
+            onClick={() => navigate("/protocols/sovryn/lend")}
+          />
+        </div>
       ) : (
         <div className="px-4">
           <button

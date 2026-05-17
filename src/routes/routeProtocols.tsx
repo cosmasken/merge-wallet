@@ -27,6 +27,10 @@ export const routeProtocols = [
         path: "sovryn/earn",
         element: <SovrynEarnView />,
       },
+      {
+        path: "sovryn/lend",
+        element: <SovrynEarnView />,
+      },
     ],
   },
 ];

@@ -40,6 +40,9 @@ export default function SovrynEarnView() {
   const ixusd = IXUSD[chainId] as `0x${string}` | undefined
   const irbtc = IRBTC[chainId] as `0x${string}` | undefined
 
+  // Hoist above refresh so it's in scope for the dep array
+  const isRbtcPool = pool === "rbtc"
+
   const refresh = useCallback(async () => {
     if (!address) return
     try {
@@ -51,18 +54,29 @@ export default function SovrynEarnView() {
           sovryn.getTokenPrice(ixusd),
         ])
         setXusdBalance(xBal)
+        if (!isRbtcPool) {
+          setITokenBal(iBal)
+          setAssetBal(aBal)
+          setTokenPrice(p)
+        }
+      }
+      if (irbtc && isRbtcPool) {
+        const [iBal, aBal, p] = await Promise.all([
+          sovryn.getITokenBalance(irbtc, address as `0x${string}`),
+          sovryn.getAssetBalance(irbtc, address as `0x${string}`),
+          sovryn.getTokenPrice(irbtc),
+        ])
         setITokenBal(iBal)
         setAssetBal(aBal)
         setTokenPrice(p)
       }
     } catch {}
-  }, [address, chainId])
+  }, [address, chainId, isRbtcPool])
 
   useEffect(() => { refresh() }, [refresh])
 
-  const isRbtcPool = pool === "rbtc"
   const sourceBal = isRbtcPool ? BigInt(rbtcBalance) : xusdBalance
-  const earningBal = isRbtcPool ? 0n : assetBal
+  const earningBal = assetBal
   const underlyingLabel = isRbtcPool ? "RBTC" : "XUSD"
 
   const isSupplyOk = supplyAmt && !isNaN(Number(supplyAmt)) && Number(supplyAmt) > 0
@@ -194,21 +208,19 @@ export default function SovrynEarnView() {
             disabled={!isSupplyOk || isLowSupply || isBusy} fullWidth />
         </Card>
 
-        {/* Withdraw — only XUSD for now, RBTC withdraw needs iRBTC balance */}
-        {!isRbtcPool && (
-          <Card className="p-4">
-            <h2 className="text-sm font-bold mb-2">Withdraw {underlyingLabel}</h2>
-            <div className="flex items-center justify-between mb-1">
-              <label className="text-xs text-neutral-500">Amount (iXUSD)</label>
-              <span className="text-xs text-neutral-400 font-mono">Earning: {formatEther(assetBal)} {underlyingLabel}</span>
-            </div>
-            <input type="text" placeholder="0.00" value={withdrawAmt} onChange={e => setWithdrawAmt(e.target.value)}
-              className="w-full p-3 rounded-lg border border-neutral-300 bg-white dark:bg-neutral-800 dark:border-neutral-600 text-lg font-mono" />
-            <button onClick={() => setWithdrawAmt(formatEther(assetBal))} className="text-xs text-primary font-semibold mt-1 mb-2">Max</button>
-            <Button label={isBusy ? <div className="flex items-center gap-2"><LoadingSpinner size="sm" color="white" /><span>Withdrawing...</span></div> : "Withdraw"} onClick={handleWithdraw}
-              disabled={!isWithdrawOk || isLowWithdraw || isBusy} fullWidth />
-          </Card>
-        )}
+        {/* Withdraw */}
+        <Card className="p-4">
+          <h2 className="text-sm font-bold mb-2">Withdraw {underlyingLabel}</h2>
+          <div className="flex items-center justify-between mb-1">
+            <label className="text-xs text-neutral-500">Amount ({isRbtcPool ? "iRBTC" : "iXUSD"})</label>
+            <span className="text-xs text-neutral-400 font-mono">Earning: {formatEther(assetBal)} {underlyingLabel}</span>
+          </div>
+          <input type="text" placeholder="0.00" value={withdrawAmt} onChange={e => setWithdrawAmt(e.target.value)}
+            className="w-full p-3 rounded-lg border border-neutral-300 bg-white dark:bg-neutral-800 dark:border-neutral-600 text-lg font-mono" />
+          <button onClick={() => setWithdrawAmt(formatEther(assetBal))} className="text-xs text-primary font-semibold mt-1 mb-2">Max</button>
+          <Button label={isBusy ? <div className="flex items-center gap-2"><LoadingSpinner size="sm" color="white" /><span>Withdrawing...</span></div> : "Withdraw"} onClick={handleWithdraw}
+            disabled={!isWithdrawOk || isLowWithdraw || isBusy} fullWidth />
+        </Card>
 
         {error && <p className="text-error text-sm bg-error/10 p-3 rounded-lg">{error}</p>}
       </div>

@@ -1,7 +1,7 @@
-import { useEffect, useState, useCallback } from "react"
+import { useEffect, useState, useCallback, useMemo } from "react"
 import { useSelector } from "react-redux"
-import { useNavigate } from "react-router"
-import { formatEther, parseEther } from "viem"
+import { useNavigate, useSearchParams } from "react-router"
+import { formatEther, parseEther, erc20Abi } from "viem"
 
 import ViewHeader from "@/layout/ViewHeader"
 import Card from "@/atoms/Card"
@@ -13,71 +13,104 @@ import SovrynService from "@/rsk/SovrynService"
 import { classifyError } from "@/kernel/evm/errors"
 import SecurityService, { AuthActions } from "@/kernel/app/SecurityService"
 import NotificationService from "@/kernel/app/NotificationService"
-import { XUSD, SOV, SWAPS_EXTERNAL, SOVRYN_PROTOCOL } from "@/rsk/addresses"
-
-type SwapDirection = "rbtcToXusd" | "sovToXusd"
+import { WRBTC, XUSD, SWAPS_EXTERNAL, getProtocolTokens } from "@/rsk/addresses"
+import { getPublicClientByChainId } from "@/kernel/evm/ClientService"
 
 const SLIPPAGE_OPTIONS = [0.1, 0.5, 1, 3, 5]
+const RBTC_SENTINEL = "RBTC"
+
+/** Token option shown in the dropdowns */
+interface TokenOption {
+  symbol: string
+  address: `0x${string}` | null // null = native RBTC
+  decimals: number
+}
 
 export default function SovrynSwapView() {
   const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
   const address = useSelector(selectWalletAddress)
   const chainId = useSelector(selectChainId)
-  const balance = useSelector(selectWalletBalance)
+  const nativeBal = useSelector(selectWalletBalance)
 
-  const [direction, setDirection] = useState<SwapDirection>("rbtcToXusd")
+  // ── Token lists ──────────────────────────────────────────────
+  const tokenOptions = useMemo<TokenOption[]>(() => {
+    const registry = getProtocolTokens(chainId)
+    const erc20s: TokenOption[] = registry.map(t => ({
+      symbol: t.symbol,
+      address: t.address,
+      decimals: t.decimals,
+    }))
+    return [{ symbol: RBTC_SENTINEL, address: null, decimals: 18 }, ...erc20s]
+  }, [chainId])
+
+  const defaultFrom = searchParams.get("from") || RBTC_SENTINEL
+  const defaultTo = searchParams.get("to") || "XUSD"
+
+  const [fromSymbol, setFromSymbol] = useState(defaultFrom)
+  const [toSymbol, setToSymbol] = useState(defaultTo)
   const [amount, setAmount] = useState("")
   const [expectedReturn, setExpectedReturn] = useState<bigint | null>(null)
   const [isLoadingQuote, setIsLoadingQuote] = useState(false)
   const [isSwapping, setIsSwapping] = useState(false)
   const [error, setError] = useState("")
   const [txHash, setTxHash] = useState("")
-  const [sovBalance, setSovBalance] = useState<bigint>(0n)
-  const [xusdBalance, setXusdBalance] = useState<bigint>(0n)
   const [slippage, setSlippage] = useState(0.5)
   const [showSlippage, setShowSlippage] = useState(false)
+  const [tokenBalances, setTokenBalances] = useState<Record<string, bigint>>({})
 
   const sovryn = SovrynService(chainId)
+  const wrbtc = WRBTC[chainId] as `0x${string}` | undefined
 
-  const sourceSymbol = direction === "rbtcToXusd" ? "RBTC" : "SOV"
-  const sourceBalance = direction === "rbtcToXusd" ? BigInt(balance) : sovBalance
+  const fromToken = tokenOptions.find(t => t.symbol === fromSymbol) ?? tokenOptions[0]
+  const toToken = tokenOptions.find(t => t.symbol === toSymbol) ?? tokenOptions.find(t => t.symbol !== fromSymbol)!
+  const toOptions = tokenOptions.filter(t => t.symbol !== fromSymbol)
 
-  const xusd = XUSD[chainId] as `0x${string}` | undefined
-  const sov = SOV[chainId] as `0x${string}` | undefined
-
+  // ── Load ERC20 balances ──────────────────────────────────────
   useEffect(() => {
-    if (!address || chainId !== 30) return
-    sovryn.getXusdBalance(address as `0x${string}`).then(setXusdBalance).catch(() => {})
-    sovryn.getSovBalance(address as `0x${string}`).then(setSovBalance).catch(() => {})
+    if (!address) return
+    const client = getPublicClientByChainId(chainId)
+    const registry = getProtocolTokens(chainId)
+    Promise.all(
+      registry.map(t =>
+        client.readContract({
+          address: t.address,
+          abi: erc20Abi,
+          functionName: "balanceOf",
+          args: [address as `0x${string}`],
+        }).then(b => ({ symbol: t.symbol, bal: b as bigint })).catch(() => ({ symbol: t.symbol, bal: 0n }))
+      )
+    ).then(results => {
+      const map: Record<string, bigint> = {}
+      results.forEach(r => { map[r.symbol] = r.bal })
+      setTokenBalances(map)
+    })
   }, [address, chainId])
 
+  const sourceBalance: bigint = fromToken.address === null
+    ? BigInt(nativeBal)
+    : (tokenBalances[fromToken.symbol] ?? 0n)
+
+  // ── Quote ────────────────────────────────────────────────────
   useEffect(() => {
     if (!amount || isNaN(Number(amount)) || Number(amount) <= 0) {
       setExpectedReturn(null); return
     }
+    if (!wrbtc) return
+
     setIsLoadingQuote(true)
     const timer = setTimeout(async () => {
       try {
-        if (direction === "rbtcToXusd") {
-          const ret = await sovryn.getExpectedXusdReturn(parseEther(amount))
-          setExpectedReturn(ret)
-        } else {
-          const { getPublicClientByChainId } = await import("@/kernel/evm/ClientService")
-          const client = getPublicClientByChainId(chainId)
-          const { sovrynProtocolAbi } = await import("@/rsk/abis/sovryn")
-          const ret = await client.readContract({
-            address: SOVRYN_PROTOCOL[chainId] as `0x${string}`,
-            abi: sovrynProtocolAbi,
-            functionName: "getSwapExpectedReturn",
-            args: [sov!, xusd!, parseEther(amount)],
-          }) as bigint
-          setExpectedReturn(ret)
-        }
+        const srcAddr = fromToken.address ?? wrbtc  // RBTC uses WRBTC as path anchor
+        const dstAddr = toToken.address!
+        const path = await sovryn.resolveSwapPath(srcAddr, dstAddr)
+        const rate = await sovryn.getRateByPath(path, parseEther(amount))
+        setExpectedReturn(rate)
       } catch { setExpectedReturn(null) }
       setIsLoadingQuote(false)
     }, 500)
     return () => clearTimeout(timer)
-  }, [amount, direction, chainId])
+  }, [amount, fromSymbol, toSymbol, chainId])
 
   const isValidAmount = amount && !isNaN(Number(amount)) && Number(amount) > 0
   const isInsufficient = isValidAmount && parseEther(amount) > sourceBalance
@@ -85,29 +118,41 @@ export default function SovrynSwapView() {
     ? expectedReturn - (expectedReturn * BigInt(Math.round(slippage * 100)) / 10000n)
     : 0n
 
+  // ── Swap ─────────────────────────────────────────────────────
   const handleSwap = useCallback(async () => {
-    if (!isValidAmount || isInsufficient) return
+    if (!isValidAmount || isInsufficient || !wrbtc) return
     setIsSwapping(true)
     setError("")
     try {
       const authorized = await SecurityService().authorize(AuthActions.SendTransaction)
-      if (!authorized) { NotificationService().error("Authorization required"); setIsSwapping(false); return }
-
-      // SOV→XUSD: auto-approve if needed
-      if (direction === "sovToXusd") {
-        const spender = SWAPS_EXTERNAL[chainId] as `0x${string}` | undefined
-        if (sov && spender) {
-          const allowance = await sovryn.getAllowance(sov, spender)
-          const amountWei = parseEther(amount)
-          if (allowance < amountWei) {
-            await sovryn.approveToken(sov, spender, amountWei)
-          }
-        }
+      if (!authorized) {
+        NotificationService().error("Authorization required")
+        setIsSwapping(false)
+        return
       }
 
-      const hash = direction === "rbtcToXusd"
-        ? await sovryn.swapRbtcToXusd(amount, minReturn)
-        : await sovryn.swapSovToXusd(amount, minReturn)
+      const amountWei = parseEther(amount)
+      const srcAddr = fromToken.address ?? wrbtc
+      const dstAddr = toToken.address!
+      const path = await sovryn.resolveSwapPath(srcAddr, dstAddr)
+
+      let hash: `0x${string}`
+
+      if (fromToken.address === null) {
+        // Native RBTC → send value, path starts with WRBTC
+        hash = await sovryn.convertByPath(path, amountWei, minReturn, amountWei)
+      } else {
+        // ERC20 source → approve spender (SwapsExternal) then convertByPath
+        const swapsExternal = SWAPS_EXTERNAL[chainId] as `0x${string}` | undefined
+        if (swapsExternal) {
+          const allowance = await sovryn.getAllowance(fromToken.address, swapsExternal)
+          if (allowance < amountWei) {
+            await sovryn.approveToken(fromToken.address, swapsExternal, amountWei)
+          }
+        }
+        hash = await sovryn.convertByPath(path, amountWei, minReturn, 0n)
+      }
+
       setTxHash(hash)
       NotificationService().success("Swap submitted!")
     } catch (e) {
@@ -116,7 +161,18 @@ export default function SovrynSwapView() {
       NotificationService().error(err.message)
     }
     setIsSwapping(false)
-  }, [amount, direction, isValidAmount, isInsufficient, minReturn, chainId])
+  }, [amount, fromToken, toToken, isValidAmount, isInsufficient, minReturn, chainId, wrbtc])
+
+  const handleFromChange = (sym: string) => {
+    setFromSymbol(sym)
+    setExpectedReturn(null)
+    setError("")
+    // Avoid same-token pairs
+    if (toSymbol === sym) {
+      const alt = tokenOptions.find(t => t.symbol !== sym)
+      if (alt) setToSymbol(alt.symbol)
+    }
+  }
 
   if (txHash) {
     return (
@@ -139,33 +195,40 @@ export default function SovrynSwapView() {
 
   return (
     <div>
-      <ViewHeader title="Sovryn Swap" subtitle="RBTC / SOV → XUSD" showBack />
+      <ViewHeader title="Sovryn Swap" subtitle="Swap any token on Rootstock" showBack />
       <a href="https://sovryn.app" target="_blank" rel="noopener noreferrer"
         className="mx-4 mb-1 block text-center text-xs text-primary font-semibold py-1.5 rounded-lg bg-primary/5 border border-primary/20">
-        Margin trading, loans & staking on Sovryn dapp ↗
+        Margin trading, loans &amp; staking on Sovryn dapp ↗
       </a>
       <div className="flex flex-col gap-4 px-4">
         <Card className="p-4">
-          {/* Direction toggle */}
-          <div className="flex gap-2 mb-3">
-            {(["rbtcToXusd", "sovToXusd"] as SwapDirection[]).map(d => (
-              <button key={d} onClick={() => { setDirection(d); setExpectedReturn(null); setError("") }}
-                className={`flex-1 p-2.5 rounded-lg border-2 text-sm font-semibold transition-colors ${
-                  direction === d ? "border-primary bg-primary/10 text-primary" : "border-neutral-300 dark:border-neutral-600 text-neutral-500"
-                }`}>
-                {d === "rbtcToXusd" ? "RBTC → XUSD" : "SOV → XUSD"}
-              </button>
-            ))}
-          </div>
 
           {/* You pay */}
-          <div>
+          <div className="mb-3">
             <div className="flex items-center justify-between mb-1">
-              <label className="text-xs text-neutral-500">You pay ({sourceSymbol})</label>
-              <span className="text-xs text-neutral-400 font-mono">Balance: {formatEther(sourceBalance)} {sourceSymbol}</span>
+              <label className="text-xs text-neutral-500">You pay</label>
+              <span className="text-xs text-neutral-400 font-mono">
+                Bal: {formatEther(sourceBalance)} {fromToken.symbol}
+              </span>
             </div>
-            <input type="text" placeholder="0.00" value={amount} onChange={e => setAmount(e.target.value)}
-              className="w-full p-3 rounded-lg border border-neutral-300 bg-white dark:bg-neutral-800 dark:border-neutral-600 text-lg font-mono" />
+            <div className="flex gap-2">
+              <select
+                value={fromSymbol}
+                onChange={e => handleFromChange(e.target.value)}
+                className="flex-shrink-0 p-2.5 rounded-lg border border-neutral-300 dark:border-neutral-600 bg-white dark:bg-neutral-800 text-sm font-semibold"
+              >
+                {tokenOptions.map(t => (
+                  <option key={t.symbol} value={t.symbol}>{t.symbol}</option>
+                ))}
+              </select>
+              <input
+                type="text"
+                placeholder="0.00"
+                value={amount}
+                onChange={e => setAmount(e.target.value)}
+                className="flex-1 p-3 rounded-lg border border-neutral-300 bg-white dark:bg-neutral-800 dark:border-neutral-600 text-lg font-mono"
+              />
+            </div>
             <button onClick={() => setAmount(formatEther(sourceBalance))} className="text-xs text-primary font-semibold mt-1">Max</button>
           </div>
 
@@ -179,20 +242,30 @@ export default function SovrynSwapView() {
           {/* You receive */}
           <div>
             <div className="flex items-center justify-between mb-1">
-              <label className="text-xs text-neutral-500">You receive (XUSD)</label>
-              <span className="text-xs text-neutral-400 font-mono">Balance: {formatEther(xusdBalance)} XUSD</span>
+              <label className="text-xs text-neutral-500">You receive</label>
             </div>
-            <div className="w-full p-3 rounded-lg border border-neutral-200 dark:border-neutral-700 bg-neutral-50 dark:bg-neutral-900 text-lg font-mono text-neutral-400">
-              {isLoadingQuote ? (
-                <div className="flex items-center gap-2"><LoadingSpinner size="sm" /><span className="text-sm">Fetching quote...</span></div>
-              ) : expectedReturn !== null ? formatEther(expectedReturn) : "0.00"}
+            <div className="flex gap-2">
+              <select
+                value={toSymbol}
+                onChange={e => { setToSymbol(e.target.value); setExpectedReturn(null) }}
+                className="flex-shrink-0 p-2.5 rounded-lg border border-neutral-300 dark:border-neutral-600 bg-white dark:bg-neutral-800 text-sm font-semibold"
+              >
+                {toOptions.map(t => (
+                  <option key={t.symbol} value={t.symbol}>{t.symbol}</option>
+                ))}
+              </select>
+              <div className="flex-1 p-3 rounded-lg border border-neutral-200 dark:border-neutral-700 bg-neutral-50 dark:bg-neutral-900 text-lg font-mono text-neutral-400">
+                {isLoadingQuote ? (
+                  <div className="flex items-center gap-2"><LoadingSpinner size="sm" /><span className="text-sm">Fetching quote...</span></div>
+                ) : expectedReturn !== null ? formatEther(expectedReturn) : "0.00"}
+              </div>
             </div>
           </div>
 
           {expectedReturn !== null && isValidAmount && (
-            <div className="mt-2 p-2 rounded-lg bg-neutral-50 dark:bg-neutral-900 text-xs text-neutral-500">
-              Rate: 1 {sourceSymbol} ≈ {(Number(formatEther(expectedReturn)) / Number(amount)).toFixed(6)} XUSD
-              · Min received: {formatEther(minReturn)} XUSD
+            <div className="mt-3 p-2 rounded-lg bg-neutral-50 dark:bg-neutral-900 text-xs text-neutral-500">
+              Rate: 1 {fromToken.symbol} ≈ {(Number(formatEther(expectedReturn)) / Number(amount)).toFixed(6)} {toToken.symbol}
+              · Min received: {formatEther(minReturn)} {toToken.symbol}
             </div>
           )}
         </Card>
@@ -221,7 +294,7 @@ export default function SovrynSwapView() {
         </Card>
 
         {isInsufficient && (
-          <p className="text-error text-sm bg-error/10 p-3 rounded-lg">Insufficient {sourceSymbol} balance</p>
+          <p className="text-error text-sm bg-error/10 p-3 rounded-lg">Insufficient {fromToken.symbol} balance</p>
         )}
 
         {error && <p className="text-error text-sm bg-error/10 p-3 rounded-lg">{error}</p>}
@@ -229,9 +302,13 @@ export default function SovrynSwapView() {
         <Button
           label={isSwapping ? <div className="flex items-center gap-2"><LoadingSpinner size="sm" color="white" /><span>Swapping...</span></div> : "Swap"}
           onClick={handleSwap}
-          disabled={!isValidAmount || isInsufficient || isSwapping}
+          disabled={!isValidAmount || isInsufficient || isSwapping || !wrbtc}
           fullWidth
         />
+
+        {!wrbtc && (
+          <p className="text-xs text-neutral-400 text-center">Sovryn swaps not available on this network</p>
+        )}
       </div>
     </div>
   )
