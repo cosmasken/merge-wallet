@@ -57,6 +57,7 @@ export default function SovrynSwapView() {
   const [txHash, setTxHash] = useState("")
   const [slippage, setSlippage] = useState(0.5)
   const [showSlippage, setShowSlippage] = useState(false)
+  const [bypassSlippage, setBypassSlippage] = useState(false)
   const [tokenBalances, setTokenBalances] = useState<Record<string, bigint>>({})
 
   const sovryn = SovrynService(chainId)
@@ -115,7 +116,7 @@ export default function SovrynSwapView() {
   const isValidAmount = amount && !isNaN(Number(amount)) && Number(amount) > 0
   const isInsufficient = isValidAmount && parseEther(amount) > sourceBalance
   const minReturn = expectedReturn !== null
-    ? expectedReturn - (expectedReturn * BigInt(Math.round(slippage * 100)) / 10000n)
+    ? (bypassSlippage ? 1n : expectedReturn - (expectedReturn * BigInt(Math.round(slippage * 100)) / 10000n))
     : 0n
 
   // ── Swap ─────────────────────────────────────────────────────
@@ -201,6 +202,18 @@ export default function SovrynSwapView() {
         Margin trading, loans &amp; staking on Sovryn dapp ↗
       </a>
       <div className="flex flex-col gap-4 px-4">
+        {chainId === 31 && (
+          <div className="p-3 rounded-lg bg-amber-500/10 border border-amber-500/20 text-amber-500 text-xs flex flex-col gap-1.5 animate-in fade-in duration-300">
+            <span className="font-bold flex items-center gap-1">⚠️ Rootstock Testnet Pool Warning</span>
+            <span>
+              Testnet liquidity pools on Sovryn are thin or dry. Swaps can easily fail with <strong>ERR_INVALID_AMOUNT</strong> or revert due to slippage.
+            </span>
+            <span className="mt-1">
+              👉 <strong>Tip:</strong> Enable <strong>"Bypass slippage limit"</strong> below to allow swaps to go through even with high price impact.
+            </span>
+          </div>
+        )}
+
         <Card className="p-4">
 
           {/* You pay */}
@@ -265,7 +278,7 @@ export default function SovrynSwapView() {
           {expectedReturn !== null && isValidAmount && (
             <div className="mt-3 p-2 rounded-lg bg-neutral-50 dark:bg-neutral-900 text-xs text-neutral-500">
               Rate: 1 {fromToken.symbol} ≈ {(Number(formatEther(expectedReturn)) / Number(amount)).toFixed(6)} {toToken.symbol}
-              · Min received: {formatEther(minReturn)} {toToken.symbol}
+              · Min received: {bypassSlippage ? "1 satoshi" : `${formatEther(minReturn)} ${toToken.symbol}`}
             </div>
           )}
         </Card>
@@ -290,6 +303,18 @@ export default function SovrynSwapView() {
                 </button>
               ))}
             </div>
+          )}
+
+          {chainId === 31 && (
+            <label className="flex items-center gap-2 mt-3 cursor-pointer p-2.5 rounded bg-amber-500/5 dark:bg-amber-500/10 border border-amber-500/10 text-xs text-amber-600 dark:text-amber-400">
+              <input
+                type="checkbox"
+                checked={bypassSlippage}
+                onChange={e => setBypassSlippage(e.target.checked)}
+                className="rounded border-amber-500 text-amber-500 focus:ring-amber-500"
+              />
+              <span className="font-semibold">Bypass slippage limit (Set min return to 1 satoshi)</span>
+            </label>
           )}
         </Card>
 

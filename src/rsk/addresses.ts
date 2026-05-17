@@ -63,6 +63,7 @@ export const SOVRYN_SWAP_NETWORK: Record<number, string> = {
 }
 export const BTC_WRAPPER_PROXY: Record<number, string> = {
   [MAINNET]: '0x2BEe6167f91D10db23252e03de039Da6b9047D49',
+  [TESTNET]: '0xA3a46b149360a0B1e005CA8cB7522938A2da7532',
 }
 
 // ── Sovryn iTokens (Lending Pool / LoanToken contracts) ────

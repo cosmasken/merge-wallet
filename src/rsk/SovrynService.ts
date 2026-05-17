@@ -10,12 +10,14 @@ import {
   XUSD,
   IXUSD,
   IRBTC,
+  BTC_WRAPPER_PROXY,
 } from "./addresses"
 import {
   sovrynSwapNetworkAbi,
   sovrynProtocolAbi,
   loanTokenAbi,
   wrbtcLoanTokenAbi,
+  btcWrapperProxyAbi,
 } from "./abis/sovryn"
 
 export default function SovrynService(chainId: number) {
@@ -28,6 +30,7 @@ export default function SovrynService(chainId: number) {
   const wrbtc = WRBTC[chainId] as `0x${string}` | undefined
   const sov = SOV[chainId] as `0x${string}` | undefined
   const xusd = XUSD[chainId] as `0x${string}` | undefined
+  const btcWrapperProxy = BTC_WRAPPER_PROXY[chainId] as `0x${string}` | undefined
 
   function requireAvailable() {
     if (!protocol || !wrbtc) throw new Error(`Sovryn not available on chain ${chainId}`)
@@ -242,22 +245,37 @@ export default function SovrynService(chainId: number) {
     minReturn: bigint,
     sendValue: bigint = 0n,
   ): Promise<`0x${string}`> {
-    const swapNetwork = await getSwapNetworkAddress()
+    const isBtcSwap = sendValue > 0n || (wrbtc && path[path.length - 1].toLowerCase() === wrbtc.toLowerCase())
 
-    const data = encodeFunctionData({
-      abi: sovrynSwapNetworkAbi,
-      functionName: "convertByPath",
-      args: [
-        path,
-        amount,
-        minReturn,
-        getUserAddress(),  // beneficiary
-        zeroAddress,       // affiliateAccount
-        0n,                // affiliateFee
-      ],
-    })
-    const { hash } = await txManager.sendContractTransaction(swapNetwork, sendValue, data)
-    return hash
+    if (isBtcSwap && btcWrapperProxy) {
+      const data = encodeFunctionData({
+        abi: btcWrapperProxyAbi,
+        functionName: "convertByPath",
+        args: [
+          path,
+          amount,
+          minReturn,
+        ],
+      })
+      const { hash } = await txManager.sendContractTransaction(btcWrapperProxy, sendValue, data)
+      return hash
+    } else {
+      const swapNetwork = await getSwapNetworkAddress()
+      const data = encodeFunctionData({
+        abi: sovrynSwapNetworkAbi,
+        functionName: "convertByPath",
+        args: [
+          path,
+          amount,
+          minReturn,
+          getUserAddress(),  // beneficiary
+          zeroAddress,       // affiliateAccount
+          0n,                // affiliateFee
+        ],
+      })
+      const { hash } = await txManager.sendContractTransaction(swapNetwork, sendValue, data)
+      return hash
+    }
   }
 
   // ── Lending (iToken mint/burn) ────────────────────────────

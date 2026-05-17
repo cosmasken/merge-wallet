@@ -1,6 +1,21 @@
 // ABI fragments for Sovryn Protocol and SovrynSwapNetwork interactions
 // Generated from ISovryn.sol, ISovrynSwapNetwork.sol, and deployment artifacts.
 
+// ── BTCWrapperProxy: convertByPath (3-param version) ──────────────
+export const btcWrapperProxyAbi = [
+  {
+    type: 'function',
+    name: 'convertByPath',
+    inputs: [
+      { name: 'path', type: 'address[]', internalType: 'address[]' },
+      { name: 'amount', type: 'uint256', internalType: 'uint256' },
+      { name: 'minReturn', type: 'uint256', internalType: 'uint256' },
+    ],
+    outputs: [{ name: '', type: 'uint256', internalType: 'uint256' }],
+    stateMutability: 'payable',
+  },
+] as const
+
 // ── SovrynSwapNetwork: convertByPath (6-param version) ──────────────
 export const sovrynSwapNetworkAbi = [
   {
