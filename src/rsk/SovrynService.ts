@@ -15,6 +15,7 @@ import {
   sovrynSwapNetworkAbi,
   sovrynProtocolAbi,
   loanTokenAbi,
+  wrbtcLoanTokenAbi,
 } from "./abis/sovryn"
 
 export default function SovrynService(chainId: number) {
@@ -329,12 +330,59 @@ export default function SovrynService(chainId: number) {
     return hash
   }
 
-  async function getIXusdAddress(): Promise<`0x${string}`> {
-    return (IXUSD[chainId] ?? zeroAddress) as `0x${string}`
+  // ── RBTC Lending (iRBTC payable mint/burn) ─────────────────
+
+  /**
+   * Supply RBTC to earn interest (mint iRBTC via mintWithBTC).
+   * Sends native RBTC as msg.value — no approval needed.
+   */
+  async function lendRbtc(rbtcAmountWei: bigint): Promise<`0x${string}`> {
+    requireAvailable()
+    const irbtc = IRBTC[chainId] as `0x${string}` | undefined
+    if (!irbtc) throw new Error("iRBTC not available")
+
+    const user = getUserAddress()
+    const data = encodeFunctionData({
+      abi: wrbtcLoanTokenAbi,
+      functionName: "mintWithBTC",
+      args: [user, false],
+    })
+    const { hash } = await txManager.sendContractTransaction(irbtc, rbtcAmountWei, data)
+    return hash
   }
 
-  async function getIRbtcAddress(): Promise<`0x${string}`> {
-    return (IRBTC[chainId] ?? zeroAddress) as `0x${string}`
+  /**
+   * Withdraw RBTC by burning iRBTC (burnToBTC).
+   */
+  async function withdrawRbtc(iRbtcAmountWei: bigint): Promise<`0x${string}`> {
+    requireAvailable()
+    const irbtc = IRBTC[chainId] as `0x${string}` | undefined
+    if (!irbtc) throw new Error("iRBTC not available")
+
+    const user = getUserAddress()
+    const data = encodeFunctionData({
+      abi: wrbtcLoanTokenAbi,
+      functionName: "burnToBTC",
+      args: [user, iRbtcAmountWei, false],
+    })
+    const { hash } = await txManager.sendContractTransaction(irbtc, 0n, data)
+    return hash
+  }
+
+  /**
+   * Get expected return for a swap using rateByPath on the swap network.
+   */
+  async function getRateByPath(
+    path: readonly `0x${string}`[],
+    amount: bigint,
+  ): Promise<bigint> {
+    const swapNetwork = await getSwapNetworkAddress()
+    return publicClient.readContract({
+      address: swapNetwork,
+      abi: sovrynSwapNetworkAbi,
+      functionName: "rateByPath",
+      args: [path, amount],
+    }) as Promise<bigint>
   }
 
   return {
@@ -353,7 +401,10 @@ export default function SovrynService(chainId: number) {
     getITokenBalance,
     lend,
     withdraw,
-    getIXusdAddress,
-    getIRbtcAddress,
+    lendRbtc,
+    withdrawRbtc,
+    getRateByPath,
+    protocol,
+    wrbtc,
   }
 }

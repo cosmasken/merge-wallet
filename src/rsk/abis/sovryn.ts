@@ -150,3 +150,29 @@ export const loanTokenAbi = [
     stateMutability: 'view',
   },
 ] as const
+
+// ── iRBTC-specific: payable mint / burn-to-BTC ─────────────────────
+export const wrbtcLoanTokenAbi = [
+  ...loanTokenAbi,
+  {
+    type: 'function',
+    name: 'mintWithBTC',
+    inputs: [
+      { name: 'receiver', type: 'address', internalType: 'address' },
+      { name: 'useLM', type: 'bool', internalType: 'bool' },
+    ],
+    outputs: [{ name: 'mintAmount', type: 'uint256', internalType: 'uint256' }],
+    stateMutability: 'payable',
+  },
+  {
+    type: 'function',
+    name: 'burnToBTC',
+    inputs: [
+      { name: 'receiver', type: 'address', internalType: 'address' },
+      { name: 'burnAmount', type: 'uint256', internalType: 'uint256' },
+      { name: 'useLM', type: 'bool', internalType: 'bool' },
+    ],
+    outputs: [{ name: 'loanAmountPaid', type: 'uint256', internalType: 'uint256' }],
+    stateMutability: 'nonpayable',
+  },
+] as const
