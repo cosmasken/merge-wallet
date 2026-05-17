@@ -103,13 +103,8 @@ export default function ProtocolDashboard() {
           </button>
 
           {/* Sovryn Card */}
-          <button onClick={() => chainId === 30 ? navigate("/protocols/sovryn/swap") : undefined} className="text-left w-full" disabled={chainId !== 30}>
-            <Card className={`p-4 ${chainId !== 30 ? "opacity-60" : ""}`}>
-              {chainId !== 30 && (
-                <div className="mb-2 p-1.5 rounded bg-warn-light/20 border border-warn/30 text-xs text-warn-dark text-center">
-                  Mainnet only — switch to RSK Mainnet
-                </div>
-              )}
+          <button onClick={() => navigate("/protocols/sovryn/swap")} className="text-left w-full">
+            <Card className="p-4">
               <div className="flex items-start gap-3">
                 <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-purple-500 to-pink-400 flex items-center justify-center text-white font-bold text-sm shrink-0">
                   Sv
@@ -123,13 +118,11 @@ export default function ProtocolDashboard() {
                   </div>
                   <p className="text-xs text-neutral-400 mt-0.5">Swap, earn, and trade with leverage</p>
                   <div className="flex flex-wrap gap-x-3 gap-y-0.5 mt-2 text-xs">
-                    {byProtocol('sovryn').length > 0 ? byProtocol('sovryn').map(t => (
-                      <span key={t.symbol} className="text-neutral-500">
+                    {byProtocol('sovryn').map(t => (
+                      <span key={t.symbol} className="text-neutral-500 font-medium">
                         {t.symbol}: <WeiDisplay wei={protocolBalances[t.symbol] ?? 0n} symbol="" decimals={t.decimals} />
                       </span>
-                    )) : (
-                      <span className="text-neutral-400 italic">Tokens only available on mainnet</span>
-                    )}
+                    ))}
                   </div>
                 </div>
                 <svg viewBox="0 0 24 24" className="w-5 h-5 text-neutral-300 shrink-0 mt-1" fill="none" stroke="currentColor" strokeWidth="2">
