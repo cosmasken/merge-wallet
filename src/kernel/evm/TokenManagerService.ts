@@ -1,5 +1,6 @@
 import { erc20Abi, getAddress } from "viem"
 import { getPublicClient } from "@/kernel/evm/ClientService"
+import { getProtocolTokens } from "@/rsk/addresses"
 
 export interface TokenBalance {
   address: `0x${string}`
@@ -33,11 +34,20 @@ const RSK_TOKENS: Record<number, { symbol: string; address: string; decimals: nu
 }
 
 export function getTokenList(chainId: number): TokenInfo[] {
-  return (RSK_TOKENS[chainId] ?? []).map(t => ({
+  const rskTokens = (RSK_TOKENS[chainId] ?? []).map(t => ({
     address: t.address as `0x${string}`,
     symbol: t.symbol,
     decimals: t.decimals,
   }))
+
+  // Add protocol tokens
+  for (const pt of getProtocolTokens(chainId)) {
+    if (!rskTokens.some(t => t.address.toLowerCase() === pt.address.toLowerCase())) {
+      rskTokens.push({ address: pt.address, symbol: pt.symbol, decimals: pt.decimals })
+    }
+  }
+
+  return rskTokens
 }
 
 export default function TokenManagerService(chainId?: number) {
@@ -60,8 +70,8 @@ export default function TokenManagerService(chainId?: number) {
 
       return {
         address: normalizedToken,
-        symbol: "ERC-20",
-        decimals: 18,
+        symbol: "",
+        decimals: 0,
         balance: balance as bigint,
       }
     } catch {

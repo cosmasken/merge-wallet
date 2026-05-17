@@ -2,11 +2,13 @@ import { NavLink } from "react-router-dom";
 
 import WalletIcon from "@/icons/WalletIcon";
 import AssetsIcon from "@/icons/AssetsIcon";
+import ProtocolsIcon from "@/icons/ProtocolsIcon";
 import SettingsIcon from "@/icons/SettingsIcon";
 
 const tabs = [
   { to: "/wallet", label: "Wallet", icon: WalletIcon },
   { to: "/assets", label: "Assets", icon: AssetsIcon },
+  { to: "/protocols", label: "Protocols", icon: ProtocolsIcon },
   { to: "/settings", label: "Settings", icon: SettingsIcon },
 ];
 

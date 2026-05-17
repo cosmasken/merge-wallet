@@ -56,9 +56,20 @@ export default function TokenDetailView() {
       TokenManagerService(chainId)
         .getTokenBalance(address as `0x${string}`, tokenInfo.address!)
         .then(res => {
-          setToken(res);
+          if (res) {
+            setToken({ ...res, symbol: tokenInfo.symbol, decimals: tokenInfo.decimals });
+          } else {
+            setToken({
+              address: tokenInfo.address as `0x${string}`,
+              symbol: tokenInfo.symbol,
+              decimals: tokenInfo.decimals,
+              balance: 0n,
+            });
+          }
           setLoading(false);
         });
+    } else {
+      setLoading(false);
     }
   }, [symbol, address, nativeBalance, chainId, trackedTokens]);
 

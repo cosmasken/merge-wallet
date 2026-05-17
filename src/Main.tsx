@@ -13,6 +13,7 @@ import WalletOnboarding from "@/views/wallet/WalletOnboarding";
 import { routeWallet } from "@/routes/routeWallet";
 import { routeAssets } from "@/routes/routeAssets";
 import { routeSettings } from "@/routes/routeSettings";
+import { routeProtocols } from "@/routes/routeProtocols";
 
 const routes = [
   {
@@ -30,6 +31,7 @@ const routes = [
       ...routeWallet,
       ...routeAssets,
       ...routeSettings,
+      ...routeProtocols,
     ],
   },
 ];

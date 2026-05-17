@@ -10,34 +10,27 @@ import GovernanceView from "@/views/settings/GovernanceView";
 export const routeSettings = [
   {
     path: "/settings",
-    element: <SettingsView />,
-  },
-  {
-    path: "/settings/security",
-    element: <SecuritySettings />,
-  },
-  {
-    path: "/settings/network",
-    element: <NetworkSettings />,
-  },
-  {
-    path: "/settings/currency",
-    element: <CurrencySettings />,
-  },
-  {
-    path: "/settings/governance",
-    element: <GovernanceView />,
-  },
-  {
-    path: "/settings/about",
-    element: <AboutView />,
-  },
-  {
-    path: "/settings/language",
-    element: <LanguageSettings />,
-  },
-  {
-    path: "/settings/contacts",
-    element: <AddressBook />,
+    children: [
+      {
+        index: true,
+        element: <SettingsView />,
+      },
+      {
+        path: "about",
+        element: <AboutView />,
+      },
+      {
+        path: "language",
+        element: <LanguageSettings />,
+      },
+      {
+        path: "contacts",
+        element: <AddressBook />,
+      },
+      {
+        path: "governance",
+        element: <GovernanceView />,
+      },
+    ],
   },
 ];
